@@ -1,0 +1,33 @@
+{
+    "blend": {
+        "func": "add",
+        "srcrgb": "one",
+        "dstrgb": "zero"
+    },
+    "vertex": "lod_terrain",
+    "fragment": "lod_terrain",
+    "attributes": [
+        "Position",
+        "Color",
+        "UV0",
+        "UV2",
+        "Normal"
+    ],
+    "samplers": [
+        { "name": "Sampler0" }
+    ],
+    "uniforms": [
+        { "name": "ModelViewMat", "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+        { "name": "ProjMat", "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+        { "name": "QualityMode", "type": "int", "count": 1, "values": [ 1 ] },
+        { "name": "ShaderMode", "type": "int", "count": 1, "values": [ 0 ] },
+        { "name": "TopU0", "type": "float", "count": 1, "values": [ 0.0 ] },
+        { "name": "TopV0", "type": "float", "count": 1, "values": [ 0.0 ] },
+        { "name": "TopU1", "type": "float", "count": 1, "values": [ 1.0 ] },
+        { "name": "TopV1", "type": "float", "count": 1, "values": [ 1.0 ] },
+        { "name": "SideU0", "type": "float", "count": 1, "values": [ 0.0 ] },
+        { "name": "SideV0", "type": "float", "count": 1, "values": [ 0.0 ] },
+        { "name": "SideU1", "type": "float", "count": 1, "values": [ 1.0 ] },
+        { "name": "SideV1", "type": "float", "count": 1, "values": [ 1.0 ] }
+    ]
+}

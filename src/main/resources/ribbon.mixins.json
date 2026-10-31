@@ -5,9 +5,15 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
+    "MixinEntityHit",
+    "MixinGameRendererJitter",
+    "MixinLevelRendererFsr2",
+    "MixinLODLifecycle",
     "MixinLevelBrightness",
     "MixinEntityRenderer",
-    "MixinBlockEntityRenderer"
+    "MixinBlockEntityRenderer",
+    "pathfinding.MixinPathNavigation",
+    "shadercache.MixinShaderInstance"
   ],
   "injectors": {
     "defaultRequire": 1

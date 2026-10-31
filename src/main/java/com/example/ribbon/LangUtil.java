@@ -84,7 +84,6 @@ public class LangUtil {
         EN.put("ribbon.page.hud", "Ribbon · HUD");
         EN.put("ribbon.page.visuals", "Ribbon · Visuals");
         EN.put("ribbon.page.effects", "Ribbon · Effects");
-        EN.put("ribbon.page.gameplay", "Ribbon · Gameplay");
         EN.put("ribbon.page.performance", "Ribbon · Performance");
         EN.put("ribbon.page.lunar", "Ribbon · Lunar");
         EN.put("ribbon.page.misc", "Ribbon · Misc");
@@ -212,7 +211,6 @@ public class LangUtil {
         EN.put("option.dynamic_light_item_light.tooltip", "Held items with light emission produce dynamic light");
         EN.put("option.dynamic_light_item_min", "Min item light");
         EN.put("option.dynamic_light_item_min.tooltip", "Minimum light level for a held item to trigger dynamic light");
-        EN.put("ribbon.page.dynamic_light", "Ribbon · Dynamic Light");
         EN.put("option.dynamic_light_smooth", "Smooth transition");
         EN.put("option.dynamic_light_smooth.tooltip", "Smoothly transition light brightness and position");
         EN.put("option.dynamic_light_smooth_speed", "Smooth speed");
@@ -239,7 +237,6 @@ public class LangUtil {
         EN.put("option.click_effect_ui_widgets_only.tooltip", "Only trigger click effects when clicking a button or widget");
         EN.put("option.click_effect_mute_vanilla", "Mute vanilla click sound");
         EN.put("option.click_effect_mute_vanilla.tooltip", "Cancel the vanilla button click sound when triggered");
-        EN.put("ribbon.page.music", "Ribbon · Music");
         EN.put("option.music_player_enabled", "Music player");
         EN.put("option.music_player_enabled.tooltip", "Enable the built-in MP3 player. Put .mp3 files in .minecraft/ribbon_music/");
         EN.put("option.music_hud_enabled", "Show music HUD");
@@ -265,12 +262,17 @@ public class LangUtil {
         EN.put("option.texture_loading_threads.tooltip", "Number of threads for async texture loading. Higher is not always better.");
         EN.put("option.texture_debug_log", "Texture Loading Debug Log");
         EN.put("option.texture_debug_log.tooltip", "Print detailed timing and cache hit logs to the console.");
-        EN.put("option.fsr_enabled", "FSR 1.0 Super Resolution (Experimental)");
-        EN.put("option.fsr_enabled.tooltip", "Enables FSR upscaling and sharpening. May conflict with shaders.");
+        EN.put("option.fsr_mode", "FSR Mode");
+        EN.put("option.fsr_mode.tooltip", "Select FSR 1.0 (Spatial) or FSR 2.2 (Temporal). FSR2 needs Motion Vectors.");
         EN.put("option.fsr_render_scale", "Internal Render Scale");
         EN.put("option.fsr_render_scale.tooltip", "0.5 = Half res (best performance), 1.0 = Native res (sharpen only)");
         EN.put("option.fsr_sharpness", "RCAS Sharpness");
         EN.put("option.fsr_sharpness.tooltip", "0 = None, 20 = Recommended, 100 = Over-sharpen");
+        EN.put("option.fsr_history_weight", "FSR2 History Weight");
+        EN.put("option.fsr_history_weight.tooltip", "Higher = smoother/stabler (0.9 recommended). Too low = flicker, too high = ghosting.");
+        EN.put("enum.OFF", "Off");
+        EN.put("enum.FSR1", "FSR 1.0");
+        EN.put("enum.FSR2", "FSR 2.2");
         EN.put("option.info_hud_enabled", "Info HUD");
         EN.put("option.info_hud_enabled.tooltip", "Show coordinates, biome, CPS, and armor durability on screen");
         EN.put("option.info_hud_corner", "Info HUD position");
@@ -293,11 +295,50 @@ public class LangUtil {
         EN.put("option.memory_chunk_nbt_trim.tooltip", "Clears processed block entity NBT after chunk load. (High risk, off by default)");
         EN.put("option.memory_show_in_hud", "Show Memory Stats in HUD");
         EN.put("option.memory_show_in_hud.tooltip", "Displays cache hits and saved objects in the Info HUD.");
-
+        // ===== 光影源码缓存 =====
+        EN.put("option.shader_cache_enabled", "Shader Source Caching");
+        EN.put("option.shader_cache_enabled.tooltip", "Cache parsed shader sources to reduce stutter when reloading shader packs.");
+        // ===== 异步寻路 (英文) =====
+        EN.put("option.async_pathfinding_enabled", "Async Pathfinding (Experimental)");
+        EN.put("option.async_pathfinding_enabled.tooltip", "Pre-computes pathfinding in the background to reduce main-thread load.");
+        EN.put("option.async_pathfinding_threads", "Pathfinding Threads");
+        EN.put("option.async_pathfinding_threads.tooltip", "Number of background threads for pathfinding.");
+        EN.put("option.async_pathfinding_cache_ticks", "Path Cache Lifetime");
+        EN.put("option.async_pathfinding_cache_ticks.tooltip", "How long (in ticks) a cached path remains valid.");
+        EN.put("option.async_pathfinding_hot_threshold", "Hot Entity Threshold");
+        EN.put("option.async_pathfinding_hot_threshold.tooltip", "Number of consecutive requests before an entity is considered 'hot' and pre-computed.");
+        EN.put("option.async_pathfinding_max_in_flight", "Max In-Flight Tasks");
+        EN.put("option.async_pathfinding_max_in_flight.tooltip", "Maximum number of asynchronous pathfinding tasks running simultaneously.");
+        EN.put("option.async_pathfinding_snapshot_range", "Snapshot Radius");
+        EN.put("option.async_pathfinding_snapshot_range.tooltip", "Radius (in chunks) of the world snapshot used for background pathfinding.");
+        // ===== 远景 LOD (英文) =====
+        EN.put("ribbon.page.lod", "Ribbon · LOD");
+        EN.put("option.lod_enabled", "Distant LOD");
+        EN.put("option.lod_enabled.tooltip", "Generate distant terrain from the save's .mca heightmaps. Non-invasive: never allocates LevelChunk or touches the GL state machine.");
+        EN.put("option.lod_radius_chunks", "LOD Radius");
+        EN.put("option.lod_radius_chunks.tooltip", "Chunk radius around the player covered by distant LOD terrain.");
+        EN.put("option.lod_worker_threads", "LOD Worker Threads");
+        EN.put("option.lod_worker_threads.tooltip", "Background threads for building LOD meshes. 0 = auto (CPU cores - 2).");
+        EN.put("option.lod_request_interval_ticks", "LOD Request Interval");
+        EN.put("option.lod_request_interval_ticks.tooltip", "How often (in ticks) the wanted LOD chunk set is recomputed.");
+        EN.put("option.lod_water_surface", "Water Surface Approximation");
+        EN.put("option.lod_water_surface.tooltip", "Render chunks below sea level (Y<63) with a water tint approximation.");
+        EN.put("option.lod_frustum_culling", "LOD Frustum Culling");
+        EN.put("option.lod_frustum_culling.tooltip", "Cull invisible LOD meshes with the vanilla frustum before submitting.");
+        EN.put("option.lod_vertical_bias", "LOD Vertical Bias");
+        EN.put("option.lod_vertical_bias.tooltip", "Vertical offset (blocks) to align distant terrain with near terrain.");
+        EN.put("option.lod_quality", "LOD Quality");
+        EN.put("option.lod_quality.tooltip", "LOD appearance quality. LOW = flat MapColor fill. MEDIUM = color + directional lighting (top-lit, side-shaded). HIGH = samples the vanilla terrain atlas (blurred) so colors match vanilla exactly.");
+        EN.put("enum.LOW", "Low");
+        EN.put("enum.MEDIUM", "Medium");
+        EN.put("enum.HIGH", "High");
         // ===== 中文 =====
         ZH.put("ribbon.page", "Ribbon");
         ZH.put("option.info_hud_enabled", "信息 HUD");
         ZH.put("option.info_hud_enabled.tooltip", "在屏幕上显示坐标、生物群系、CPS 和装备耐久");
+        // ===== 光影源码缓存 =====
+        ZH.put("option.shader_cache_enabled", "光影源码缓存");
+        ZH.put("option.shader_cache_enabled.tooltip", "缓存解析后的光影源码，二次加载光影包时大幅减少卡顿。");
         ZH.put("option.info_hud_corner", "信息 HUD 位置");
         ZH.put("option.info_hud_corner.tooltip", "信息 HUD 显示在屏幕的哪个角落");
         ZH.put("option.info_hud_scale", "信息 HUD 缩放");
@@ -376,7 +417,6 @@ public class LangUtil {
         ZH.put("ribbon.page.hud", "Ribbon · HUD");
         ZH.put("ribbon.page.visuals", "Ribbon · 视觉");
         ZH.put("ribbon.page.effects", "Ribbon · 特效");
-        ZH.put("ribbon.page.gameplay", "Ribbon · 体验");
         ZH.put("ribbon.page.performance", "Ribbon · 性能");
         ZH.put("ribbon.page.lunar", "Ribbon · 农历");
         ZH.put("ribbon.page.misc", "Ribbon · 杂项");
@@ -504,7 +544,6 @@ public class LangUtil {
         ZH.put("option.dynamic_light_item_light.tooltip", "手持发光物品时产生动态光照");
         ZH.put("option.dynamic_light_item_min", "最低物品发光");
         ZH.put("option.dynamic_light_item_min.tooltip", "手持物品触发动态光照的最低亮度阈值");
-        ZH.put("ribbon.page.dynamic_light", "Ribbon · 动态光源");
         ZH.put("option.dynamic_light_smooth", "平滑过渡");
         ZH.put("option.dynamic_light_smooth.tooltip", "光源亮度和位置平滑渐变");
         ZH.put("option.dynamic_light_smooth_speed", "平滑速度");
@@ -531,7 +570,6 @@ public class LangUtil {
         ZH.put("option.click_effect_ui_widgets_only.tooltip", "只在点击到按钮/控件时触发特效");
         ZH.put("option.click_effect_mute_vanilla", "静音原版音效");
         ZH.put("option.click_effect_mute_vanilla.tooltip", "触发特效时取消原版按钮点击音效");
-        ZH.put("ribbon.page.music", "Ribbon · 音乐");
         ZH.put("option.music_player_enabled", "音乐播放器");
         ZH.put("option.music_player_enabled.tooltip", "启用内置 MP3 播放器。把 .mp3 文件放进 .minecraft/ribbon_music/");
         ZH.put("option.music_hud_enabled", "显示音乐 HUD");
@@ -557,12 +595,17 @@ public class LangUtil {
         ZH.put("option.texture_loading_threads.tooltip", "异步加载材质的线程数量，过高可能导致内存溢出。");
         ZH.put("option.texture_debug_log", "材质加载调试日志");
         ZH.put("option.texture_debug_log.tooltip", "在控制台输出详细的解析耗时和缓存命中情况。");
-        ZH.put("option.fsr_enabled", "FSR 1.0 超分辨率 (实验性)");
-        ZH.put("option.fsr_enabled.tooltip", "开启 FSR 上采样与锐化，可能会与光影冲突");
+        ZH.put("option.fsr_mode", "FSR 超分辨率模式");
+        ZH.put("option.fsr_mode.tooltip", "选择 FSR 1.0（空间）或 FSR 2.2（时域）。FSR 2.2 需要计算运动矢量。");
         ZH.put("option.fsr_render_scale", "内部渲染缩放");
         ZH.put("option.fsr_render_scale.tooltip", "0.5 = 半分辨率（最流畅），1.0 = 原生分辨率（仅锐化）");
         ZH.put("option.fsr_sharpness", "RCAS 锐化强度");
         ZH.put("option.fsr_sharpness.tooltip", "0 = 无锐化，20 = 推荐，100 = 过度锐化");
+        ZH.put("option.fsr_history_weight", "FSR2 历史权重");
+        ZH.put("option.fsr_history_weight.tooltip", "越高越平滑稳定（推荐 0.9）。过低闪烁，过高拖影。");
+        ZH.put("enum.OFF", "关闭");
+        ZH.put("enum.FSR1", "FSR 1.0");
+        ZH.put("enum.FSR2", "FSR 2.2");
 
         // ===== 内存优化 (中文) =====
         ZH.put("option.memory_optimization_enabled", "深度内存优化 (对标 FerriteCore)");
@@ -579,6 +622,40 @@ public class LangUtil {
         ZH.put("option.memory_chunk_nbt_trim.tooltip", "区块加载后清空已处理的方块实体 NBT。(高风险，默认关闭)");
         ZH.put("option.memory_show_in_hud", "在 HUD 显示内存统计");
         ZH.put("option.memory_show_in_hud.tooltip", "在信息 HUD 中显示缓存命中和节省的对象数。");
+        // ===== 异步寻路 (中文) =====
+        ZH.put("option.async_pathfinding_enabled", "异步寻路预计算 (实验性)");
+        ZH.put("option.async_pathfinding_enabled.tooltip", "在后台线程预计算寻路，大幅减轻主线程卡顿。");
+        ZH.put("option.async_pathfinding_threads", "寻路线程数");
+        ZH.put("option.async_pathfinding_threads.tooltip", "用于后台寻路的线程数量。");
+        ZH.put("option.async_pathfinding_cache_ticks", "路径缓存存活时间");
+        ZH.put("option.async_pathfinding_cache_ticks.tooltip", "寻路缓存的有效时长（tick）。");
+        ZH.put("option.async_pathfinding_hot_threshold", "高频寻路判定阈值");
+        ZH.put("option.async_pathfinding_hot_threshold.tooltip", "实体连续寻路多少次后，开始触发后台预计算。");
+        ZH.put("option.async_pathfinding_max_in_flight", "最大并发任务数");
+        ZH.put("option.async_pathfinding_max_in_flight.tooltip", "同时进行的后台寻路任务上限，防止线程池积压。");
+        ZH.put("option.async_pathfinding_snapshot_range", "快照区域半径");
+        ZH.put("option.async_pathfinding_snapshot_range.tooltip", "后台寻路时读取的世界快照半径（区块）。");
+        // ===== 远景 LOD (中文) =====
+        ZH.put("ribbon.page.lod", "Ribbon · 远景");
+        ZH.put("option.lod_enabled", "远景 LOD");
+        ZH.put("option.lod_enabled.tooltip", "从存档 .mca 高度图生成远景地形。非侵入式：不 new LevelChunk、不碰 OpenGL 状态机。");
+        ZH.put("option.lod_radius_chunks", "LOD 覆盖半径");
+        ZH.put("option.lod_radius_chunks.tooltip", "玩家周围由远景 LOD 地形覆盖的区块半径。");
+        ZH.put("option.lod_worker_threads", "LOD 构建线程数");
+        ZH.put("option.lod_worker_threads.tooltip", "后台构建 LOD 网格的线程数。0 = 自动（CPU 核心数 - 2）。");
+        ZH.put("option.lod_request_interval_ticks", "LOD 请求间隔");
+        ZH.put("option.lod_request_interval_ticks.tooltip", "每隔多少 tick 重新计算需要构建的 LOD 区块集合。");
+        ZH.put("option.lod_water_surface", "水面近似");
+        ZH.put("option.lod_water_surface.tooltip", "把低于海平面(Y<63)的区块按水面着色近似渲染。");
+        ZH.put("option.lod_frustum_culling", "LOD 视锥剔除");
+        ZH.put("option.lod_frustum_culling.tooltip", "提交前用原版视锥剔除不可见的 LOD 网格。");
+        ZH.put("option.lod_vertical_bias", "LOD 垂直偏移");
+        ZH.put("option.lod_vertical_bias.tooltip", "远景地形的垂直偏移（格），用于对齐远景与近景。");
+        ZH.put("option.lod_quality", "LOD 质量");
+        ZH.put("option.lod_quality.tooltip", "LOD 外观质量。低 = 纯色平涂。中 = 颜色 + 方向光照（顶面亮/侧面暗，有立体感）。高 = 采样原版 terrain atlas 纹理（糊化版），颜色与原版完全一致。");
+        ZH.put("enum.LOW", "低");
+        ZH.put("enum.MEDIUM", "中");
+        ZH.put("enum.HIGH", "高");
     }
 
     public static String tr(String key) {

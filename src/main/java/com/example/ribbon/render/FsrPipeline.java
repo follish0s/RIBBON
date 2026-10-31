@@ -49,11 +49,16 @@ public final class FsrPipeline {
         return instance;
     }
 
-    // 🚨 修改：从 Pre 改成 Post，在 HUD 和 GUI 全部画完之后再接管画面
+    // 🚨 终极完美时机：在 Post 阶段，所有的 HUD 和界面都已经画完了
     @SubscribeEvent
     public static void onRenderGuiPost(RenderGuiEvent.Post event) {
-        if (!Config.isFsrEnabled()) return;
-        if (Minecraft.getInstance().level == null) return;
+        if (!Config.isFsrEnabled()) return;  // 仅 FSR1 模式走此管线；FSR2 由 Fsr2Renderer 独立处理
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return;
+
+        // 🚨 绝杀：只要打开了任意界面（背包、箱子、ESC 菜单），直接跳过 FSR
+        // 这样原版的界面绝对不会受任何污染，画面也绝对不会变空气！
+        if (mc.screen != null) return;
 
         getInstance().render();
     }
@@ -202,7 +207,6 @@ public final class FsrPipeline {
             // 3. 恢复状态
             GL33C.glUseProgram(0);
             GL33C.glBindTexture(GL33C.GL_TEXTURE_2D, 0);
-            GL33C.glBindFramebuffer(GL33C.GL_FRAMEBUFFER, 0);
             GL33C.glViewport(vp[0], vp[1], vp[2], vp[3]);
 
             GlStateManager._colorMask(colorMask[0] != 0, colorMask[1] != 0, colorMask[2] != 0, colorMask[3] != 0);
@@ -211,14 +215,17 @@ public final class FsrPipeline {
             if (blend) GlStateManager._enableBlend(); else GlStateManager._disableBlend();
             if (cull) GlStateManager._enableCull(); else GlStateManager._disableCull();
 
+            // 强制绑定回主帧缓冲
+            mc.getMainRenderTarget().bindWrite(true);
+
         } catch (Exception e) {
             LOGGER.error("[FSR] 渲染异常，启用 Fallback", e);
             triggerFallback();
             try {
                 GL33C.glUseProgram(0);
-                GL33C.glBindFramebuffer(GL33C.GL_FRAMEBUFFER, 0);
                 GlStateManager._colorMask(true, true, true, true);
                 GlStateManager._depthMask(true);
+                Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
             } catch (Exception ignored) {}
         }
     }

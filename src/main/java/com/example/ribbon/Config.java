@@ -61,10 +61,21 @@ public class Config {
     public static final ModConfigSpec.BooleanValue ITEM_ENTITY_CULLING_ENABLED;
     public static final ModConfigSpec.IntValue ITEM_ENTITY_MAX_DISTANCE;
 
-    // ===== 新增：极速材质加载配置 =====
+    // ===== 极速材质加载配置 =====
     public static final ModConfigSpec.BooleanValue FAST_TEXTURE_LOADING;
     public static final ModConfigSpec.IntValue TEXTURE_LOADING_THREADS;
     public static final ModConfigSpec.BooleanValue TEXTURE_DEBUG_LOG;
+
+    // ===== 光影源码缓存（声明移到此处） =====
+    public static final ModConfigSpec.BooleanValue SHADER_CACHE_ENABLED;
+
+    // ===== 异步寻路配置 =====
+    public static final ModConfigSpec.BooleanValue ASYNC_PATHFINDING_ENABLED;
+    public static final ModConfigSpec.IntValue ASYNC_PATHFINDING_THREADS;
+    public static final ModConfigSpec.IntValue ASYNC_PATHFINDING_CACHE_TICKS;
+    public static final ModConfigSpec.IntValue ASYNC_PATHFINDING_HOT_THRESHOLD;
+    public static final ModConfigSpec.IntValue ASYNC_PATHFINDING_MAX_IN_FLIGHT;
+    public static final ModConfigSpec.IntValue ASYNC_PATHFINDING_SNAPSHOT_RANGE;
 
     public static final ModConfigSpec.BooleanValue LUNAR_HUD_ENABLED;
     public static final ModConfigSpec.EnumValue<OverlayCorner> LUNAR_HUD_CORNER;
@@ -100,12 +111,12 @@ public class Config {
     public static final ModConfigSpec.BooleanValue MUSIC_HUD_ENABLED;
     public static final ModConfigSpec.EnumValue<OverlayCorner> MUSIC_HUD_CORNER;
 
-    // ===== Info HUD（坐标/群系/CPS/装备耐久） =====
+    // ===== Info HUD =====
     public static final ModConfigSpec.BooleanValue INFO_HUD_ENABLED;
     public static final ModConfigSpec.EnumValue<OverlayCorner> INFO_HUD_CORNER;
     public static final ModConfigSpec.DoubleValue INFO_HUD_SCALE;
 
-    // ===== 内存深度优化系统 (对标 FerriteCore) =====
+    // ===== 内存深度优化系统 =====
     public static final ModConfigSpec.BooleanValue MEMORY_OPTIMIZATION_ENABLED;
     public static final ModConfigSpec.BooleanValue MEMORY_SHAPE_DEDUP;
     public static final ModConfigSpec.BooleanValue MEMORY_PROPERTY_MAP_DEDUP;
@@ -114,10 +125,25 @@ public class Config {
     public static final ModConfigSpec.BooleanValue MEMORY_CHUNK_NBT_TRIM;
     public static final ModConfigSpec.BooleanValue MEMORY_SHOW_IN_HUD;
 
-    // ===== FSR 1.0 (EASU + RCAS) =====
-    public static final ModConfigSpec.BooleanValue FSR_ENABLED;
+    // ===== 零 GC 战斗碰撞优化（对象池已并入 Vec3Pool/MixinEntityHit，无需独立开关） =====
+
+    // ===== FSR =====
+    // 用枚举取代原 FSR_ENABLED 布尔开关：OFF=关闭, FSR1=空间(1.0), FSR2=时域(2.2)
+    public static final ModConfigSpec.EnumValue<FsrMode> FSR_MODE;
     public static final ModConfigSpec.DoubleValue FSR_RENDER_SCALE;
     public static final ModConfigSpec.DoubleValue FSR_SHARPNESS;
+    public static final ModConfigSpec.DoubleValue FSR_HISTORY_WEIGHT;
+
+    // ===== 远景 LOD =====
+    public static final ModConfigSpec.BooleanValue LOD_ENABLED;
+    public static final ModConfigSpec.IntValue LOD_RADIUS_CHUNKS;
+    public static final ModConfigSpec.IntValue LOD_WORKER_THREADS;
+    public static final ModConfigSpec.IntValue LOD_REQUEST_INTERVAL_TICKS;
+    public static final ModConfigSpec.BooleanValue LOD_WATER_SURFACE;
+    public static final ModConfigSpec.BooleanValue LOD_FRUSTUM_CULLING;
+    public static final ModConfigSpec.DoubleValue LOD_VERTICAL_BIAS;
+    public static final ModConfigSpec.IntValue LOD_VIEW_DISTANCE_BLOCKS;
+    public static final ModConfigSpec.EnumValue<LodQuality> LOD_QUALITY;
 
     public static final ModConfigSpec SPEC;
 
@@ -193,6 +219,20 @@ public class Config {
         FAST_TEXTURE_LOADING = BUILDER.comment("启用极速材质加载（异步解析）", "注意：可能与部分优化模组（如 ModernFix）冲突").define("fastTextureLoading", false);
         TEXTURE_LOADING_THREADS = BUILDER.comment("材质加载并发线程数", "过高可能导致内存溢出崩溃，建议 2-4").defineInRange("textureLoadingThreads", 2, 1, 8);
         TEXTURE_DEBUG_LOG = BUILDER.comment("输出材质加载调试日志（会刷屏）").define("textureDebugLog", false);
+
+        // ===== 光影源码缓存（必须在 performance 块内、SPEC.build() 之前） =====
+        SHADER_CACHE_ENABLED = BUILDER.comment("启用光影源码缓存",
+                        "二次加载光影时会跳过源码解析，大幅减少卡顿")
+                .define("shaderCacheEnabled", true);
+
+        // 🚨 异步寻路配置
+        ASYNC_PATHFINDING_ENABLED = BUILDER.comment("启用异步寻路预计算").define("asyncPathfinding", true);
+        ASYNC_PATHFINDING_THREADS = BUILDER.comment("寻路线程数").defineInRange("asyncPathfindingThreads", 2, 1, 8);
+        ASYNC_PATHFINDING_CACHE_TICKS = BUILDER.comment("缓存存活时间（tick）").defineInRange("asyncPathfindingCacheTicks", 40, 10, 200);
+        ASYNC_PATHFINDING_HOT_THRESHOLD = BUILDER.comment("高频寻路判定阈值").defineInRange("asyncPathfindingHotThreshold", 3, 1, 20);
+        ASYNC_PATHFINDING_MAX_IN_FLIGHT = BUILDER.comment("最大在途异步任务数").defineInRange("asyncPathfindingMaxInFlight", 100, 10, 500);
+        ASYNC_PATHFINDING_SNAPSHOT_RANGE = BUILDER.comment("快照区域半径（区块）", "太高可能占用内存").defineInRange("asyncPathfindingSnapshotRange", 3, 1, 8);
+
         BUILDER.pop();
 
         BUILDER.push("lunar");
@@ -237,7 +277,6 @@ public class Config {
         INFO_HUD_SCALE = BUILDER.comment("信息 HUD 文字缩放").defineInRange("scale", 1.0, 0.5, 3.0);
         BUILDER.pop();
 
-        // 🚨 核心修复：千问漏掉的变量声明和初始化
         BUILDER.push("memory");
         MEMORY_OPTIMIZATION_ENABLED = BUILDER.comment("启用内存深度优化系统（对标 FerriteCore）", "通过 Mixin 注入对形状、属性表、模型定位符、多部件谓词做全局去重").define("enabled", true);
         MEMORY_SHAPE_DEDUP = BUILDER.comment("碰撞箱/渲染形状全局去重").define("shapeDedup", true);
@@ -249,9 +288,26 @@ public class Config {
         BUILDER.pop();
 
         BUILDER.push("fsr");
-        FSR_ENABLED = BUILDER.comment("启用 AMD FSR 1.0 后处理管线（EASU 上采样 + RCAS 锐化）").define("enabled", false);
+        FSR_MODE = BUILDER.comment("FSR 超分辨率模式", "OFF = 关闭", "FSR1 = AMD FSR 1.0（EASU 空间上采样 + RCAS 锐化）", "FSR2 = FSR 2.2 时域管线（需计算运动矢量，需 OpenGL 4.6+）").defineEnum("mode", FsrMode.OFF);
         FSR_RENDER_SCALE = BUILDER.comment("内部渲染分辨率缩放比例").defineInRange("renderScale", 0.75, 0.5, 1.0);
-        FSR_SHARPNESS = BUILDER.comment("RCAS 锐化强度").defineInRange("sharpness", 0.2, 0.0, 1.0);
+        FSR_SHARPNESS = BUILDER.comment("RCAS 锐化强度（FSR1/FSR2 通用）").defineInRange("sharpness", 0.2, 0.0, 1.0);
+        FSR_HISTORY_WEIGHT = BUILDER.comment("FSR 2.2 历史帧累积权重", "越高越平滑稳定（推荐 0.9），过低会闪烁、过高会拖影").defineInRange("historyWeight", 0.9, 0.0, 1.0);
+        BUILDER.pop();
+
+        BUILDER.push("lod");
+        LOD_ENABLED = BUILDER.comment("启用远景 LOD", "直接读取存档 .mca 的高度图生成远景地形，不 new LevelChunk、不碰 OpenGL，非侵入式").define("enabled", true);
+        LOD_RADIUS_CHUNKS = BUILDER.comment("LOD 覆盖半径（区块）", "玩家周围该半径范围内、且超出原版区块渲染范围的远景区域会被 LOD 接管").defineInRange("radiusChunks", 8, 2, 1024);
+        LOD_WORKER_THREADS = BUILDER.comment("LOD 构建线程数", "0 = 自动（CPU 核心数 - 2，至少 1）").defineInRange("workerThreads", 0, 0, 16);
+        LOD_REQUEST_INTERVAL_TICKS = BUILDER.comment("LOD 请求节流间隔（tick）", "每 N tick 重新计算一次玩家周围需要构建的 LOD 区块集合").defineInRange("requestIntervalTicks", 5, 1, 100);
+        LOD_WATER_SURFACE = BUILDER.comment("渲染水面近似", "把高度低于海平面(63)的区块按水面着色渲染（近似，不含半透明排序）").define("waterSurface", true);
+        LOD_FRUSTUM_CULLING = BUILDER.comment("LOD 视锥剔除", "提交前用原版视锥剔除不可见的 LOD 网格").define("frustumCulling", true);
+        LOD_VERTICAL_BIAS = BUILDER.comment("LOD 垂直偏移（格）", "正值整体抬高、负值下压，用于对齐远景与近景地形").defineInRange("verticalBias", 0.0, -16.0, 16.0);
+        LOD_VIEW_DISTANCE_BLOCKS = BUILDER.comment("LOD 视距上限（格）", "超出该距离的 LOD 区块在提交前直接跳过（CPU 侧远切），避免被 GPU Far Plane 硬件裁剪导致地平线硬切/穿插").defineInRange("viewDistanceBlocks", 4096, 256, 65536);
+        LOD_QUALITY = BUILDER.comment("LOD 配色质量",
+                        "LOW = 纯色顶点色（最省，远景为纯 MapColor 平涂）",
+                        "MEDIUM = 纯色 + 方向光照（顶面亮/侧面暗，有立体感，默认）",
+                        "HIGH = 采样原版 terrain atlas 纹理（糊化版），颜色与原版一致")
+                .defineEnum("quality", LodQuality.MEDIUM);
         BUILDER.pop();
 
         SPEC = BUILDER.build();
@@ -285,6 +341,17 @@ public class Config {
     public static boolean isFastTextureLoadingEnabled() { try { return FAST_TEXTURE_LOADING.get(); } catch (IllegalStateException e) { return false; } }
     public static int getTextureLoadingThreads() { try { return TEXTURE_LOADING_THREADS.get(); } catch (IllegalStateException e) { return 2; } }
     public static boolean isTextureDebugLogEnabled() { try { return TEXTURE_DEBUG_LOG.get(); } catch (IllegalStateException e) { return false; } }
+
+    // ===== 光影源码缓存 Getter =====
+    public static boolean isShaderCacheEnabled() { try { return SHADER_CACHE_ENABLED.get(); } catch (IllegalStateException e) { return true; } }
+
+    // ===== 异步寻路 Getter =====
+    public static boolean isAsyncPathfindingEnabled() { try { return ASYNC_PATHFINDING_ENABLED.get(); } catch (IllegalStateException e) { return true; } }
+    public static int getAsyncPathfindingThreads() { try { return ASYNC_PATHFINDING_THREADS.get(); } catch (IllegalStateException e) { return 2; } }
+    public static int getAsyncPathfindingCacheTicks() { try { return ASYNC_PATHFINDING_CACHE_TICKS.get(); } catch (IllegalStateException e) { return 40; } }
+    public static int getAsyncPathfindingHotThreshold() { try { return ASYNC_PATHFINDING_HOT_THRESHOLD.get(); } catch (IllegalStateException e) { return 3; } }
+    public static int getAsyncPathfindingMaxInFlight() { try { return ASYNC_PATHFINDING_MAX_IN_FLIGHT.get(); } catch (IllegalStateException e) { return 100; } }
+    public static int getAsyncPathfindingSnapshotRange() { try { return ASYNC_PATHFINDING_SNAPSHOT_RANGE.get(); } catch (IllegalStateException e) { return 3; } }
 
     public static boolean isLunarHudEnabled() { try { return LUNAR_HUD_ENABLED.get(); } catch (IllegalStateException e) { return true; } }
     public static OverlayCorner getLunarHudCorner() { try { return LUNAR_HUD_CORNER.get(); } catch (IllegalStateException e) { return OverlayCorner.BOTTOM_LEFT; } }
@@ -332,15 +399,29 @@ public class Config {
     public static boolean isPropertyMapDedupEnabled() { try { return MEMORY_PROPERTY_MAP_DEDUP.get(); } catch (IllegalStateException e) { return true; } }
     public static boolean isModelInterningEnabled() { try { return MEMORY_MODEL_INTERNING.get(); } catch (IllegalStateException e) { return true; } }
     public static boolean isMultipartPredicateEnabled() { try { return MEMORY_MULTIPART_PREDICATE.get(); } catch (IllegalStateException e) { return true; } }
-    public static boolean isMultipartPredicateDedupEnabled() {
-        return isMultipartPredicateEnabled();
-    }
+    public static boolean isMultipartPredicateDedupEnabled() { return isMultipartPredicateEnabled(); }
     public static boolean isChunkNbtTrimEnabled() { try { return MEMORY_CHUNK_NBT_TRIM.get(); } catch (IllegalStateException e) { return false; } }
     public static boolean isMemoryShowInHudEnabled() { try { return MEMORY_SHOW_IN_HUD.get(); } catch (IllegalStateException e) { return true; } }
 
-    public static boolean isFsrEnabled() { try { return FSR_ENABLED.get(); } catch (IllegalStateException e) { return false; } }
+    // ===== FSR Getter =====
+    public static FsrMode getFsrMode() { try { return FSR_MODE.get(); } catch (IllegalStateException e) { return FsrMode.OFF; } }
+    // 仅 FSR1 模式时启用原 FSR 1.0 后处理管线（FsrPipeline 仍走该路径）
+    public static boolean isFsrEnabled() { return getFsrMode() == FsrMode.FSR1; }
+    public static boolean isFsr2Enabled() { return getFsrMode() == FsrMode.FSR2; }
     public static double getFsrRenderScale() { try { return FSR_RENDER_SCALE.get(); } catch (IllegalStateException e) { return 0.75; } }
     public static double getFsrSharpness() { try { return FSR_SHARPNESS.get(); } catch (IllegalStateException e) { return 0.2; } }
+    public static double getFsrHistoryWeight() { try { return FSR_HISTORY_WEIGHT.get(); } catch (IllegalStateException e) { return 0.9; } }
+
+    // ===== 远景 LOD Getter =====
+    public static boolean isLodEnabled() { try { return LOD_ENABLED.get(); } catch (IllegalStateException e) { return true; } }
+    public static int getLodRadiusChunks() { try { return LOD_RADIUS_CHUNKS.get(); } catch (IllegalStateException e) { return 8; } }
+    public static int getLodWorkerThreads() { try { return LOD_WORKER_THREADS.get(); } catch (IllegalStateException e) { return 0; } }
+    public static int getLodRequestIntervalTicks() { try { return LOD_REQUEST_INTERVAL_TICKS.get(); } catch (IllegalStateException e) { return 5; } }
+    public static boolean isLodWaterSurface() { try { return LOD_WATER_SURFACE.get(); } catch (IllegalStateException e) { return true; } }
+    public static boolean isLodFrustumCulling() { try { return LOD_FRUSTUM_CULLING.get(); } catch (IllegalStateException e) { return true; } }
+    public static double getLodVerticalBias() { try { return LOD_VERTICAL_BIAS.get(); } catch (IllegalStateException e) { return 0.0; } }
+    public static int getLodViewDistanceBlocks() { try { return LOD_VIEW_DISTANCE_BLOCKS.get(); } catch (IllegalStateException e) { return 4096; } }
+    public static LodQuality getLodQuality() { try { return LOD_QUALITY.get(); } catch (IllegalStateException e) { return LodQuality.MEDIUM; } }
 
     public enum OverlayCorner { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
     public enum OutlineColorMode { RAINBOW, BLUE_PURPLE, GREEN_PURPLE, BLUE_GREEN, PURPLE_YELLOW, PURPLE_GREEN_YELLOW }
@@ -348,4 +429,6 @@ public class Config {
     public enum HealthColorMode { RAINBOW, CUSTOM }
     public enum Language { ENGLISH, CHINESE }
     public enum HolidayScope { CHINA_ONLY, INTERNATIONAL, ALL }
+    public enum FsrMode { OFF, FSR1, FSR2 }
+    public enum LodQuality { LOW, MEDIUM, HIGH }
 }

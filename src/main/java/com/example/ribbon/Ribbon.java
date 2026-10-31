@@ -22,26 +22,34 @@ public class Ribbon {
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
+            // 1. 初始化 UI 与兼容层
             RibbonOptions.init();
             DistantHorizonsCompat.init();
             EntityCullingManager.init();
-            com.example.ribbon.music.MusicPlayerManager.init();     // ← 新增
-            com.example.ribbon.music.MusicLibrary.rescan();         // ← 新增
 
-            // ===== 初始化极速材质加载线程池 =====
-            TextureThreadPool.init();
+            // 2. 初始化音乐播放器
+            com.example.ribbon.music.MusicPlayerManager.init();
+            com.example.ribbon.music.MusicLibrary.rescan();
 
-            // ===== 兼容性检测 =====
+            // 3. 初始化底层线程池
+            TextureThreadPool.init(); // 极速材质加载线程池
+
+            // 4. 初始化光影源码缓存 (本次新增)
+            com.example.ribbon.shadercache.ShaderSourceCache.init();
+
+            // 5. 启动异步寻路线程池 (千问写的功能)
+            com.example.ribbon.pathfinding.AsyncPathfindingManager.getInstance().start();
+
+            // 6. 兼容性检测
             if (ModList.get().isLoaded("modernfix")) {
                 if (Config.isFastTextureLoadingEnabled()) {
                     LOGGER.warn("[Ribbon] Detected ModernFix! Ribbon's Fast Texture Loading might conflict with ModernFix's dynamic resources. Automatically falling back to safe mode.");
-                    // 实际生产中，可以通过修改配置文件或内存变量，强制将其关闭，这里仅作日志提示
                 } else {
                     LOGGER.info("[Ribbon] ModernFix detected. Fast Texture Loading is currently disabled, no conflict.");
                 }
             }
 
-            LOGGER.info("[Ribbon] Client setup complete");
+            LOGGER.info("[Ribbon] 客户端启动完成，所有底层引擎已就绪");
         }
     }
 }
