@@ -159,28 +159,53 @@ public class ScrollableFrame extends AbstractFrame {
         }
     }
 
+    /**
+     * 把鼠标事件坐标换算到滚动内容坐标系。
+     *
+     * <p>26.2 的命中判定通过子控件 {@code isMouseOver} 完成（{@code getChildAt}），
+     * 而 {@link #render} 里传给子控件的 hover 坐标已经过 {@link #applyOffset} 换算。
+     * 点击/拖动/释放若用原始坐标，滚动后就会命中列表里的另一行——表现为
+     * 「点这个按钮实际改的是别的选项」。</p>
+     */
+    private MouseButtonEvent mapToContent(MouseButtonEvent evt) {
+        return new MouseButtonEvent(
+                applyOffset(this.horizontalScrollBar, evt.x(), false),
+                applyOffset(this.verticalScrollBar, evt.y(), false),
+                evt.buttonInfo());
+    }
+
     @Override
     public boolean mouseClicked(MouseButtonEvent __evt, boolean __doubleClick) {
-        double mouseX = __evt.x();
-        double mouseY = __evt.y();
-        int button = __evt.input();
-        return (this.canScrollHorizontal && this.horizontalScrollBar.mouseClicked(__evt, false)) || (this.canScrollVertical && this.verticalScrollBar.mouseClicked(__evt, false)) || super.mouseClicked(__evt, __doubleClick);
+        // 滚动条位于视口之外，必须用真实坐标先判定
+        if ((this.canScrollHorizontal && this.horizontalScrollBar.mouseClicked(__evt, false))
+                || (this.canScrollVertical && this.verticalScrollBar.mouseClicked(__evt, false))) {
+            return true;
+        }
+        if (!this.canScrollHorizontal && !this.canScrollVertical) {
+            return super.mouseClicked(__evt, __doubleClick);
+        }
+        if (this.viewPortDimension != null && !this.viewPortDimension.containsCursor(__evt.x(), __evt.y())) {
+            return false;
+        }
+        return super.mouseClicked(mapToContent(__evt), __doubleClick);
     }
 
     @Override
     public boolean mouseDragged(MouseButtonEvent __evt, double deltaX, double deltaY) {
-        double mouseX = __evt.x();
-        double mouseY = __evt.y();
-        int button = __evt.input();
-        return (this.canScrollHorizontal && this.horizontalScrollBar.mouseDragged(__evt, deltaX, deltaY)) || (this.canScrollVertical && this.verticalScrollBar.mouseDragged(__evt, deltaX, deltaY)) || super.mouseDragged(__evt, deltaX, deltaY);
+        if ((this.canScrollHorizontal && this.horizontalScrollBar.mouseDragged(__evt, deltaX, deltaY))
+                || (this.canScrollVertical && this.verticalScrollBar.mouseDragged(__evt, deltaX, deltaY))) {
+            return true;
+        }
+        return super.mouseDragged(mapToContent(__evt), deltaX, deltaY);
     }
 
     @Override
     public boolean mouseReleased(MouseButtonEvent __evt) {
-        double mouseX = __evt.x();
-        double mouseY = __evt.y();
-        int button = __evt.input();
-        return (this.canScrollHorizontal && this.horizontalScrollBar.mouseReleased(__evt)) || (this.canScrollVertical && this.verticalScrollBar.mouseReleased(__evt)) || super.mouseReleased(__evt);
+        if ((this.canScrollHorizontal && this.horizontalScrollBar.mouseReleased(__evt))
+                || (this.canScrollVertical && this.verticalScrollBar.mouseReleased(__evt))) {
+            return true;
+        }
+        return super.mouseReleased(mapToContent(__evt));
     }
 
     @Override
