@@ -23,8 +23,11 @@ public class Ribbon {
 
         // 26.2 的 @EventBusSubscriber 不再区分 MOD/GAME 总线，MOD 总线事件显式注册
         modContainer.registerExtensionPoint(net.neoforged.neoforge.client.gui.IConfigScreenFactory.class,
-                (container, screen) -> new org.embeddedt.embeddium.impl.gui.EmbeddiumVideoOptionsScreen(
-                        screen, org.embeddedt.embeddium.impl.gui.EmbeddiumVideoOptionsScreen.makePages()));
+                (container, screen) -> {
+                    LOGGER.info("[Ribbon] 配置屏工厂被调用，正在打开 Ribbon 设置界面");
+                    return new org.embeddedt.embeddium.impl.gui.EmbeddiumVideoOptionsScreen(
+                            screen, org.embeddedt.embeddium.impl.gui.EmbeddiumVideoOptionsScreen.makePages());
+                });
         modEventBus.addListener(Config::onLoad);
         modEventBus.addListener(RibbonUIHandler.ModBusEvents::registerKeys);
 

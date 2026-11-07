@@ -85,6 +85,8 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
 
         OptionGUIConstructionEvent.BUS.post(new OptionGUIConstructionEvent(pages));
 
+        org.embeddedt.embeddium.impl.Embeddium.logger().info("[Ribbon] makePages 构建完成，共 {} 页", pages.size());
+
         return List.copyOf(pages);
     }
 

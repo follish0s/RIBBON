@@ -43,8 +43,14 @@ public class FpsTpsOverlay {
         lastServerTick = now;
     }
 
+    private static boolean loggedFirstFrame;
+
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiEvent.Post event) {
+        if (!loggedFirstFrame) {
+            loggedFirstFrame = true;
+            com.mojang.logging.LogUtils.getLogger().info("[Ribbon] FPS 悬浮层进入渲染循环");
+        }
         Minecraft mc = Minecraft.getInstance();
         if (com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc) || mc.level == null) return;
         if (!Config.SHOW_OVERLAY.get()) return;
