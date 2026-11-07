@@ -27,8 +27,21 @@ public class ClickEffectHandler {
 
     @SubscribeEvent
     public static void onMouseClick(InputEvent.MouseButton.Post event) {
-        if (event.getAction() != GLFW.GLFW_PRESS) return;
-        int button = event.getButton();
+        onMouseButton(event.getAction(), event.getButton());
+    }
+
+    /**
+     * 平台无关的点击入口。
+     *
+     * <p>NeoForge 侧由 {@link #onMouseClick}(InputEvent.MouseButton.Post) 调用；
+     * Fabric 侧由 MouseHandlerMixin 注入到 {@code MouseHandler#onButton} 的 TAIL 调用
+     * （与 NeoForge 事件的触发点等价：任何窗口的按键回调都经过这里）。</p>
+     *
+     * @param action GLFW 动作（GLFW_PRESS / GLFW_RELEASE）
+     * @param button GLFW 鼠标键编号
+     */
+    public static void onMouseButton(int action, int button) {
+        if (action != GLFW.GLFW_PRESS) return;
         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT && button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
 
         Config.ClickEffectType type = Config.CLICK_EFFECT_TYPE.get();

@@ -25,7 +25,8 @@ public class RainbowGuiHandler {
         );
     }
 
-    private static void renderCrosshair(GuiGraphics gui) {
+    /** 平台无关：NeoForge 注册图层与 Fabric attachElementAfter 共用。 */
+    public static void renderCrosshair(GuiGraphics gui) {
         if (!Config.RAINBOW_CROSSHAIR.get()) return;
 
         Minecraft mc = Minecraft.getInstance();

@@ -4,6 +4,8 @@ import com.example.ribbon.compat.GuiGraphics;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.resources.Identifier;
 
@@ -44,6 +46,19 @@ public final class RibbonFabricHooks {
             com.example.ribbon.lunar.LunarHudHandler.onRender(g);
             com.example.ribbon.music.MusicPlayerHudHandler.onRender(g);
                 });
+
+        // 彩虹准星：挂在原版准星图层之后（对应 NeoForge 的
+        // RegisterGuiLayersEvent.registerAbove(VanillaGuiLayers.CROSSHAIR, ...)）
+        HudElementRegistry.attachElementAfter(
+                VanillaHudElements.CROSSHAIR,
+                Identifier.fromNamespaceAndPath("ribbon", "rainbow_crosshair"),
+                (gfx, deltaTracker) ->
+                        com.example.ribbon.RainbowGuiHandler.renderCrosshair(GuiGraphics.wrap(gfx)));
+
+        // 伤害数字：对应 NeoForge 的 LivingDamageEvent.Post（两者都在服务端逻辑触发，
+        // 单人模式下集成服务端与客户端同 JVM，静态状态共享，行为边界一致）
+        ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) ->
+                com.example.ribbon.DamageNumberHandler.onDamage(entity, source, damageTaken));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             com.example.ribbon.ShaderpackMonitor.onClientTick();

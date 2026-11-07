@@ -40,6 +40,8 @@ dependencies {
     // Fabric 侧 API：仅编译期引用，运行时由 fabric-loader / fabric-api 提供。
     // 26.2 起游戏不再混淆（无 intermediary），两侧运行时均为官方映射，因此同一份
     // 字节码可以同时在 NeoForge 与 Fabric 上运行 —— 这是「单 jar 双平台」的前提。
+    // Fabric 侧 mixin 编译期注解（Fabric Loader 运行时自带 sponge-mixin；NeoForge 用自己的 mixin 实现）
+    compileOnly "net.fabricmc:sponge-mixin:0.17.4+mixin.0.8.7"
     compileOnly "net.fabricmc:fabric-loader:${fabric_loader_version}"
     compileOnly "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
 }

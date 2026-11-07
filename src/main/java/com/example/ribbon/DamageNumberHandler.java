@@ -11,7 +11,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
@@ -49,39 +48,55 @@ public class DamageNumberHandler {
         if (initialized) return;
         initialized = true;
 
-        if (ModList.get().isLoaded("avaritia")) {
+        if (com.example.ribbon.platform.PlatformInfo.isModLoaded("avaritia")) {
             SPECIAL_WEAPONS.add("avaritia:infinity_sword");
             SPECIAL_WEAPONS.add("avaritia:infinity_axe");
             SPECIAL_WEAPONS.add("avaritia:infinity_bow");
             SPECIAL_WEAPONS.add("avaritia:infinity_trident");
         }
-        if (ModList.get().isLoaded("manaita_plus") || ModList.get().isLoaded("manaita_plus_legacy")) {
+        if (com.example.ribbon.platform.PlatformInfo.isModLoaded("manaita_plus") || com.example.ribbon.platform.PlatformInfo.isModLoaded("manaita_plus_legacy")) {
             SPECIAL_WEAPONS.add("manaita_plus:manaita_sword");
             SPECIAL_WEAPONS.add("manaita_plus_legacy:manaita_sword");
             SPECIAL_WEAPONS.add("manaita_plus:manaita_axe");
         }
-        if (ModList.get().isLoaded("lolipickaxe")) {
+        if (com.example.ribbon.platform.PlatformInfo.isModLoaded("lolipickaxe")) {
             SPECIAL_WEAPONS.add("lolipickaxe:loli_pickaxe");
             SPECIAL_WEAPONS.add("lolipickaxe:loli_sword");
         }
-        if (ModList.get().isLoaded("projecte")) {
+        if (com.example.ribbon.platform.PlatformInfo.isModLoaded("projecte")) {
             SPECIAL_WEAPONS.add("projecte:red_matter_sword");
             SPECIAL_WEAPONS.add("projecte:red_matter_axe");
             SPECIAL_WEAPONS.add("projecte:red_katar");
             SPECIAL_WEAPONS.add("projecte:dark_matter_sword");
         }
-        if (ModList.get().isLoaded("enigmaticlegacy")) {
+        if (com.example.ribbon.platform.PlatformInfo.isModLoaded("enigmaticlegacy")) {
             SPECIAL_WEAPONS.add("enigmaticlegacy:the_acknowledgment");
         }
-        if (ModList.get().isLoaded("arcaneworld")) {
+        if (com.example.ribbon.platform.PlatformInfo.isModLoaded("arcaneworld")) {
             SPECIAL_WEAPONS.add("arcaneworld:annivire");
         }
     }
 
     @SubscribeEvent
     public static void onLivingDamage(LivingDamageEvent.Post event) {
+        onDamage(event.getEntity(), event.getSource(), event.getInflictedDamage());
+    }
+
+    /**
+     * 平台无关的伤害入口。
+     *
+     * <p>NeoForge 侧由 {@link #onLivingDamage}(LivingDamageEvent.Post) 调用（单人模式下
+     * 该事件在集成服务端触发，与客户端同 JVM，静态状态共享）；Fabric 侧由
+     * {@code ServerLivingEntityEvents.AFTER_DAMAGE} 调用 —— 同样走集成服务端，
+     * 与 NeoForge 的行为边界（多人服务器上不显示）完全一致。</p>
+     *
+     * @param target 受击实体
+     * @param source 伤害源
+     * @param damage 最终 inflicted 伤害（护甲/吸收减免后）
+     */
+    public static void onDamage(LivingEntity target, DamageSource source, float damage) {
         if (!Config.isDamageNumbersEnabled()) return;
-        if (!(event.getSource().getEntity() instanceof Player player)) return;
+        if (!(source.getEntity() instanceof Player player)) return;
 
         initSpecialWeapons();
 
@@ -94,7 +109,6 @@ public class DamageNumberHandler {
             }
         }
 
-        float damage = event.getInflictedDamage();
         if (damage <= 0 && !isSpecial) return;
         if (isSpecial && damage <= 0) damage = Float.MAX_VALUE;
 
@@ -110,8 +124,7 @@ public class DamageNumberHandler {
             lastSpecialNumberSpawnTime = currentTime;
         }
 
-        int color = isSpecial ? -1 : determineColor(event.getSource());
-        LivingEntity target = event.getEntity();
+        int color = isSpecial ? -1 : determineColor(source);
         long mergeWindow = Config.getDamageNumberMergeWindow();
 
         DamageNumber existing = null;

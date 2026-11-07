@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.example.ribbon.fabric.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "description": "Ribbon 的 Fabric 专属注入。只在 fabric.mod.json 声明，NeoForge 侧不加载；26.2 无 intermediary，直接使用官方映射名，无需 refmap。",
+  "client": [
+    "MouseHandlerMixin",
+    "CameraMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
