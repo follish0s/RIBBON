@@ -1,7 +1,7 @@
 package com.example.ribbon;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -36,7 +36,7 @@ public class ClickEffectHandler {
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
-        if (mc.options.hideGui) return;
+        if (com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc)) return;
 
         if (Config.isClickEffectCoverUi() && mc.screen != null) return;
 
@@ -72,7 +72,7 @@ public class ClickEffectHandler {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 
-        GuiGraphics gui = event.getGuiGraphics();
+        GuiGraphics gui = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         long now = System.currentTimeMillis();
 
         Iterator<ClickEffect> it = EFFECTS.iterator();

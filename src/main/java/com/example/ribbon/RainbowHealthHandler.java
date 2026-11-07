@@ -1,8 +1,8 @@
 package com.example.ribbon;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import com.example.ribbon.compat.GuiGraphics;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -13,8 +13,8 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 @EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public class RainbowHealthHandler {
 
-    private static final ResourceLocation HEART_TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/gui/icons.png");
+    private static final Identifier HEART_TEXTURE =
+            Identifier.withDefaultNamespace("textures/gui/icons.png");
 
     // icons.png 中血条的 UV 坐标（1.21 vanilla）
     private static final int U_CONTAINER = 16;  // 空心底
@@ -29,7 +29,7 @@ public class RainbowHealthHandler {
     public static void registerGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(
                 VanillaGuiLayers.PLAYER_HEALTH,
-                ResourceLocation.fromNamespaceAndPath("ribbon", "rainbow_health"),
+                Identifier.fromNamespaceAndPath("ribbon", "rainbow_health"),
                 (guiGraphics, deltaTracker) -> renderHealth(guiGraphics)
         );
     }
@@ -38,7 +38,7 @@ public class RainbowHealthHandler {
         if (!Config.RAINBOW_HEALTH.get()) return;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui) return;
+        if (mc.player == null || com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc)) return;
 
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();

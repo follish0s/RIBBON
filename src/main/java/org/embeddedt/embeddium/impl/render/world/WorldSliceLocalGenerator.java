@@ -3,7 +3,7 @@ package org.embeddedt.embeddium.impl.render.world;
 import com.google.common.base.Suppliers;
 import org.embeddedt.embeddium.api.render.chunk.EmbeddiumBlockAndTintGetter;
 import org.embeddedt.embeddium.impl.world.WorldSlice;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import org.objectweb.asm.*;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.spongepowered.asm.mixin.MixinEnvironment;

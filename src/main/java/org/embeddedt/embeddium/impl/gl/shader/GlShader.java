@@ -1,8 +1,8 @@
 package org.embeddedt.embeddium.impl.gl.shader;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import org.embeddedt.embeddium.impl.gl.GlObject;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL20C;
@@ -13,9 +13,9 @@ import org.lwjgl.opengl.GL20C;
 public class GlShader extends GlObject {
     private static final Logger LOGGER = LogManager.getLogger(GlShader.class);
 
-    private final ResourceLocation name;
+    private final Identifier name;
 
-    public GlShader(ShaderType type, ResourceLocation name, String src) {
+    public GlShader(ShaderType type, Identifier name, String src) {
         this.name = name;
 
         int handle = GL20C.glCreateShader(type.id);
@@ -37,7 +37,7 @@ public class GlShader extends GlObject {
         this.setHandle(handle);
     }
 
-    public ResourceLocation getName() {
+    public Identifier getName() {
         return this.name;
     }
 

@@ -29,7 +29,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderBuffers;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -47,12 +47,13 @@ import org.joml.Matrix4f;
 
 import java.util.*;
 import java.util.function.Consumer;
+import net.neoforged.fml.loading.LoadingModList;
 
 /**
  * Provides an extension to vanilla's {@link LevelRenderer}.
  */
 public class EmbeddiumWorldRenderer {
-    private static final boolean ENABLE_BLOCKENTITY_CULLING = FMLLoader.getLoadingModList().getModFileById("valkyrienskies") == null;
+    private static final boolean ENABLE_BLOCKENTITY_CULLING = LoadingModList.get().getModFileById("valkyrienskies") == null;
 
     private final Minecraft client;
 
@@ -184,7 +185,7 @@ public class EmbeddiumWorldRenderer {
             throw new IllegalStateException("Client instance has no active player entity");
         }
 
-        Vec3 pos = camera.getPosition();
+        Vec3 pos = camera.position();
         float pitch = camera.getXRot();
         float yaw = camera.getYRot();
         float fogDistance = RenderSystem.getShaderFogEnd();
@@ -400,7 +401,7 @@ public class EmbeddiumWorldRenderer {
                                     float tickDelta) {
         MultiBufferSource.BufferSource immediate = bufferBuilders.bufferSource();
 
-        Vec3 cameraPos = camera.getPosition();
+        Vec3 cameraPos = camera.position();
         double x = cameraPos.x();
         double y = cameraPos.y();
         double z = cameraPos.z();

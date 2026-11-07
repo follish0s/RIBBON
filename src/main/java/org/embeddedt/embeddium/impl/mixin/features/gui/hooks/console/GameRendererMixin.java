@@ -3,7 +3,7 @@ package org.embeddedt.embeddium.impl.mixin.features.gui.hooks.console;
 import org.embeddedt.embeddium.impl.gui.console.ConsoleHooks;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import org.lwjgl.glfw.GLFW;

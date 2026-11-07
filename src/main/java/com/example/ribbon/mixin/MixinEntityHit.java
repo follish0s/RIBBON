@@ -6,7 +6,7 @@ package com.example.ribbon.mixin;
 
 import com.example.ribbon.util.Vec3Pool;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.Illusioner;
+import net.minecraft.world.entity.monster.illager.Illusioner;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

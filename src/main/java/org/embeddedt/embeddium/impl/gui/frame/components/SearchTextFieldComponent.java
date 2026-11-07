@@ -6,11 +6,11 @@ import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
@@ -21,6 +21,9 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.function.BiFunction;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.KeyEvent;
 
 public class SearchTextFieldComponent extends AbstractWidget {
     protected final Dim2i dim;
@@ -93,7 +96,10 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent __evt, boolean __doubleClick) {
+        double mouseX = __evt.x();
+        double mouseY = __evt.y();
+        int button = __evt.input();
         int i = Mth.floor(mouseX) - this.dim.x() - 6;
         String string = this.textRenderer.plainSubstrByWidth(this.model.text.substring(this.model.firstCharacterIndex), this.getInnerWidth());
         this.model.setCursor(this.textRenderer.plainSubstrByWidth(string, i).length() + this.model.firstCharacterIndex);
@@ -135,7 +141,9 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
+    public boolean charTyped(CharacterEvent __evt) {
+        char chr = (char) __evt.codepoint();
+        int modifiers = 0;
         if (!this.isActive()) {
             return false;
         }
@@ -161,11 +169,14 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent __evt) {
+        int keyCode = __evt.key();
+        int scanCode = 0;
+        int modifiers = __evt.modifiers();
         if (!this.isActive()) {
             return false;
         } else {
-            this.model.selecting = Screen.hasShiftDown();
+            this.model.selecting = Minecraft.getInstance().hasShiftDown();
             if (Screen.isSelectAll(keyCode)) {
                 this.model.setCursorToEnd();
                 this.model.setSelectionEnd(0);
@@ -192,7 +203,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         if (this.model.editable) {
                             this.model.selecting = false;
                             this.model.erase(-1);
-                            this.model.selecting = Screen.hasShiftDown();
+                            this.model.selecting = Minecraft.getInstance().hasShiftDown();
                         }
                         return true;
                     }
@@ -200,7 +211,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         if (this.model.editable) {
                             this.model.selecting = false;
                             this.model.erase(1);
-                            this.model.selecting = Screen.hasShiftDown();
+                            this.model.selecting = Minecraft.getInstance().hasShiftDown();
                         }
                         return true;
                     }

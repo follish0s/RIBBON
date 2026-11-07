@@ -1,6 +1,6 @@
 package org.embeddedt.embeddium.impl.gui.console;
 
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 
 public class ConsoleHooks {
     public static void render(GuiGraphics drawContext, double currentTime) {

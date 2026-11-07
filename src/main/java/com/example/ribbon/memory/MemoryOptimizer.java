@@ -73,10 +73,10 @@ public final class MemoryOptimizer {
             new ConcurrentHashMap<>(512);
 
     /**
-     * ModelResourceLocation 规范化池（客户端专用）。
+     * ModelIdentifier 规范化池（客户端专用）。
      *
      * <p>用 {@code Object} 声明以避免本类（common）引入 {@code @OnlyIn(CLIENT)} 类型，
-     * 保证专用服务器可正常加载。实际存取的都是 ModelResourceLocation 实例。</p>
+     * 保证专用服务器可正常加载。实际存取的都是 ModelIdentifier 实例。</p>
      *
      * <p>键为 {@code "namespace:path#variant"} 规范化字符串。命中即返回同一实例，
      * 避免相同路径反复生成新 record 对象与其内部字符串（String Interning 效果）。</p>
@@ -189,7 +189,7 @@ public final class MemoryOptimizer {
         }
     }
 
-    // ==================== ③ ModelResourceLocation 驻留 ====================
+    // ==================== ③ ModelIdentifier 驻留 ====================
 
     /**
      * 只读查询池（不入池）。用于在构造新实例<b>之前</b>判断是否已有等价实例，
@@ -209,13 +209,13 @@ public final class MemoryOptimizer {
     }
 
     /**
-     * 规范化 ModelResourceLocation（客户端）。
+     * 规范化 ModelIdentifier（客户端）。
      *
      * <p>键用 {@code Object} 弱类型声明以保持本类在专用服务器上可加载。
-     * 调用方负责传入 ModelResourceLocation 并做向下转型。</p>
+     * 调用方负责传入 ModelIdentifier 并做向下转型。</p>
      *
      * @param key   规范化字符串键，形如 {@code "minecraft:stone#inventory"}
-     * @param value 新建的 ModelResourceLocation 实例
+     * @param value 新建的 ModelIdentifier 实例
      * @return 池中已存在的等价实例；若不干预则返回 {@code null}
      */
     public static Object internModelLocation(String key, Object value) {

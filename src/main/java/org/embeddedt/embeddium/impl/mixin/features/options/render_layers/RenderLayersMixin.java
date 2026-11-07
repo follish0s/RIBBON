@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.impl.mixin.features.options.render_layers;
 
 import org.embeddedt.embeddium.impl.Embeddium;
-import net.minecraft.client.GraphicsStatus;
+import com.example.ribbon.compat.GraphicsStatus;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

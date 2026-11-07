@@ -7,9 +7,9 @@ package com.example.ribbon.render.fsr2;
 import com.example.ribbon.Config;
 import com.example.ribbon.Ribbon;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.opengl.GL46C;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -231,10 +231,10 @@ public final class Fsr2Renderer {
         boolean depthTest = GL46C.glIsEnabled(GL46C.GL_DEPTH_TEST);
         boolean cull = GL46C.glIsEnabled(GL46C.GL_CULL_FACE);
 
-        GlStateManager._disableBlend();
-        GlStateManager._disableDepthTest();
-        GlStateManager._disableCull();
-        GlStateManager._colorMask(true, true, true, true);
+        com.example.ribbon.compat.LegacyRenderState.disableBlend();
+        com.example.ribbon.compat.LegacyRenderState.disableDepthTest();
+        com.example.ribbon.compat.LegacyRenderState.disableCull();
+        com.example.ribbon.compat.LegacyRenderState.colorMask(true, true, true, true);
 
         GL46C.glBindFramebuffer(GL46C.GL_READ_FRAMEBUFFER, intermediateFbo);
         GL46C.glBindFramebuffer(GL46C.GL_DRAW_FRAMEBUFFER, mainFbo);
@@ -242,9 +242,9 @@ public final class Fsr2Renderer {
         GL46C.glBindFramebuffer(GL46C.GL_FRAMEBUFFER, mainFbo);
 
         GL46C.glViewport(vp[0], vp[1], vp[2], vp[3]);
-        if (blend) GlStateManager._enableBlend(); else GlStateManager._disableBlend();
-        if (depthTest) GlStateManager._enableDepthTest(); else GlStateManager._disableDepthTest();
-        if (cull) GlStateManager._enableCull(); else GlStateManager._disableCull();
+        if (blend) com.example.ribbon.compat.LegacyRenderState.enableBlend(); else com.example.ribbon.compat.LegacyRenderState.disableBlend();
+        if (depthTest) com.example.ribbon.compat.LegacyRenderState.enableDepthTest(); else com.example.ribbon.compat.LegacyRenderState.disableDepthTest();
+        if (cull) com.example.ribbon.compat.LegacyRenderState.enableCull(); else com.example.ribbon.compat.LegacyRenderState.disableCull();
     }
 
     private static boolean checkComputeSupport() {
@@ -409,7 +409,7 @@ public final class Fsr2Renderer {
     }
 
     private static String loadShaderString(String resourcePath) throws IOException {
-        ResourceLocation rl = ResourceLocation.fromNamespaceAndPath(Ribbon.MODID, resourcePath);
+        Identifier rl = Identifier.fromNamespaceAndPath(Ribbon.MODID, resourcePath);
         try (InputStream is = Minecraft.getInstance().getResourceManager().getResource(rl)
                 .orElseThrow(() -> new IOException("找不到着色器资源: " + rl)).open()) {
             return new String(is.readAllBytes(), StandardCharsets.UTF_8);

@@ -4,7 +4,7 @@ import com.google.common.base.Predicates;
 import org.embeddedt.embeddium.api.options.structure.Option;
 import org.embeddedt.embeddium.api.options.structure.OptionPage;
 import org.embeddedt.embeddium.api.options.control.CyclingControl;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;

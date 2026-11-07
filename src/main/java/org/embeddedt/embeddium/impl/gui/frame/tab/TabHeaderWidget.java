@@ -5,11 +5,11 @@ import org.embeddedt.embeddium.impl.Embeddium;
 import org.embeddedt.embeddium.impl.gui.widgets.FlatButtonWidget;
 import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.Pack;
@@ -26,10 +26,10 @@ import java.util.Optional;
 import java.util.Set;
 
 public class TabHeaderWidget extends FlatButtonWidget {
-    private static final ResourceLocation FALLBACK_LOCATION = ResourceLocation.withDefaultNamespace("textures/misc/unknown_pack.png");
+    private static final Identifier FALLBACK_LOCATION = Identifier.withDefaultNamespace("textures/misc/unknown_pack.png");
 
     private static final Set<String> erroredLogos = new HashSet<>();
-    private final ResourceLocation logoTexture;
+    private final Identifier logoTexture;
 
     public static MutableComponent getLabel(String modId) {
         return (switch(modId) {
@@ -42,7 +42,7 @@ public class TabHeaderWidget extends FlatButtonWidget {
     public TabHeaderWidget(Dim2i dim, String modId) {
         super(dim, getLabel(modId), () -> {});
         Optional<String> logoFile = erroredLogos.contains(modId) ? Optional.empty() : ModList.get().getModContainerById(modId).flatMap(c -> c.getModInfo().getLogoFile());
-        ResourceLocation texture = null;
+        Identifier texture = null;
         if(logoFile.isPresent()) {
             final Pack.ResourcesSupplier supplier = ResourcePackLoader.getPackFor(modId).orElse(ResourcePackLoader.getPackFor("neoforge").orElseThrow(()->new RuntimeException("Can't find neoforge, WHAT!")));
             try(PackResources pack = supplier.openPrimary(new PackLocationInfo("mod:" + modId, Component.empty(), PackSource.BUILT_IN, Optional.empty()))) {
@@ -53,8 +53,8 @@ public class TabHeaderWidget extends FlatButtonWidget {
                         logo.close();
                         throw new IOException("Logo " + logoFile.get() + " for " + modId + " is not square");
                     }
-                    texture = ResourceLocation.fromNamespaceAndPath(Embeddium.MODID, "logo/" + modId);
-                    Minecraft.getInstance().getTextureManager().register(texture, new DynamicTexture(logo));
+                    texture = Identifier.fromNamespaceAndPath(Embeddium.MODID, "logo/" + modId);
+                    Minecraft.getInstance().getTextureManager().register(texture, new DynamicTexture(() -> "ribbon-dynamic", logo));
                 }
             } catch(IOException e) {
                 erroredLogos.add(modId);
@@ -78,7 +78,7 @@ public class TabHeaderWidget extends FlatButtonWidget {
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
         super.render(drawContext, mouseX, mouseY, delta);
 
-        ResourceLocation icon = Objects.requireNonNullElse(this.logoTexture, FALLBACK_LOCATION);
+        Identifier icon = Objects.requireNonNullElse(this.logoTexture, FALLBACK_LOCATION);
         int fontHeight = Minecraft.getInstance().font.lineHeight;
         int imgY = this.dim.getCenterY() - (fontHeight / 2);
         drawContext.blit(icon, this.dim.x() + 5, imgY, 0.0f, 0.0f, fontHeight, fontHeight, fontHeight, fontHeight);

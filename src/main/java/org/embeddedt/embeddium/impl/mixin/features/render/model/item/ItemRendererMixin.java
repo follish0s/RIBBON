@@ -10,7 +10,7 @@ import org.embeddedt.embeddium.api.util.ColorARGB;
 import org.embeddedt.embeddium.api.vertex.buffer.VertexBufferWriter;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.color.item.ItemColors;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;

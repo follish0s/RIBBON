@@ -116,7 +116,7 @@ public abstract class MixinLODLifecycle {
             // 两者差几个区块时，环带整体偏移、边缘断层（表现为"LOD 一直偏离一点"）。
             // 统一用相机（眼睛）位置取区块坐标，与 LODRenderEventHandler 的
             // camChunkX/camChunkZ（floor(camPos.x/16)）完全同源。
-            net.minecraft.world.phys.Vec3 cam = mc.gameRenderer.getMainCamera().getPosition();
+            net.minecraft.world.phys.Vec3 cam = mc.gameRenderer.mainCamera().position();
             int camChunkX = (int) Math.floor(cam.x / 16.0);
             int camChunkZ = (int) Math.floor(cam.z / 16.0);
             ChunkPos center = new ChunkPos(camChunkX, camChunkZ);
@@ -153,7 +153,7 @@ public abstract class MixinLODLifecycle {
                 for (int dz = -outerRadius; dz <= outerRadius; dz++) {
                     int d2 = dx * dx + dz * dz;
                     if (d2 > innerSq && d2 <= outerSq) {
-                        wanted.add(new ChunkPos(center.x + dx, center.z + dz));
+                        wanted.add(new ChunkPos(center.x() + dx, center.z() + dz));
                     }
                 }
             }

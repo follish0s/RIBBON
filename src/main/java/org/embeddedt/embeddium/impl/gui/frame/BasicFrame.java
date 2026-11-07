@@ -2,7 +2,7 @@ package org.embeddedt.embeddium.impl.gui.frame;
 
 import org.embeddedt.embeddium.impl.gui.widgets.AbstractWidget;
 import org.embeddedt.embeddium.api.math.Dim2i;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;

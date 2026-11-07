@@ -5,7 +5,7 @@ import com.example.ribbon.optimization.RuntimeConfig;
 import com.example.ribbon.optimization.ShaderStateCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -52,7 +52,7 @@ public final class DynamicLightManager {
             Map.entry("minecraft:spectral_arrow", 6)
     );
 
-    /** Item → 光照等级缓存：注册表查询与 ResourceLocation.toString() 只做一次。 */
+    /** Item → 光照等级缓存：注册表查询与 Identifier.toString() 只做一次。 */
     private static final Map<Item, Integer> ITEM_LIGHT_CACHE = new IdentityHashMap<>();
     private static final int ITEM_LIGHT_CACHE_MAX = 512;
 
@@ -200,7 +200,7 @@ public final class DynamicLightManager {
         }
 
         // 2) 非方块物品：用注册名匹配白名单
-        ResourceLocation key = BuiltInRegistries.ITEM.getKey(item);
+        Identifier key = BuiltInRegistries.ITEM.getKey(item);
         if (key != null) {
             Integer v = ITEM_LIGHT_MAP.get(key.toString());
             if (v != null) return v;

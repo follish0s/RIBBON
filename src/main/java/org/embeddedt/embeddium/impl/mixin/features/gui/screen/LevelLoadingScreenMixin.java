@@ -8,7 +8,7 @@ import org.embeddedt.embeddium.api.vertex.format.common.ColorVertex;
 import org.embeddedt.embeddium.api.vertex.buffer.VertexBufferWriter;
 import org.embeddedt.embeddium.api.util.ColorABGR;
 import org.embeddedt.embeddium.api.util.ColorARGB;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;

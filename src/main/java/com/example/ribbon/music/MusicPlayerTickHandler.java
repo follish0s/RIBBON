@@ -31,7 +31,7 @@ public final class MusicPlayerTickHandler {
             if (mc.screen == null) {
                 try {
                     MusicPlayerScreen screen = new MusicPlayerScreen();
-                    mc.setScreen(screen);
+                    mc.setScreenAndShow(screen);
                     LOGGER.info("[Ribbon] 音乐 UI 已打开");
                 } catch (Throwable t) {
                     LOGGER.error("[Ribbon] 打开音乐 UI 失败", t);

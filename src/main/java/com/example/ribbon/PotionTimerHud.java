@@ -6,7 +6,7 @@ package com.example.ribbon;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.neoforged.api.distmarker.Dist;
@@ -47,7 +47,7 @@ public final class PotionTimerHud {
         if (com.example.ribbon.optimization.FocusState.shouldPauseBackgroundWork()) return;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.options.hideGui || mc.level == null || mc.player == null) return;
+        if (com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc) || mc.level == null || mc.player == null) return;
         if (mc.getDebugOverlay() != null && mc.getDebugOverlay().showDebugScreen()) return;
 
         Collection<MobEffectInstance> effects = mc.player.getActiveEffects();
@@ -101,7 +101,7 @@ public final class PotionTimerHud {
             default           -> { tx = margin;                       ty = margin; }
         }
 
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         int x1 = (int) (tx - 3);
         int y1 = (int) (ty - 3);
         int x2 = (int) (tx + blockW * scale + 3);

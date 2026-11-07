@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class ShaderParser {
     public static String parseShader(String src, ShaderConstants constants) {
@@ -48,7 +48,7 @@ public class ShaderParser {
         String namespace = matcher.group("namespace");
         String path = matcher.group("path");
 
-        ResourceLocation identifier = ResourceLocation.fromNamespaceAndPath(namespace, path);
+        Identifier identifier = Identifier.fromNamespaceAndPath(namespace, path);
         String source = ShaderLoader.getShaderSource(identifier);
 
         return ShaderParser.parseShader(source);

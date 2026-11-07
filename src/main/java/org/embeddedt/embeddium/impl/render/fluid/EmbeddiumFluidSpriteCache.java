@@ -5,17 +5,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.material.FluidState;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 
 public class EmbeddiumFluidSpriteCache {
     // Cache the sprites array to avoid reallocating it on every call
     private final TextureAtlasSprite[] sprites = new TextureAtlasSprite[3];
-    private final Object2ObjectOpenHashMap<ResourceLocation, TextureAtlasSprite> spriteCache = new Object2ObjectOpenHashMap<>();
+    private final Object2ObjectOpenHashMap<Identifier, TextureAtlasSprite> spriteCache = new Object2ObjectOpenHashMap<>();
 
-    private TextureAtlasSprite getTexture(ResourceLocation identifier) {
+    private TextureAtlasSprite getTexture(Identifier identifier) {
         TextureAtlasSprite sprite = spriteCache.get(identifier);
 
         if (sprite == null) {
@@ -30,7 +30,7 @@ public class EmbeddiumFluidSpriteCache {
         IClientFluidTypeExtensions fluidExt = IClientFluidTypeExtensions.of(fluidState);
         sprites[0] = getTexture(fluidExt.getStillTexture(fluidState, world, pos));
         sprites[1] = getTexture(fluidExt.getFlowingTexture(fluidState, world, pos));
-        ResourceLocation overlay = fluidExt.getOverlayTexture(fluidState, world, pos);
+        Identifier overlay = fluidExt.getOverlayTexture(fluidState, world, pos);
         sprites[2] = overlay != null ? getTexture(overlay) : null;
         return sprites;
     }

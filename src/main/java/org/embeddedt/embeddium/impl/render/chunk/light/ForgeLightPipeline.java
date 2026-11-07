@@ -7,7 +7,7 @@ import org.embeddedt.embeddium.impl.model.quad.ModelQuadView;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.neoforged.neoforge.client.model.IQuadTransformer;
 import net.neoforged.neoforge.client.model.lighting.FlatQuadLighter;
 import net.neoforged.neoforge.client.model.lighting.QuadLighter;

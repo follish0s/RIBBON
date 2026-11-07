@@ -17,15 +17,15 @@ import org.embeddedt.embeddium.api.options.structure.OptionStorage;
 import org.embeddedt.embeddium.impl.gui.widgets.FlatButtonWidget;
 import org.embeddedt.embeddium.api.math.Dim2i;
 import org.embeddedt.embeddium.api.util.ColorARGB;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.embeddedt.embeddium.api.options.OptionIdentifier;
 import org.embeddedt.embeddium.impl.gui.frame.AbstractFrame;
 import org.embeddedt.embeddium.impl.gui.frame.BasicFrame;
@@ -45,9 +45,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
+import net.minecraft.client.input.KeyEvent;
 
 public class EmbeddiumVideoOptionsScreen extends Screen {
-    private static final ResourceLocation LOGO_LOCATION = ResourceLocation.fromNamespaceAndPath(Embeddium.MODID, "textures/embeddium/gui/logo_transparent.png");
+    private static final Identifier LOGO_LOCATION = Identifier.fromNamespaceAndPath(Embeddium.MODID, "textures/embeddium/gui/logo_transparent.png");
     private static final int LOGO_SIZE = 256;
 
     private static final AtomicReference<Component> tabFrameSelectedTab = new AtomicReference<>(null);
@@ -147,7 +148,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         var prompt = new PromptScreen(this, DONATION_PROMPT_MESSAGE, 320, 190,
                 new PromptScreen.Action(Component.literal("Support Sodium"), this::openDonationPage));
 
-        this.minecraft.setScreen(prompt);
+        this.minecraft.setScreenAndShow(prompt);
     }
 
 
@@ -263,7 +264,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
                     .setId(OptionIdentifier.create("iris", "shader_packs"))
                     .setOnSelectFunction(() -> {
                         if(ShaderModBridge.openShaderScreen(this) instanceof Screen screen) {
-                            this.minecraft.setScreen(screen);
+                            this.minecraft.setScreenAndShow(screen);
                         }
                         return false;
                     })
@@ -302,7 +303,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
                 .addChild(dim -> this.closeButton);
     }
 
-    @Override
+    
     public void renderBackground(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
         if (com.example.ribbon.optimization.RuntimeConfig.liquidGlassEnabled
                 && renderLiquidGlassBackground(gfx, partialTick)) {
@@ -370,7 +371,28 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         }
     }
 
+    
     @Override
+
+
+    
+    public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor __graphics,
+
+
+    
+            int mouseX, int mouseY, float delta) {
+
+
+    
+        this.render(com.example.ribbon.compat.GuiGraphics.wrap(__graphics), mouseX, mouseY, delta);
+
+
+    
+    }
+
+
+
+    
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
         this.flushPendingSearchRebuild();
         this.renderBackground(drawContext, mouseX, mouseY, delta);
@@ -489,14 +511,17 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent __evt) {
+        int keyCode = __evt.key();
+        int scanCode = 0;
+        int modifiers = __evt.modifiers();
         if (keyCode == GLFW.GLFW_KEY_P && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0 && !(this.searchTextField != null && this.searchTextField.isFocused())) {
-            Minecraft.getInstance().setScreen(new VideoSettingsScreen(this.prevScreen, Minecraft.getInstance(), Minecraft.getInstance().options));
+            Minecraft.getInstance().setScreenAndShow(new VideoSettingsScreen(this.prevScreen, Minecraft.getInstance(), Minecraft.getInstance().options));
 
             return true;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(__evt);
     }
 
     @Override
@@ -506,7 +531,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.prevScreen);
+        this.minecraft.setScreenAndShow(this.prevScreen);
     }
 
     public static final List<FormattedText> DONATION_PROMPT_MESSAGE;

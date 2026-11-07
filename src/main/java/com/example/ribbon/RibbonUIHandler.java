@@ -14,7 +14,7 @@ public class RibbonUIHandler {
             "key.ribbon.zoom",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_C,
-            "key.categories.ribbon"
+            KeyMapping.Category.MISC
     );
 
     // 播放/暂停：K
@@ -22,7 +22,7 @@ public class RibbonUIHandler {
             "key.ribbon.music_play_pause",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_K,
-            "key.categories.ribbon"
+            KeyMapping.Category.MISC
     );
 
     // 下一首：.
@@ -30,7 +30,7 @@ public class RibbonUIHandler {
             "key.ribbon.music_next",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_PERIOD,
-            "key.categories.ribbon"
+            KeyMapping.Category.MISC
     );
 
     // 上一首：,
@@ -38,7 +38,7 @@ public class RibbonUIHandler {
             "key.ribbon.music_prev",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_COMMA,
-            "key.categories.ribbon"
+            KeyMapping.Category.MISC
     );
 
     // 打开音乐 UI：P
@@ -46,7 +46,7 @@ public class RibbonUIHandler {
             "key.ribbon.music_menu",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_P,
-            "key.categories.ribbon"
+            KeyMapping.Category.MISC
     );
 
     @EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)

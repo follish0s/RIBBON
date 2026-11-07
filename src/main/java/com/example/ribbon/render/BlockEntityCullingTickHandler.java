@@ -48,12 +48,12 @@ public final class BlockEntityCullingTickHandler {
         ClientLevel level = mc.level;
         if (level == null || mc.player == null) return;
 
-        Vec3 cameraPos = mc.gameRenderer.getMainCamera().getPosition();
+        Vec3 cameraPos = mc.gameRenderer.mainCamera().position();
         // 与实体剔除共用同一个幂等门控；相机静止时进一步降频
         if (!CullingOptimizer.shouldScan(cameraPos, level.getGameTime())) return;
 
-        int centerX = mc.player.chunkPosition().x;
-        int centerZ = mc.player.chunkPosition().z;
+        int centerX = mc.player.chunkPosition().x();
+        int centerZ = mc.player.chunkPosition().z();
 
         SCAN_BUFFER.clear();
         for (int dx = -CHUNK_RADIUS; dx <= CHUNK_RADIUS; dx++) {

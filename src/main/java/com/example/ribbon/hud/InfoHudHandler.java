@@ -7,7 +7,7 @@ package com.example.ribbon.hud;
 import com.example.ribbon.Config;
 import com.example.ribbon.Ribbon;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -82,11 +82,11 @@ public final class InfoHudHandler {
     @SubscribeEvent
     public static void onRenderGui(RenderGuiEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.options.hideGui || mc.level == null || mc.player == null) return;
+        if (com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc) || mc.level == null || mc.player == null) return;
         if (!Config.isInfoHudEnabled()) return;
         if (com.example.ribbon.optimization.FocusState.shouldPauseBackgroundWork()) return;
 
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         float scale = (float) Config.getInfoHudScale();
         int sw = mc.getWindow().getGuiScaledWidth();
         int sh = mc.getWindow().getGuiScaledHeight();
@@ -105,7 +105,7 @@ public final class InfoHudHandler {
 
             // ② 生物群系
             var biomeKey = mc.level.getBiome(pos).unwrapKey();
-            String biomeName = biomeKey.map(k -> k.location().getPath()).orElse("unknown");
+            String biomeName = biomeKey.map(k -> k.identifier().getPath()).orElse("unknown");
             fresh.add("Biome: " + biomeName);
 
             // ③ CPS

@@ -1,10 +1,10 @@
 package com.example.ribbon;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.neoforged.api.distmarker.Dist;
@@ -16,12 +16,12 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 @EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public class BiomeTitleHandler {
 
-    private static ResourceLocation lastBiomeId = null;
+    private static Identifier lastBiomeId = null;
     private static Component currentBiomeName = null;
     private static long titleStartTime = 0;
     private static boolean titleVisible = false;
 
-    private static ResourceLocation pendingBiomeId = null;
+    private static Identifier pendingBiomeId = null;
     private static int pendingConfirmCount = 0;
     private static final int CONFIRM_THRESHOLD = 3;
 
@@ -39,8 +39,8 @@ public class BiomeTitleHandler {
         if (mc.player.tickCount % 10 != 0) return;
 
         Holder<Biome> biomeHolder = mc.level.getBiome(mc.player.blockPosition());
-        ResourceLocation biomeId = biomeHolder.unwrapKey()
-                .map(key -> key.location())
+        Identifier biomeId = biomeHolder.unwrapKey()
+                .map(key -> key.identifier())
                 .orElse(null);
 
         if (biomeId == null) return;
@@ -81,7 +81,7 @@ public class BiomeTitleHandler {
             return;
         }
 
-        GuiGraphics gui = event.getGuiGraphics();
+        GuiGraphics gui = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 

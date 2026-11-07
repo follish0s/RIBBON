@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -97,17 +97,17 @@ public class RainbowOutlineHandler {
                 break;
         }
 
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.disableCull();
+        com.example.ribbon.compat.LegacyRenderState.enableBlend();
+        com.example.ribbon.compat.LegacyRenderState.defaultBlendFunc();
+        com.example.ribbon.compat.LegacyRenderState.disableDepthTest();
+        com.example.ribbon.compat.LegacyRenderState.depthMask(false);
+        com.example.ribbon.compat.LegacyRenderState.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        com.example.ribbon.compat.LegacyRenderState.disableCull();
 
         VertexConsumer consumer = bufferSource.getBuffer(RenderType.lines());
 
         poseStack.pushPose();
-        Vec3 cameraPos = camera.getPosition();
+        Vec3 cameraPos = camera.position();
         poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
         renderShape(poseStack, consumer, shape,
@@ -116,10 +116,10 @@ public class RainbowOutlineHandler {
 
         poseStack.popPose();
 
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(true);
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
+        com.example.ribbon.compat.LegacyRenderState.enableDepthTest();
+        com.example.ribbon.compat.LegacyRenderState.depthMask(true);
+        com.example.ribbon.compat.LegacyRenderState.enableCull();
+        com.example.ribbon.compat.LegacyRenderState.disableBlend();
     }
 
     private static void renderShape(PoseStack poseStack, VertexConsumer consumer, VoxelShape shape,

@@ -1,7 +1,7 @@
 package com.example.ribbon;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -88,7 +88,7 @@ public class DamageNumberHandler {
         ItemStack mainHand = player.getMainHandItem();
         boolean isSpecial = false;
         if (!mainHand.isEmpty()) {
-            String id = mainHand.getItem().builtInRegistryHolder().key().location().toString();
+            String id = mainHand.getItem().builtInRegistryHolder().key().identifier().toString();
             if (SPECIAL_WEAPONS.contains(id)) {
                 isSpecial = true;
             }
@@ -160,7 +160,7 @@ public class DamageNumberHandler {
     public static void onRenderGui(RenderGuiEvent.Post event) {
         if (!Config.isDamageNumbersEnabled()) return;
 
-        GuiGraphics gui = event.getGuiGraphics();
+        GuiGraphics gui = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 
@@ -224,8 +224,8 @@ public class DamageNumberHandler {
             double currentY = worldY + yOffset;
             double currentZ = worldZ + offsetZ;
 
-            var camera = mc.gameRenderer.getMainCamera();
-            Vec3 camPos = camera.getPosition();
+            var camera = mc.gameRenderer.mainCamera();
+            Vec3 camPos = camera.position();
             float yawRad = (float) Math.toRadians(camera.getYRot());
             float pitchRad = (float) Math.toRadians(camera.getXRot());
 

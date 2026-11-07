@@ -7,7 +7,7 @@ package com.example.ribbon.lod.render;
 import com.example.ribbon.Ribbon;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -41,16 +41,16 @@ public final class LODShaderRegistry {
      *
      * <p><b>关键</b>：Minecraft 1.21.1 运行版 {@link ShaderInstance} 的构造器
      * {@code ShaderInstance(ResourceProvider, String, VertexFormat)} 内部用
-     * {@code ResourceLocation.withDefaultNamespace(...)} 把 json/vsh/fsh 一律解析到
+     * {@code Identifier.withDefaultNamespace(...)} 把 json/vsh/fsh 一律解析到
      * {@code minecraft} namespace（忽略传入的 namespace）。因此 shader 资源必须放在
      * {@code assets/minecraft/shaders/core/lod_terrain.*}，且这里必须用 {@code minecraft}
      * namespace 才能命中。曾用 {@code ribbon} namespace 导致注册时报
      * {@code FileNotFound: minecraft:shaders/core/lod_terrain.vsh}。</p>
      */
-    public static final ResourceLocation LOD_TERRAIN = ResourceLocation.fromNamespaceAndPath("minecraft", "lod_terrain");
+    public static final Identifier LOD_TERRAIN = Identifier.fromNamespaceAndPath("minecraft", "lod_terrain");
 
     /** 探针 shader（全屏红三角诊断用，绕开矩阵/雾/颜色一切变量）。 */
-    public static final ResourceLocation LOD_PROBE = ResourceLocation.fromNamespaceAndPath("minecraft", "lod_probe");
+    public static final Identifier LOD_PROBE = Identifier.fromNamespaceAndPath("minecraft", "lod_probe");
 
     /** 当前 shader 实例（volatile，资源重载时被回调替换）。 */
     private static volatile ShaderInstance lodTerrainShader;

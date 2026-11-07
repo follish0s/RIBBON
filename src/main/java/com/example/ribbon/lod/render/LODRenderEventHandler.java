@@ -9,12 +9,12 @@ import com.example.ribbon.lod.mesh.LODMesh;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -84,7 +84,7 @@ public final class LODRenderEventHandler {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) return;
 
-        net.minecraft.world.phys.Vec3 camPos = event.getCamera().getPosition();
+        net.minecraft.world.phys.Vec3 camPos = event.getCamera().position();
 
         // 【关键·先淘汰后收割】必须先 evictFarAway 腾位，再 drainReady 放入新网格。
         // 否则 readyMeshes 满时，drainReady 会 recycle 丢弃新构建的网格（白构建），
@@ -197,7 +197,7 @@ public final class LODRenderEventHandler {
             // 叉积验证为 CCW，但任何一面的偏差都会被 CULL 剔除导致"面片消失/地形穿插"。
             // 远景 LOD 顶点量小，背面剔除的收益可忽略，而误剔除的代价是可见面丢失，
             // 因此提交期间强制关闭背面剔除，draw 完再恢复。
-            RenderSystem.disableCull();
+            com.example.ribbon.compat.LegacyRenderState.disableCull();
 
             if (irisRendering) {
                 // —— 光影(AFTER_LEVEL)专用状态 ——
@@ -218,17 +218,17 @@ public final class LODRenderEventHandler {
                 // 3) LEQUAL 深度测试 + 深度写入，LOD 内部正确遮挡；
                 // 4) 关闭混合（不透明），杜绝 composite 残留混合状态导致过曝。
                 mc.getMainRenderTarget().bindWrite(false);
-                RenderSystem.enableDepthTest();
-                RenderSystem.depthMask(true);
-                RenderSystem.depthFunc(GL11.GL_LEQUAL);
-                RenderSystem.disableBlend();
+                com.example.ribbon.compat.LegacyRenderState.enableDepthTest();
+                com.example.ribbon.compat.LegacyRenderState.depthMask(true);
+                com.example.ribbon.compat.LegacyRenderState.depthFunc(GL11.GL_LEQUAL);
+                com.example.ribbon.compat.LegacyRenderState.disableBlend();
                 GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
             } else {
                 // 【修复·强制深度写入 + 深度测试】不依赖 setupRenderState 的隐含状态，
                 // 显式确保深度测试开启且深度可写，解决"纸片穿插"。
-                RenderSystem.enableDepthTest();
-                RenderSystem.depthMask(true);
-                RenderSystem.depthFunc(GL11.GL_LEQUAL);
+                com.example.ribbon.compat.LegacyRenderState.enableDepthTest();
+                com.example.ribbon.compat.LegacyRenderState.depthMask(true);
+                com.example.ribbon.compat.LegacyRenderState.depthFunc(GL11.GL_LEQUAL);
             }
 
             // 注意：VertexBuffer.drawWithShader(modelView, projection, shader) 用
@@ -241,8 +241,8 @@ public final class LODRenderEventHandler {
             // 深度已稳定（不再拖影）。不采样 terrain atlas，避免错误纹理。
             ShaderInstance shader = LODShaderRegistry.getShader();
             if (shader != null) {
-                RenderSystem.setShader(() -> shader);
-                RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+                com.example.ribbon.compat.LegacyRenderState.setShader(() -> shader);
+                com.example.ribbon.compat.LegacyRenderState.setShaderColor(1f, 1f, 1f, 1f);
                 // 【关键·uniform 时机】drawWithShader 内部会 shader.apply() 把 QualityMode
                 // 等自定义 uniform 重置为 json 默认值，覆盖掉 applyQualityUniforms 的设置。
                 // 因此这里不能提前 set，必须等 apply 之后再设（见下方 draw 循环）。
@@ -350,15 +350,15 @@ public final class LODRenderEventHandler {
             if (!irisRendering) {
                 com.example.ribbon.IrisReflection.restoreMainBound();
             }
-            RenderSystem.enableCull();
+            com.example.ribbon.compat.LegacyRenderState.enableCull();
             // 光影路径：恢复深度测试、深度写入与混合状态（AFTER_LEVEL 后可能还有
             // GUI/手部等渲染，不能留下被我们改过的状态污染它们）。
             if (irisRendering) {
-                RenderSystem.enableDepthTest();
-                RenderSystem.depthMask(true);
-                RenderSystem.depthFunc(GL11.GL_LEQUAL);
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
+                com.example.ribbon.compat.LegacyRenderState.enableDepthTest();
+                com.example.ribbon.compat.LegacyRenderState.depthMask(true);
+                com.example.ribbon.compat.LegacyRenderState.depthFunc(GL11.GL_LEQUAL);
+                com.example.ribbon.compat.LegacyRenderState.enableBlend();
+                com.example.ribbon.compat.LegacyRenderState.defaultBlendFunc();
             }
             // 与 setupRenderState 配对：仅无光影路径调用了 solid 状态，故仅无光影时清理。
             if (!irisRendering) {
@@ -410,10 +410,10 @@ public final class LODRenderEventHandler {
     // ==================== 三档质量 uniform ====================
 
     /** HIGH 档顶面 sprite（草方块顶）的 atlas 位置。 */
-    private static final ResourceLocation TOP_SPRITE = ResourceLocation.fromNamespaceAndPath("minecraft", "block/grass_block_top");
+    private static final Identifier TOP_SPRITE = Identifier.fromNamespaceAndPath("minecraft", "block/grass_block_top");
 
     /** HIGH 档侧面 sprite（草方块侧，含草皮与土）的 atlas 位置。 */
-    private static final ResourceLocation SIDE_SPRITE = ResourceLocation.fromNamespaceAndPath("minecraft", "block/grass_block_side");
+    private static final Identifier SIDE_SPRITE = Identifier.fromNamespaceAndPath("minecraft", "block/grass_block_side");
 
     /** sprite UV 是否已解析（资源重载后需重建）。 */
     private static volatile boolean spriteUvResolved = false;

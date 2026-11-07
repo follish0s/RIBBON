@@ -2,7 +2,7 @@ package com.example.ribbon.render;
 
 import com.example.ribbon.Config;
 import com.example.ribbon.Ribbon;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -146,7 +146,7 @@ public final class FsrPipeline {
     }
 
     private String loadShaderString(String resourcePath) throws IOException {
-        var resourceLocation = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(Ribbon.MODID, resourcePath);
+        var resourceLocation = net.minecraft.resources.Identifier.fromNamespaceAndPath(Ribbon.MODID, resourcePath);
         var resource = Minecraft.getInstance().getResourceManager().getResource(resourceLocation)
                 .orElseThrow(() -> new IOException("找不到着色器资源: " + resourceLocation));
         try (InputStream is = resource.open()) {
@@ -178,11 +178,11 @@ public final class FsrPipeline {
             boolean cull = GL33C.glIsEnabled(GL33C.GL_CULL_FACE);
 
             // 2. 设置纯净渲染状态
-            GlStateManager._colorMask(true, true, true, true);
-            GlStateManager._depthMask(false);
-            GlStateManager._disableDepthTest();
-            GlStateManager._disableBlend();
-            GlStateManager._disableCull();
+            com.example.ribbon.compat.LegacyRenderState.colorMask(true, true, true, true);
+            com.example.ribbon.compat.LegacyRenderState.depthMask(false);
+            com.example.ribbon.compat.LegacyRenderState.disableDepthTest();
+            com.example.ribbon.compat.LegacyRenderState.disableBlend();
+            com.example.ribbon.compat.LegacyRenderState.disableCull();
 
             // Pass 1: EASU
             GL33C.glBindFramebuffer(GL33C.GL_FRAMEBUFFER, easuFbo);
@@ -209,11 +209,11 @@ public final class FsrPipeline {
             GL33C.glBindTexture(GL33C.GL_TEXTURE_2D, 0);
             GL33C.glViewport(vp[0], vp[1], vp[2], vp[3]);
 
-            GlStateManager._colorMask(colorMask[0] != 0, colorMask[1] != 0, colorMask[2] != 0, colorMask[3] != 0);
-            GlStateManager._depthMask(depthMask);
-            if (depthTest) GlStateManager._enableDepthTest(); else GlStateManager._disableDepthTest();
-            if (blend) GlStateManager._enableBlend(); else GlStateManager._disableBlend();
-            if (cull) GlStateManager._enableCull(); else GlStateManager._disableCull();
+            com.example.ribbon.compat.LegacyRenderState.colorMask(colorMask[0] != 0, colorMask[1] != 0, colorMask[2] != 0, colorMask[3] != 0);
+            com.example.ribbon.compat.LegacyRenderState.depthMask(depthMask);
+            if (depthTest) com.example.ribbon.compat.LegacyRenderState.enableDepthTest(); else com.example.ribbon.compat.LegacyRenderState.disableDepthTest();
+            if (blend) com.example.ribbon.compat.LegacyRenderState.enableBlend(); else com.example.ribbon.compat.LegacyRenderState.disableBlend();
+            if (cull) com.example.ribbon.compat.LegacyRenderState.enableCull(); else com.example.ribbon.compat.LegacyRenderState.disableCull();
 
             // 强制绑定回主帧缓冲
             mc.getMainRenderTarget().bindWrite(true);
@@ -223,8 +223,8 @@ public final class FsrPipeline {
             triggerFallback();
             try {
                 GL33C.glUseProgram(0);
-                GlStateManager._colorMask(true, true, true, true);
-                GlStateManager._depthMask(true);
+                com.example.ribbon.compat.LegacyRenderState.colorMask(true, true, true, true);
+                com.example.ribbon.compat.LegacyRenderState.depthMask(true);
                 Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
             } catch (Exception ignored) {}
         }

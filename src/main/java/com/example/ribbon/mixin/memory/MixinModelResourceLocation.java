@@ -5,20 +5,20 @@
 package com.example.ribbon.mixin.memory;
 
 import com.example.ribbon.memory.MemoryOptimizer;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.resources.model.ModelIdentifier;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * ModelResourceLocation 字符串驻留（String Interning）。
+ * ModelIdentifier 字符串驻留（String Interning）。
  *
- * <p><b>优化原理：</b>已核对 1.21.1 的 {@code ModelResourceLocation} 是
- * 一个 <b>record</b>，组件为 {@code ResourceLocation id} + {@code String variant}，
+ * <p><b>优化原理：</b>已核对 1.21.1 的 {@code ModelIdentifier} 是
+ * 一个 <b>record</b>，组件为 {@code Identifier id} + {@code String variant}，
  * 并提供静态工厂 {@code valueOf(String)} / {@code withDefaultNamespace(String)} /
- * {@code standalone(ResourceLocation)}。原版模型加载阶段会为同一路径
+ * {@code standalone(Identifier)}。原版模型加载阶段会为同一路径
  * （如 {@code "minecraft:stone#inventory"}）反复构造新 record 实例，
  * 每个实例都带一份独立的 {@code variant} 字符串。</p>
  *
@@ -39,11 +39,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * </ul>
  *
  * <p>已核对的真实成员（来自 1.21.1 NeoForm raw.jar 常量池）：
- * 类为 {@code record}，含 {@code id : ResourceLocation}、{@code variant : String}、
+ * 类为 {@code record}，含 {@code id : Identifier}、{@code variant : String}、
  * 静态方法 {@code valueOf}、{@code withDefaultNamespace}、{@code standalone}。</p>
  */
-@Mixin(ModelResourceLocation.class)
-public abstract class MixinModelResourceLocation {
+@Mixin(ModelIdentifier.class)
+public abstract class MixinModelIdentifier {
 
     /**
      * 拦截 {@code valueOf(String)}，返回池中已存在的等价实例。
@@ -51,48 +51,48 @@ public abstract class MixinModelResourceLocation {
      * <p>入参形如 {@code "minecraft:stone#inventory"}，本身即为规范化键，
      * 无需额外加工即可作为池键使用。</p>
      */
-    @Inject(method = "valueOf(Ljava/lang/String;)Lnet/minecraft/client/resources/model/ModelResourceLocation;",
+    @Inject(method = "valueOf(Ljava/lang/String;)Lnet/minecraft/client/resources/model/ModelIdentifier;",
             at = @At("HEAD"), cancellable = true, require = 0)
-    private static void ribbon$internValueOf(String descriptor, CallbackInfoReturnable<ModelResourceLocation> cir) {
+    private static void ribbon$internValueOf(String descriptor, CallbackInfoReturnable<ModelIdentifier> cir) {
         try {
             if (!MemoryOptimizer.isEnabled()) return;
             if (descriptor == null) return;
 
             // 先查池：命中则复用已有实例，跳过 record 构造
             Object hit = MemoryOptimizer.peekModelLocation(descriptor);
-            if (hit instanceof ModelResourceLocation mrl) {
+            if (hit instanceof ModelIdentifier mrl) {
                 MemoryOptimizer.recordModelLocationHit();
                 cir.setReturnValue(mrl);
                 return;
             }
             // 未命中：不 cancel，让原版构造出实例，随后由 ribbon$register 入池
         } catch (Throwable t) {
-            MemoryOptimizer.reportFallback("ModelResourceLocation.valueOf", t);
+            MemoryOptimizer.reportFallback("ModelIdentifier.valueOf", t);
         }
     }
 
     /**
      * 在 {@code valueOf} 返回前把新实例登记进池，供后续调用复用。
      */
-    @Inject(method = "valueOf(Ljava/lang/String;)Lnet/minecraft/client/resources/model/ModelResourceLocation;",
+    @Inject(method = "valueOf(Ljava/lang/String;)Lnet/minecraft/client/resources/model/ModelIdentifier;",
             at = @At("RETURN"), require = 0)
-    private static void ribbon$registerValueOf(String descriptor, CallbackInfoReturnable<ModelResourceLocation> cir) {
+    private static void ribbon$registerValueOf(String descriptor, CallbackInfoReturnable<ModelIdentifier> cir) {
         try {
             if (!MemoryOptimizer.isEnabled()) return;
             if (descriptor == null) return;
 
-            ModelResourceLocation created = cir.getReturnValue();
+            ModelIdentifier created = cir.getReturnValue();
             if (created == null) return;
 
             // 用真实的 id/variant 重新拼键，避免 valueOf 内部做过规范化导致键不一致
-            ResourceLocation id = created.id();
+            Identifier id = created.id();
             String variant = created.variant();
             if (id == null || variant == null) return;
 
             String canonicalKey = id + "#" + variant;
             MemoryOptimizer.internModelLocation(canonicalKey, created);
         } catch (Throwable t) {
-            MemoryOptimizer.reportFallback("ModelResourceLocation.register", t);
+            MemoryOptimizer.reportFallback("ModelIdentifier.register", t);
         }
     }
 }

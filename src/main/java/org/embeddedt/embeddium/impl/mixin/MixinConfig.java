@@ -93,8 +93,8 @@ public class MixinConfig {
 
         Pattern replacePattern = Pattern.compile("[^\\w]");
 
-        if (!FMLLoader.getLoadingModList().hasErrors()) {
-            for (ModInfo modInfo : FMLLoader.getLoadingModList().getMods()) {
+        if (!LoadingModList.get().hasErrors()) {
+            for (ModInfo modInfo : LoadingModList.get().getMods()) {
                 // Convert anything but alphabets and numbers to _
                 String sanitizedModId = replacePattern.matcher(modInfo.getModId()).replaceAll("_");
                 this.addMixinRule("modcompat." + sanitizedModId, true);

@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
+import com.example.ribbon.compat.ChunkPosCompat;
 
 /**
  * 异步实体寻路调度器。
@@ -114,7 +115,7 @@ public final class AsyncPathfindingManager {
     private final LongAdder totalNanos = new LongAdder();
 
     /**
-     * 区块粒度的版本号：key = {@code ChunkPos.asLong()}，value = 该区块的变更次数。
+     * 区块粒度的版本号：key = {@code ChunkPosCompat.asLong()}，value = 该区块的变更次数。
      *
      * <p><b>为什么不用全局版本号：</b>活跃世界里方块每时每刻都在变
      * （草蔓延、水流、怪物破坏方块、玩家操作）。若任何方块变化就清空全部缓存，

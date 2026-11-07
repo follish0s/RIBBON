@@ -1,7 +1,7 @@
 package com.example.ribbon;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -46,7 +46,7 @@ public class FpsTpsOverlay {
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.options.hideGui || mc.level == null) return;
+        if (com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc) || mc.level == null) return;
         if (!Config.SHOW_OVERLAY.get()) return;
 
         // ===== 帧时间采样（每帧一次）=====
@@ -62,7 +62,7 @@ public class FpsTpsOverlay {
 
         boolean enhanced = com.example.ribbon.optimization.RuntimeConfig.overlayEnhanced;
 
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         var font = mc.font;
 
         // ===== 文本节流：字符串构造 / 实体计数 / 字体宽度只在间隔到期时执行 =====

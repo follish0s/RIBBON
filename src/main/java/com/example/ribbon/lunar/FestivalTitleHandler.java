@@ -2,7 +2,7 @@ package com.example.ribbon.lunar;
 
 import com.example.ribbon.Config;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
@@ -60,7 +60,7 @@ public final class FestivalTitleHandler {
             return;
         }
 
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 

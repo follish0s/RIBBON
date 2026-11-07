@@ -2,7 +2,7 @@ package org.embeddedt.embeddium.impl.mixin.features.textures.mipmaps;
 
 import org.embeddedt.embeddium.impl.util.color.ColorSRGB;
 import net.minecraft.client.renderer.texture.MipmapGenerator;
-import net.minecraft.util.FastColor;
+import com.example.ribbon.compat.FastColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;

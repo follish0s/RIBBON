@@ -5,7 +5,7 @@ import org.embeddedt.embeddium.impl.render.chunk.compile.ChunkBuildBuffers;
 import org.embeddedt.embeddium.impl.render.chunk.terrain.material.DefaultMaterials;
 import org.embeddedt.embeddium.impl.render.chunk.terrain.material.Material;
 import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import org.embeddedt.embeddium.api.MeshAppender;
 
 import java.util.List;

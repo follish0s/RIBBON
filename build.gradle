@@ -28,8 +28,10 @@ repositories {
 dependencies {
     // 音乐播放器需要 JLayer，打包进 jar
     implementation 'com.googlecode.soundlibs:jlayer:1.0.1.4'
-    // Lombok 1.18.30 不兼容 Java 25（注解处理器 ExceptionInInitializerError），
-    // 且本代码库未实际使用 Lombok 注解，26.2 移植版移除
+    // Lombok 1.18.30 在 Java 25 下抛 ExceptionInInitializerError；改用支持 JDK 25 的版本
+    // （RenderSection / TerrainRenderPass 仍使用 @Getter / @Builder 等注解）
+    compileOnly 'org.projectlombok:lombok:1.18.40'
+    annotationProcessor 'org.projectlombok:lombok:1.18.40'
     // MixinExtras 由 NeoForge 26.2 自带；若编译报缺类再显式声明版本
     // implementation "io.github.llamalad7:mixinextras-neoforge:<26.2 对应版本>"
 }

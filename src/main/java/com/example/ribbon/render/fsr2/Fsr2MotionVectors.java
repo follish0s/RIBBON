@@ -76,9 +76,9 @@ public final class Fsr2MotionVectors {
         // prev ← curr（首次调用时 prev 自动等于 curr，速度为 0，安全）
         if (firstFrame) {
             prevVP.set(projection).mul(view);
-            prevCamPos.set((float) camera.getPosition().x(),
-                    (float) camera.getPosition().y(),
-                    (float) camera.getPosition().z());
+            prevCamPos.set((float) camera.position().x(),
+                    (float) camera.position().y(),
+                    (float) camera.position().z());
             firstFrame = false;
         } else {
             prevVP.set(currVP);
@@ -87,7 +87,7 @@ public final class Fsr2MotionVectors {
         currVP.set(projection).mul(view);
         invCurrVP.set(currVP).invert();
 
-        Vec3 p = camera.getPosition();
+        Vec3 p = camera.position();
         currCamPos.set((float) p.x(), (float) p.y(), (float) p.z());
         camDelta.set(currCamPos).sub(prevCamPos);
         matricesReady = true;

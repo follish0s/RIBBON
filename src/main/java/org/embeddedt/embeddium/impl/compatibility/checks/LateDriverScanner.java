@@ -3,7 +3,7 @@ package org.embeddedt.embeddium.impl.compatibility.checks;
 import org.embeddedt.embeddium.impl.compatibility.workarounds.nvidia.NvidiaDriverVersion;
 import org.embeddedt.embeddium.impl.gui.console.Console;
 import org.embeddedt.embeddium.impl.gui.console.message.MessageLevel;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.network.chat.Component;
 import org.embeddedt.embeddium.impl.compatibility.environment.GLContextInfo;
 import org.lwjgl.opengl.ARBDebugOutput;

@@ -3,7 +3,7 @@ package org.embeddedt.embeddium.impl.mixin.features.render.immediate;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import org.embeddedt.embeddium.impl.mixin.core.render.immediate.consumer.OverlayVertexConsumerMixin;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.FaceBakery;
+import net.minecraft.client.resources.model.cuboid.FaceBakery;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;

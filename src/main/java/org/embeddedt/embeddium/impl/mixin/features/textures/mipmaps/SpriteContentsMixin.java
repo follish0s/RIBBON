@@ -5,8 +5,8 @@ import org.embeddedt.embeddium.impl.util.NativeImageHelper;
 import org.embeddedt.embeddium.impl.util.color.ColorSRGB;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.SpriteContents;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.resources.Identifier;
+import com.example.ribbon.compat.FastColor;
 import org.embeddedt.embeddium.impl.render.chunk.sprite.SpriteTransparencyLevel;
 import org.embeddedt.embeddium.impl.render.chunk.sprite.SpriteTransparencyLevelHolder;
 import org.lwjgl.system.MemoryUtil;
@@ -31,7 +31,7 @@ public class SpriteContentsMixin implements SpriteTransparencyLevelHolder {
 
     @Shadow
     @Final
-    private ResourceLocation name;
+    private Identifier name;
 
     @Unique
     private SpriteTransparencyLevel embeddium$transparencyLevel;
@@ -45,7 +45,7 @@ public class SpriteContentsMixin implements SpriteTransparencyLevelHolder {
     // can remain minimal. Being less dependent on specific details of Fabric is good, since it means we can be more
     // cross-platform.
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/texture/SpriteContents;originalImage:Lcom/mojang/blaze3d/platform/NativeImage;", opcode = Opcodes.PUTFIELD))
-    private void sodium$beforeGenerateMipLevels(SpriteContents instance, NativeImage nativeImage, ResourceLocation identifier) {
+    private void sodium$beforeGenerateMipLevels(SpriteContents instance, NativeImage nativeImage, Identifier identifier) {
         // Only fill in transparent colors if mipmaps are on and the texture name does not contain "leaves".
         // We're injecting after the "name" field has been set, so this is safe even though we're in a constructor.
         embeddium$processTransparentImages(nativeImage, Minecraft.getInstance().options.mipmapLevels().get() > 0 && !this.name.getPath().contains("leaves"));

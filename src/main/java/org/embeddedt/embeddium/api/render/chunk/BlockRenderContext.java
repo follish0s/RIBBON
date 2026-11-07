@@ -1,12 +1,12 @@
 package org.embeddedt.embeddium.api.render.chunk;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.model.data.ModelData;
 import org.embeddedt.embeddium.impl.render.matrix_stack.CachingPoseStack;
 import org.embeddedt.embeddium.impl.render.world.WorldSliceLocalGenerator;
 import org.joml.Vector3f;

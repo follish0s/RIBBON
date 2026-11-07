@@ -33,7 +33,7 @@ public final class EntityCullingTickHandler {
             return;
         }
 
-        Vec3 cameraPos = mc.gameRenderer.getMainCamera().getPosition();
+        Vec3 cameraPos = mc.gameRenderer.mainCamera().position();
         // 相机静止时降频扫描，减少主线程 raycast；移动时立即恢复每 tick
         if (!CullingOptimizer.shouldScan(cameraPos, mc.level.getGameTime())) return;
 

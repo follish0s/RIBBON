@@ -14,10 +14,10 @@ import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.FogRenderer;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.fog.FogRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceProvider;
@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class CloudRenderer {
-    private static final ResourceLocation CLOUDS_TEXTURE_ID = ResourceLocation.withDefaultNamespace("textures/environment/clouds.png");
+    private static final Identifier CLOUDS_TEXTURE_ID = Identifier.withDefaultNamespace("textures/environment/clouds.png");
 
     private static final int CLOUD_COLOR_NEG_Y = ColorABGR.pack(0.7F, 0.7F, 0.7F, 1.0f);
     private static final int CLOUD_COLOR_POS_Y = ColorABGR.pack(1.0f, 1.0f, 1.0f, 1.0f);
@@ -202,11 +202,11 @@ public class CloudRenderer {
     }
 
     private void applyFogModifiers(ClientLevel world, FogRenderer.FogData fogData, LocalPlayer player, int cloudDistance, float tickDelta) {
-        if (Minecraft.getInstance().gameRenderer == null || Minecraft.getInstance().gameRenderer.getMainCamera() == null) {
+        if (Minecraft.getInstance().gameRenderer == null || Minecraft.getInstance().gameRenderer.mainCamera() == null) {
             return;
         }
 
-        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
         FogType cameraSubmersionType = camera.getFluidInCamera();
         if (cameraSubmersionType == FogType.LAVA) {
             if (player.isSpectator()) {
@@ -235,7 +235,7 @@ public class CloudRenderer {
                 fogData.end = cloudDistance;
                 fogData.shape = FogShape.CYLINDER;
             }
-        } else if (world.effects().isFoggyAt(Mth.floor(camera.getPosition().x), Mth.floor(camera.getPosition().z)) || Minecraft.getInstance().gui.getBossOverlay().shouldCreateWorldFog()) {
+        } else if (world.effects().isFoggyAt(Mth.floor(camera.position().x), Mth.floor(camera.position().z)) || Minecraft.getInstance().gui.getBossOverlay().shouldCreateWorldFog()) {
             fogData.start = (cloudDistance) * 0.05f;
             fogData.end = Math.min((cloudDistance), 192.0f) * 0.5f;
         }
@@ -433,7 +433,7 @@ public class CloudRenderer {
             for (int x = 0; x < width; x++) {
                 for (int z = 0; z < height; z++) {
                     int index = index(x, z, width, height);
-                    int cell = texture.getPixelRGBA(x, z);
+                    int cell = texture.getPixel(x, z);
 
                     this.colors[index] = cell;
 
@@ -442,25 +442,25 @@ public class CloudRenderer {
                     if (isOpaqueCell(cell)) {
                         edges |= DIR_NEG_Y | DIR_POS_Y;
 
-                        int negX = texture.getPixelRGBA(wrap(x - 1, width), wrap(z, height));
+                        int negX = texture.getPixel(wrap(x - 1, width), wrap(z, height));
 
                         if (cell != negX) {
                             edges |= DIR_NEG_X;
                         }
 
-                        int posX = texture.getPixelRGBA(wrap(x + 1, width), wrap(z, height));
+                        int posX = texture.getPixel(wrap(x + 1, width), wrap(z, height));
 
                         if (!isOpaqueCell(posX) && cell != posX) {
                             edges |= DIR_POS_X;
                         }
 
-                        int negZ = texture.getPixelRGBA(wrap(x, width), wrap(z - 1, height));
+                        int negZ = texture.getPixel(wrap(x, width), wrap(z - 1, height));
 
                         if (cell != negZ) {
                             edges |= DIR_NEG_Z;
                         }
 
-                        int posZ = texture.getPixelRGBA(wrap(x, width), wrap(z + 1, height));
+                        int posZ = texture.getPixel(wrap(x, width), wrap(z + 1, height));
 
                         if (!isOpaqueCell(posZ) && cell != posZ) {
                             edges |= DIR_POS_Z;

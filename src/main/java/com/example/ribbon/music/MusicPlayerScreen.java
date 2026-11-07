@@ -1,13 +1,14 @@
 package com.example.ribbon.music;
 
 import com.example.ribbon.LangUtil;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 import java.io.File;
 import java.util.List;
+import net.minecraft.client.input.MouseButtonEvent;
 
 /**
  * 独立音乐播放器界面。
@@ -28,7 +29,28 @@ public class MusicPlayerScreen extends Screen {
         super(Component.literal(LangUtil.tr("music.screen.title")));
     }
 
+    
     @Override
+
+
+    
+    public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor __graphics,
+
+
+    
+            int mouseX, int mouseY, float partialTick) {
+
+
+    
+        this.render(com.example.ribbon.compat.GuiGraphics.wrap(__graphics), mouseX, mouseY, partialTick);
+
+
+    
+    }
+
+
+
+    
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         // ===== 液态玻璃背景 =====
         drawLiquidGlassBackground(g);
@@ -217,8 +239,11 @@ public class MusicPlayerScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (button != 0) return super.mouseClicked(mx, my, button);
+    public boolean mouseClicked(MouseButtonEvent __evt, boolean __doubleClick) {
+        double mx = __evt.x();
+        double my = __evt.y();
+        int button = __evt.input();
+        if (button != 0) return super.mouseClicked(__evt, __doubleClick);
 
         int centerY = this.height - CONTROL_BAR_HEIGHT / 2;
         boolean hasTrack = MusicPlayerManager.getCurrentIndex() >= 0;
@@ -246,7 +271,7 @@ public class MusicPlayerScreen extends Screen {
 
         // ===== 列表区域点击 =====
         List<File> tracks = MusicLibrary.getTracks();
-        if (tracks.isEmpty()) return super.mouseClicked(mx, my, button);
+        if (tracks.isEmpty()) return super.mouseClicked(__evt, __doubleClick);
 
         int listBottom = this.height - CONTROL_BAR_HEIGHT - 10;
         int maxRows = (listBottom - LIST_TOP) / ROW_HEIGHT;
@@ -262,7 +287,7 @@ public class MusicPlayerScreen extends Screen {
                 return true;
             }
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(__evt, __doubleClick);
     }
 
     @Override

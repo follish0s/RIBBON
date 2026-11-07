@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.api;
 
 import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import org.embeddedt.embeddium.api.eventbus.EmbeddiumEvent;
 import org.embeddedt.embeddium.api.eventbus.EventHandlerRegistrar;

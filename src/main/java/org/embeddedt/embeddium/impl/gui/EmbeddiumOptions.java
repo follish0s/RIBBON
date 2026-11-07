@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.JsonSyntaxException;
 import org.embeddedt.embeddium.impl.Embeddium;
 import org.embeddedt.embeddium.impl.gui.options.TextProvider;
-import net.minecraft.client.GraphicsStatus;
+import com.example.ribbon.compat.GraphicsStatus;
 import net.minecraft.network.chat.Component;
 import org.embeddedt.embeddium.impl.config.ConfigMigrator;
 

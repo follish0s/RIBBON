@@ -1,8 +1,8 @@
 package org.embeddedt.embeddium.impl.mixin.features.render.model;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.Util;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.Util;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.neoforged.neoforge.client.ChunkRenderTypeSet;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

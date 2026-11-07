@@ -3,7 +3,7 @@ package org.embeddedt.embeddium.impl.mixin.features.model;
 import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.resources.model.ModelBakery;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.embeddedt.embeddium.impl.model.EpsilonizableBlockElement;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ModelBakery.class)
 public class ModelBakeryMixin {
     @Inject(method = "loadBlockModel", at = @At("RETURN"))
-    private void epsilonizeBlockModel(ResourceLocation pLocation, CallbackInfoReturnable<BlockModel> cir) {
+    private void epsilonizeBlockModel(Identifier pLocation, CallbackInfoReturnable<BlockModel> cir) {
         if(pLocation.getPath().startsWith("block/")) {
             BlockModel bm = cir.getReturnValue();
             if(bm != null) {

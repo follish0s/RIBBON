@@ -46,7 +46,7 @@ public abstract class MixinParticleEngine {
             Minecraft mc = Minecraft.getInstance();
             if (mc == null || mc.level == null) return;
 
-            Vec3 camera = mc.gameRenderer.getMainCamera().getPosition();
+            Vec3 camera = mc.gameRenderer.mainCamera().position();
             if (camera == null) return;
 
             // Particle 的 x/y/z 是 protected，用已公开的包围盒中心取坐标（零额外分配）

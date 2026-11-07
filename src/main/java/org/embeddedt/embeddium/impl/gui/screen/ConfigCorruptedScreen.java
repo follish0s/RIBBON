@@ -2,7 +2,7 @@ package org.embeddedt.embeddium.impl.gui.screen;
 
 import org.embeddedt.embeddium.impl.Embeddium;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -45,7 +45,7 @@ public class ConfigCorruptedScreen extends Screen {
 
         this.addRenderableWidget(Button.builder(TEXT_BUTTON_RESTORE_DEFAULTS, (btn) -> {
             Embeddium.restoreDefaultOptions();
-            Minecraft.getInstance().setScreen(this.child.get());
+            Minecraft.getInstance().setScreenAndShow(this.child.get());
         }).bounds(32, this.height - 40, 174, 20).build());
 
         this.addRenderableWidget(Button.builder(TEXT_BUTTON_CLOSE_GAME, (btn) -> {
@@ -53,9 +53,30 @@ public class ConfigCorruptedScreen extends Screen {
         }).bounds(this.width - 174 - 32, this.height - 40, 174, 20).build());
     }
 
+    
     @Override
+
+
+    
+    public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor __graphics,
+
+
+    
+            int mouseX, int mouseY, float delta) {
+
+
+    
+        this.render(com.example.ribbon.compat.GuiGraphics.wrap(__graphics), mouseX, mouseY, delta);
+
+
+    
+    }
+
+
+
+    
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
-        super.render(drawContext, mouseX, mouseY, delta);
+        super.extractRenderState(drawContext.unwrap(), mouseX, mouseY, delta);
 
         drawContext.drawString(this.font, Component.literal("Sodium Renderer"), 32, 32, 0xffffff);
         drawContext.drawString(this.font, Component.literal("Could not load configuration file"), 32, 48, 0xff0000);

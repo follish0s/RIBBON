@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.impl.mixin.features.textures.animations.tracking;
 
 import org.embeddedt.embeddium.api.render.texture.SpriteUtil;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

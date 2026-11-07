@@ -320,7 +320,7 @@ public class LangUtil {
         EN.put("option.memory_property_map_dedup", "Property Map Deduplication");
         EN.put("option.memory_property_map_dedup.tooltip", "Shares identical property maps. Huge gain for property-less blocks.");
         EN.put("option.memory_model_interning", "Model Location Interning");
-        EN.put("option.memory_model_interning.tooltip", "Reuses identical ModelResourceLocation instances to save string memory.");
+        EN.put("option.memory_model_interning.tooltip", "Reuses identical ModelIdentifier instances to save string memory.");
         EN.put("option.memory_multipart_predicate", "Multipart Predicate Cache");
         EN.put("option.memory_multipart_predicate.tooltip", "Caches lambda predicates for multipart models during baking.");
         EN.put("option.memory_chunk_nbt_trim", "Chunk NBT Trimming");

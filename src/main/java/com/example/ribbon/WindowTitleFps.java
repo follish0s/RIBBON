@@ -32,7 +32,7 @@ public final class WindowTitleFps {
         Minecraft mc = Minecraft.getInstance();
         boolean want = com.example.ribbon.optimization.RuntimeConfig.showFpsInTitle
                 && mc.level != null
-                && !mc.options.hideGui;
+                && !com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc);
 
         if (want && !active) {
             active = true;

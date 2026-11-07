@@ -5,7 +5,7 @@ import com.example.ribbon.IrisReflection;
 import com.example.ribbon.dynamiclight.DynamicLightManager;
 import com.example.ribbon.dynamiclight.DynamicLightState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -26,11 +26,11 @@ public class ClientWorldMixin implements ChunkTrackerHolder {
 
     @Inject(method = "onChunkLoaded", at = @At("RETURN"))
     private void markLoaded(ChunkPos pChunkPos, CallbackInfo ci) {
-        this.chunkTracker.onChunkStatusAdded(pChunkPos.x, pChunkPos.z, ChunkStatus.FLAG_HAS_BLOCK_DATA);
+        this.chunkTracker.onChunkStatusAdded(pChunkPos.x(), pChunkPos.z(), ChunkStatus.FLAG_HAS_BLOCK_DATA);
     }
 
     @Inject(method = "unload", at = @At("RETURN"))
     private void markUnloaded(LevelChunk chunk, CallbackInfo ci) {
-        this.chunkTracker.onChunkStatusRemoved(chunk.getPos().x, chunk.getPos().z, ChunkStatus.FLAG_HAS_BLOCK_DATA);
+        this.chunkTracker.onChunkStatusRemoved(chunk.getPos().x(), chunk.getPos().z(), ChunkStatus.FLAG_HAS_BLOCK_DATA);
     }
 }

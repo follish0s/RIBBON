@@ -136,7 +136,7 @@ public class RenderSectionManager {
 
     public void update(Camera camera, Viewport viewport, int frame, boolean spectator) {
         this.lastCameraPosition = camera.getBlockPosition();
-        this.cameraPosition = camera.getPosition();
+        this.cameraPosition = camera.position();
 
         this.createTerrainRenderList(camera, viewport, frame, spectator);
 
@@ -525,7 +525,7 @@ public class RenderSectionManager {
     }
 
     public @Nullable ChunkBuilderMeshingTask createRebuildTask(RenderSection render, int frame) {
-        ChunkRenderContext context = WorldSlice.prepare(this.world, render.getPosition(), this.sectionCache);
+        ChunkRenderContext context = WorldSlice.prepare(this.world, render.position(), this.sectionCache);
 
         if (context == null) {
             return null;

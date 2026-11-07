@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.embeddedt.embeddium.impl.Embeddium.MODNAME;
+import net.neoforged.fml.loading.LoadingModList;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 @SuppressWarnings("unused")
 public class MixinPlugin implements IMixinConfigPlugin {
@@ -74,7 +76,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
         try {
             // https://github.com/dima-dencep/NanoLiveConfig/commit/841e17eacca2d3a1e12b025fc490f392d202ea73
             if(MixinService.getService().getBytecodeProvider().getClassNode("net.caffeinemc.caffeineconfig.AdvancedEmbeddiumHackery") != null) {
-                FMLLoader.getLoadingModList().getModLoadingIssues().add(ModLoadingIssue.error("Rubidium/Embeddium Extra by dima_dencep hacks Embeddium to prevent accurate detection of mods causing game issues, it is not supported"));
+                LoadingModList.get().getModLoadingIssues().add(ModLoadingIssue.error("Rubidium/Embeddium Extra by dima_dencep hacks Embeddium to prevent accurate detection of mods causing game issues, it is not supported"));
             }
         } catch (ClassNotFoundException | IOException ignored) {
             // no problem
@@ -139,11 +141,11 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public List<String> getMixins() {
-        if (FMLLoader.getDist() != Dist.CLIENT) {
+        if (FMLEnvironment.dist != Dist.CLIENT) {
             return null;
         }
 
-        ModFileInfo modFileInfo = FMLLoader.getLoadingModList().getModFileById("sodium");
+        ModFileInfo modFileInfo = LoadingModList.get().getModFileById("sodium");
 
         if (modFileInfo == null) {
             // Probably a load error

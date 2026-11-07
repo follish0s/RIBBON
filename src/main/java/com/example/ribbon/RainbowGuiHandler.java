@@ -2,8 +2,8 @@ package com.example.ribbon;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import com.example.ribbon.compat.GuiGraphics;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -20,7 +20,7 @@ public class RainbowGuiHandler {
     public static void registerGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(
                 VanillaGuiLayers.CROSSHAIR,
-                ResourceLocation.fromNamespaceAndPath("ribbon", "rainbow_crosshair"),
+                Identifier.fromNamespaceAndPath("ribbon", "rainbow_crosshair"),
                 (guiGraphics, deltaTracker) -> renderCrosshair(guiGraphics)
         );
     }
@@ -29,20 +29,20 @@ public class RainbowGuiHandler {
         if (!Config.RAINBOW_CROSSHAIR.get()) return;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui) return;
+        if (mc.player == null || com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc)) return;
 
         int cx = mc.getWindow().getGuiScaledWidth() / 2;
         int cy = mc.getWindow().getGuiScaledHeight() / 2;
 
         int color = getRainbowColor();
 
-        RenderSystem.enableBlend();
+        com.example.ribbon.compat.LegacyRenderState.enableBlend();
         gui.fill(cx - 7, cy - 1, cx - 2, cy, color);
         gui.fill(cx + 2, cy - 1, cx + 7, cy, color);
         gui.fill(cx, cy - 7, cx + 1, cy - 2, color);
         gui.fill(cx, cy + 2, cx + 1, cy + 7, color);
         gui.fill(cx - 1, cy - 1, cx + 1, cy + 1, color);
-        RenderSystem.disableBlend();
+        com.example.ribbon.compat.LegacyRenderState.disableBlend();
     }
 
     // 2. 快捷栏高亮仍使用 RenderGuiEvent.Post
@@ -50,14 +50,14 @@ public class RainbowGuiHandler {
     public static void onRenderHotbar(RenderGuiEvent.Post event) {
         if (!Config.HOTBAR_HIGHLIGHT.get()) return;
 
-        GuiGraphics gui = event.getGuiGraphics();
+        GuiGraphics gui = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 
-        int selected = mc.player.getInventory().selected;
+        int selected = mc.player.getInventory().getSelectedSlot();
         if (selected < 0 || selected > 8) return;
 
         int hotbarStartX = screenWidth / 2 - 90;

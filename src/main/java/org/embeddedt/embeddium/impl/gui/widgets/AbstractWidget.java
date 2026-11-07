@@ -4,7 +4,7 @@ import net.minecraft.client.InputType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -21,6 +21,18 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, Na
     protected final Font font;
     protected boolean focused;
     protected boolean hovered;
+
+    /**
+     * 26.2 入口：GUI 改为 render-state 提取架构，此处桥接到旧形状的 render(...)。
+     */
+    @Override
+    public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor graphics,
+                                   int mouseX, int mouseY, float delta) {
+        this.render(com.example.ribbon.compat.GuiGraphics.wrap(graphics), mouseX, mouseY, delta);
+    }
+
+    public abstract void render(com.example.ribbon.compat.GuiGraphics drawContext,
+                                int mouseX, int mouseY, float delta);
 
     protected AbstractWidget() {
         this.font = Minecraft.getInstance().font;

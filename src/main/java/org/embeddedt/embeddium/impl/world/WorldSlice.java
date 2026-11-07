@@ -30,7 +30,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.model.data.ModelData;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import org.embeddedt.embeddium.api.MeshAppender;
@@ -207,7 +207,7 @@ public class WorldSlice implements EmbeddiumBlockAndTintGetter, FabricBlockView,
         try {
             this.unpackBlockData(this.blockArrays[sectionIndex], context, section);
         } catch(RuntimeException e) {
-            throw new IllegalStateException("Exception copying block data for section: " + section.getPosition(), e);
+            throw new IllegalStateException("Exception copying block data for section: " + section.position(), e);
         }
 
         this.lightArrays[sectionIndex][LightLayer.BLOCK.ordinal()] = section.getLightArray(LightLayer.BLOCK);
@@ -232,7 +232,7 @@ public class WorldSlice implements EmbeddiumBlockAndTintGetter, FabricBlockView,
         var container = ReadableContainerExtended.of(section.getBlockData());
 
         SectionPos origin = context.getOrigin();
-        SectionPos pos = section.getPosition();
+        SectionPos pos = section.position();
 
         if (origin.equals(pos))  {
             container.sodium$unpack(blockArray);
@@ -416,10 +416,10 @@ public class WorldSlice implements EmbeddiumBlockAndTintGetter, FabricBlockView,
 
     @Override
     public @Nullable AuxiliaryLightManager getAuxLightManager(ChunkPos pos) {
-        if (pos.x < (this.volume.minX() >> 4) || pos.x > (this.volume.maxX() >> 4) || pos.z < (this.volume.minZ() >> 4) || pos.z > (this.volume.maxZ() >> 4)) {
+        if (pos.x() < (this.volume.minX() >> 4) || pos.x() > (this.volume.maxX() >> 4) || pos.z() < (this.volume.minZ() >> 4) || pos.z() > (this.volume.maxZ() >> 4)) {
             return null;
         }
-        return this.auxLightArrays[getLocalSectionIndex(pos.x - (this.originX >> 4), 0, pos.z - (this.originZ >> 4))];
+        return this.auxLightArrays[getLocalSectionIndex(pos.x() - (this.originX >> 4), 0, pos.z() - (this.originZ >> 4))];
     }
 
     @Override

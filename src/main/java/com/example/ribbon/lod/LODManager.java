@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.example.ribbon.compat.ChunkPosCompat;
 
 /**
  * 远景 LOD 主调度器：后台线程池分发、生命周期管理、主线程消费。
@@ -407,6 +408,6 @@ public final class LODManager {
     public int inFlightCount() { return inFlight.size(); }
 
     private static long key(LODMesh mesh) {
-        return ChunkPos.asLong(mesh.chunkX(), mesh.chunkZ());
+        return ChunkPosCompat.asLong(mesh.chunkX(), mesh.chunkZ());
     }
 }

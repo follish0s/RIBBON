@@ -2,10 +2,11 @@ package org.embeddedt.embeddium.impl.gui.frame;
 
 import org.embeddedt.embeddium.api.options.control.ControlElement;
 import org.embeddedt.embeddium.api.math.Dim2i;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import org.embeddedt.embeddium.impl.gui.frame.components.ScrollBarComponent;
 
 import java.util.concurrent.atomic.AtomicReference;
+import net.minecraft.client.input.MouseButtonEvent;
 
 public class ScrollableFrame extends AbstractFrame {
 
@@ -159,17 +160,26 @@ public class ScrollableFrame extends AbstractFrame {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent __evt, boolean __doubleClick) {
+        double mouseX = __evt.x();
+        double mouseY = __evt.y();
+        int button = __evt.input();
         return (this.canScrollHorizontal && this.horizontalScrollBar.mouseClicked(mouseX, mouseY, button)) || (this.canScrollVertical && this.verticalScrollBar.mouseClicked(mouseX, mouseY, button)) || super.mouseClicked(applyOffset(this.horizontalScrollBar, mouseX, false), applyOffset(this.verticalScrollBar, mouseY, false), button);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(MouseButtonEvent __evt, double deltaX, double deltaY) {
+        double mouseX = __evt.x();
+        double mouseY = __evt.y();
+        int button = __evt.input();
         return (this.canScrollHorizontal && this.horizontalScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) || (this.canScrollVertical && this.verticalScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) || super.mouseDragged(applyOffset(this.horizontalScrollBar, mouseX, false), applyOffset(this.verticalScrollBar, mouseY, false), button, deltaX, deltaY);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent __evt) {
+        double mouseX = __evt.x();
+        double mouseY = __evt.y();
+        int button = __evt.input();
         return (this.canScrollHorizontal && this.horizontalScrollBar.mouseReleased(mouseX, mouseY, button)) || (this.canScrollVertical && this.verticalScrollBar.mouseReleased(mouseX, mouseY, button)) || super.mouseReleased(applyOffset(this.horizontalScrollBar, mouseX, false), applyOffset(this.verticalScrollBar, mouseY, false), button);
     }
 

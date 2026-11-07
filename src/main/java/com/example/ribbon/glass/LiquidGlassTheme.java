@@ -7,11 +7,11 @@ package com.example.ribbon.glass;
 import com.example.ribbon.optimization.RuntimeConfig;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.embeddedt.embeddium.impl.Embeddium;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +31,10 @@ public final class LiquidGlassTheme {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LiquidGlassTheme.class);
 
-    private static final ResourceLocation PANEL_LOCATION =
-            ResourceLocation.fromNamespaceAndPath("ribbon", "textures/gui/liquid_glass_panel");
-    private static final ResourceLocation SHEEN_LOCATION =
-            ResourceLocation.fromNamespaceAndPath("ribbon", "textures/gui/liquid_glass_sheen");
+    private static final Identifier PANEL_LOCATION =
+            Identifier.fromNamespaceAndPath("ribbon", "textures/gui/liquid_glass_panel");
+    private static final Identifier SHEEN_LOCATION =
+            Identifier.fromNamespaceAndPath("ribbon", "textures/gui/liquid_glass_sheen");
 
     private static final int TEX_SIZE = 64;
     private static final int SHEEN_SIZE = 128;
@@ -68,10 +68,10 @@ public final class LiquidGlassTheme {
             }
             try {
                 Minecraft mc = Minecraft.getInstance();
-                DynamicTexture panel = new DynamicTexture(buildPanelImage());
+                DynamicTexture panel = new DynamicTexture(() -> "ribbon-dynamic", buildPanelImage());
                 panel.setFilter(true, false);
                 mc.getTextureManager().register(PANEL_LOCATION, panel);
-                DynamicTexture sheen = new DynamicTexture(buildSheenImage());
+                DynamicTexture sheen = new DynamicTexture(() -> "ribbon-dynamic", buildSheenImage());
                 sheen.setFilter(true, false);
                 mc.getTextureManager().register(SHEEN_LOCATION, sheen);
                 initialized = true;
@@ -116,7 +116,7 @@ public final class LiquidGlassTheme {
                 alpha += innerLine * (30.0f - 16.0f * v);
 
                 int a = (int) clamp255(alpha * coverage);
-                image.setPixelRGBA(x, y, packAbgr(255, 255, 255, a));
+                image.setPixel(x, y, packAbgr(255, 255, 255, a));
             }
         }
         return image;
@@ -135,7 +135,7 @@ public final class LiquidGlassTheme {
                 float d = (t - 0.5f) / 0.17f;
                 float gaussian = (float) Math.exp(-d * d);
                 int a = (int) (92.0f * gaussian);
-                image.setPixelRGBA(x, y, packAbgr(255, 255, 255, a));
+                image.setPixel(x, y, packAbgr(255, 255, 255, a));
             }
         }
         return image;
@@ -158,8 +158,8 @@ public final class LiquidGlassTheme {
             return true;
         }
         float alpha = Math.min(Math.max(alphaMul, 0.0f), 1.8f);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
+        com.example.ribbon.compat.LegacyRenderState.enableBlend();
+        com.example.ribbon.compat.LegacyRenderState.defaultBlendFunc();
         if (width < 2 * CORNER || height < 2 * CORNER) {
             gfx.fill(x1, y1, x2, y2, scaleAlpha(0x32FFFFFF, alpha));
             return true;
@@ -183,11 +183,11 @@ public final class LiquidGlassTheme {
         int sx = x + (int) ((width - size) * phase);
         int sy = y + (int) ((height - size) * (1.0f - phase));
         gfx.enableScissor(x, y, x + width, y + height);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(org.lwjgl.opengl.GL11.GL_SRC_ALPHA, org.lwjgl.opengl.GL11.GL_ONE);
+        com.example.ribbon.compat.LegacyRenderState.enableBlend();
+        com.example.ribbon.compat.LegacyRenderState.blendFunc(org.lwjgl.opengl.GL11.GL_SRC_ALPHA, org.lwjgl.opengl.GL11.GL_ONE);
         gfx.setColor(1.0f, 1.0f, 1.0f, 0.55f);
         gfx.blit(SHEEN_LOCATION, sx, sy, size, size, 0.0f, 0.0f, SHEEN_SIZE, SHEEN_SIZE, SHEEN_SIZE, SHEEN_SIZE);
-        RenderSystem.defaultBlendFunc();
+        com.example.ribbon.compat.LegacyRenderState.defaultBlendFunc();
         gfx.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         gfx.disableScissor();
     }
@@ -197,12 +197,12 @@ public final class LiquidGlassTheme {
      * 保证亮场景（雪原、沙漠）下白字依然可读。
      */
     public static void renderScrim(GuiGraphics gfx, int width, int height) {
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
+        com.example.ribbon.compat.LegacyRenderState.enableBlend();
+        com.example.ribbon.compat.LegacyRenderState.defaultBlendFunc();
         gfx.fillGradient(0, 0, width, height, 0x46000000, 0x2B000000);
     }
 
-    private static void blitNineSlice(GuiGraphics gfx, ResourceLocation location, int x, int y, int width, int height) {
+    private static void blitNineSlice(GuiGraphics gfx, Identifier location, int x, int y, int width, int height) {
         int c = CORNER;
         int inner = TEX_SIZE - 2 * c;
         // 四角（1:1 像素，保证圆角锐利）

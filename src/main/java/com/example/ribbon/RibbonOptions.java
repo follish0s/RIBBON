@@ -4,7 +4,7 @@ import com.example.ribbon.optimization.RuntimeConfig;
 import com.google.common.collect.ImmutableList;
 import com.mojang.logging.LogUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.embeddedt.embeddium.api.OptionGUIConstructionEvent;
 import org.embeddedt.embeddium.api.options.OptionIdentifier;
 import org.embeddedt.embeddium.api.options.control.ControlValueFormatter;
@@ -31,8 +31,8 @@ public class RibbonOptions {
         @Override public void save() { Config.SPEC.save(); RuntimeConfig.refresh(); }
     };
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("ribbon", path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath("ribbon", path);
     }
 
     /**

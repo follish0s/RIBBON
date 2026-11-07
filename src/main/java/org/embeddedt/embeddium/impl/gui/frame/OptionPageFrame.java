@@ -12,7 +12,7 @@ import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;

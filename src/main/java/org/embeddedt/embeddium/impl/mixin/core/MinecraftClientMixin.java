@@ -31,7 +31,7 @@ public class MinecraftClientMixin {
     private void postInit(GameConfig args, CallbackInfo ci) {
         if (Embeddium.options().isReadOnly()) {
             var parent = Minecraft.getInstance().screen;
-            Minecraft.getInstance().setScreen(new ConfigCorruptedScreen(() -> parent));
+            Minecraft.getInstance().setScreenAndShow(new ConfigCorruptedScreen(() -> parent));
         }
     }
 

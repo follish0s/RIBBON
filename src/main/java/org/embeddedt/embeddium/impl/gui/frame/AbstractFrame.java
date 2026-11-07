@@ -6,7 +6,7 @@ import org.embeddedt.embeddium.impl.gui.widgets.AbstractWidget;
 import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -53,7 +53,7 @@ public abstract class AbstractFrame extends AbstractWidget implements ContainerE
             this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
         }
         for (Renderable drawable : this.drawable) {
-            drawable.render(drawContext, mouseX, mouseY, delta);
+            drawable.extractRenderState(drawContext.unwrap(), mouseX, mouseY, delta);
         }
     }
 

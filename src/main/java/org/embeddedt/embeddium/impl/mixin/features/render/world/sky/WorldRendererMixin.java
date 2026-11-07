@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.impl.mixin.features.render.world.sky;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.world.level.material.FogType;
 import org.embeddedt.embeddium.impl.render.ShaderModBridge;

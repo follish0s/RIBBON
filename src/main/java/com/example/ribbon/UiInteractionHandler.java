@@ -3,7 +3,7 @@ package com.example.ribbon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -63,6 +63,6 @@ public final class UiInteractionHandler {
         if (!onWidget) return;
 
         SoundManager sm = mc.getSoundManager();
-        sm.stop(ResourceLocation.withDefaultNamespace("ui.button.click"), SoundSource.MASTER);
+        sm.stop(Identifier.withDefaultNamespace("ui.button.click"), SoundSource.MASTER);
     }
 }

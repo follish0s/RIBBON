@@ -32,7 +32,7 @@ public class AsyncImageProcessor {
                 int[] pixels = new int[width * height];
                 for (int y = 0; y < height; y++) {
                     for (int x = 0; x < width; x++) {
-                        pixels[y * width + x] = image.getPixelRGBA(x, y);
+                        pixels[y * width + x] = image.getPixel(x, y);
                     }
                 }
 

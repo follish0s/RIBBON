@@ -2,9 +2,9 @@ package org.embeddedt.embeddium.impl.gui.widgets;
 
 import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
-import net.minecraft.client.gui.navigation.CommonInputs;
+import com.example.ribbon.compat.CommonInputs;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.KeyEvent;
 
 public class FlatButtonWidget extends AbstractWidget implements Renderable {
     protected final Dim2i dim;
@@ -39,7 +41,7 @@ public class FlatButtonWidget extends AbstractWidget implements Renderable {
 
     /** 每帧推进悬停动画，返回 0..1 的平滑发光值。 */
     protected float advanceHoverGlow() {
-        long now = net.minecraft.Util.getMillis();
+        long now = net.minecraft.util.Util.getMillis();
         if (this.lastFrameMs == 0L) {
             this.lastFrameMs = now;
         }
@@ -117,7 +119,10 @@ public class FlatButtonWidget extends AbstractWidget implements Renderable {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent __evt, boolean __doubleClick) {
+        double mouseX = __evt.x();
+        double mouseY = __evt.y();
+        int button = __evt.input();
         if (!this.enabled || !this.visible) {
             return false;
         }
@@ -132,7 +137,10 @@ public class FlatButtonWidget extends AbstractWidget implements Renderable {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent __evt) {
+        int keyCode = __evt.key();
+        int scanCode = 0;
+        int modifiers = __evt.modifiers();
         if (!this.isFocused())
             return false;
 

@@ -3,7 +3,7 @@ package com.example.ribbon.lunar;
 import com.example.ribbon.Config;
 import com.example.ribbon.LangUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -24,7 +24,7 @@ public final class FestivalCountdownHandler {
         if (!Config.isFestivalCountdownEnabled()) return;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui) return;
+        if (mc.player == null || com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc)) return;
 
         List<FestivalPreview.Entry> upcoming = FestivalPreview.getUpcoming(1);
         if (upcoming.isEmpty()) return;
@@ -35,7 +35,7 @@ public final class FestivalCountdownHandler {
         String name = LangUtil.trHoliday(next.festivalId);
         String text = "距 " + name + " " + next.daysAway + " 天";
 
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         int sw = mc.getWindow().getGuiScaledWidth();
         int sh = mc.getWindow().getGuiScaledHeight();
         int tw = mc.font.width(text);

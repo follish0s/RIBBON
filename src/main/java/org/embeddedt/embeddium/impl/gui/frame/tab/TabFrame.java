@@ -6,7 +6,7 @@ import com.google.common.collect.MultimapBuilder;
 import org.embeddedt.embeddium.impl.gui.widgets.AbstractWidget;
 import org.embeddedt.embeddium.impl.gui.widgets.FlatButtonWidget;
 import org.embeddedt.embeddium.api.math.Dim2i;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.Validate;
 import org.embeddedt.embeddium.impl.gui.frame.AbstractFrame;
@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import net.minecraft.client.input.MouseButtonEvent;
 
 public class TabFrame extends AbstractFrame {
     private static final int TAB_OPTION_INDENT = 5;
@@ -186,18 +187,27 @@ public class TabFrame extends AbstractFrame {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return (this.dim.containsCursor(mouseX, mouseY) && super.mouseClicked(mouseX, mouseY, button));
+    public boolean mouseClicked(MouseButtonEvent __evt, boolean __doubleClick) {
+        double mouseX = __evt.x();
+        double mouseY = __evt.y();
+        int button = __evt.input();
+        return (this.dim.containsCursor(mouseX, mouseY) && super.mouseClicked(__evt, __doubleClick));
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    public boolean mouseDragged(MouseButtonEvent __evt, double deltaX, double deltaY) {
+        double mouseX = __evt.x();
+        double mouseY = __evt.y();
+        int button = __evt.input();
+        return super.mouseDragged(__evt, deltaX, deltaY);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return super.mouseReleased(mouseX, mouseY, button);
+    public boolean mouseReleased(MouseButtonEvent __evt) {
+        double mouseX = __evt.x();
+        double mouseY = __evt.y();
+        int button = __evt.input();
+        return super.mouseReleased(__evt);
     }
 
     @Override

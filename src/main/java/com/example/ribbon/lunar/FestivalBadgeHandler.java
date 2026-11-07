@@ -2,7 +2,7 @@ package com.example.ribbon.lunar;
 
 import com.example.ribbon.Config;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -25,7 +25,7 @@ public final class FestivalBadgeHandler {
         if (!Config.isFestivalBadgeEnabled()) return;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui) return;
+        if (mc.player == null || com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc)) return;
 
         LunarDateInfo info = LunarDateProvider.today();
         if (info.festivalId == null) return;
@@ -34,7 +34,7 @@ public final class FestivalBadgeHandler {
         ItemStack icon = FestivalIconMap.getIcon(info.festivalId);
         if (icon.isEmpty()) return;
 
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         int sw = mc.getWindow().getGuiScaledWidth();
         int sh = mc.getWindow().getGuiScaledHeight();
 

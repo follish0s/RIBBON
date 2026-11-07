@@ -4,7 +4,7 @@ import org.embeddedt.embeddium.impl.gui.widgets.AbstractWidget;
 import org.embeddedt.embeddium.impl.gui.widgets.FlatButtonWidget;
 import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -54,6 +54,22 @@ public class PromptScreen extends Screen {
         // Disable the blur
     }
 
+    @Override
+
+
+    public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor __graphics,
+
+
+            int mouseX, int mouseY, float delta) {
+
+
+        this.render(com.example.ribbon.compat.GuiGraphics.wrap(__graphics), mouseX, mouseY, delta);
+
+
+    }
+
+
+
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
         // First, render the old screen. This gives the illusion of the prompt being on top.
         this.prevScreen.render(drawContext, -1, -1, delta);
@@ -95,7 +111,7 @@ public class PromptScreen extends Screen {
             textY += 8;
         }
 
-        super.render(drawContext, mouseX, mouseY, delta);
+        super.extractRenderState(drawContext.unwrap(), mouseX, mouseY, delta);
 
         matrices.popPose();
     }
@@ -124,7 +140,7 @@ public class PromptScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.prevScreen);
+        this.minecraft.setScreenAndShow(this.prevScreen);
     }
 
     public record Action(Component label, Runnable runnable) {

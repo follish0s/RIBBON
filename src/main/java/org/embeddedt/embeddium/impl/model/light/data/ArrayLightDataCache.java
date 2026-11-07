@@ -2,7 +2,7 @@ package org.embeddedt.embeddium.impl.model.light.data;
 
 import org.embeddedt.embeddium.impl.world.WorldSlice;
 import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import java.util.Arrays;
 
 /**

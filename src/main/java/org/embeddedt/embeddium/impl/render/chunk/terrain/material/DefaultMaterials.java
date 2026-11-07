@@ -3,7 +3,7 @@ package org.embeddedt.embeddium.impl.render.chunk.terrain.material;
 import org.embeddedt.embeddium.impl.render.chunk.terrain.DefaultTerrainRenderPasses;
 import org.embeddedt.embeddium.impl.render.chunk.terrain.material.parameters.AlphaCutoffParameter;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.world.level.material.FluidState;
 
 public class DefaultMaterials {

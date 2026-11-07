@@ -2,7 +2,7 @@ package com.example.ribbon.lunar;
 
 import com.example.ribbon.Config;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -21,7 +21,7 @@ public final class LunarHudHandler {
         if (!Config.isLunarHudEnabled()) return;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui) return;
+        if (mc.player == null || com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc)) return;
 
         LunarDateInfo info = LunarDateProvider.today();
         if (info.lunarMonth == 0) return;
@@ -40,7 +40,7 @@ public final class LunarHudHandler {
         String text = sb.toString();
 
         int color = pickColor(info);
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         int sw = mc.getWindow().getGuiScaledWidth();
         int sh = mc.getWindow().getGuiScaledHeight();
         int tw = mc.font.width(text);

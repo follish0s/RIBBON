@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.api.options;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -36,11 +36,11 @@ public final class OptionIdentifier<T> {
         return this.clz;
     }
 
-    public static OptionIdentifier<Void> create(ResourceLocation location) {
+    public static OptionIdentifier<Void> create(Identifier location) {
         return create(location, void.class);
     }
 
-    public static <T> OptionIdentifier<T> create(ResourceLocation location, Class<T> clz) {
+    public static <T> OptionIdentifier<T> create(Identifier location, Class<T> clz) {
         return create(location.getNamespace(), location.getPath(), clz);
     }
 
@@ -66,7 +66,7 @@ public final class OptionIdentifier<T> {
         return this == other;
     }
     
-    public boolean matches(ResourceLocation other) {
+    public boolean matches(Identifier other) {
         return this.modId.equals(other.getNamespace()) && 
                this.path.equals(other.getPath());
     }

@@ -1,8 +1,8 @@
 package org.embeddedt.embeddium.api;
 
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.function.Function;
 

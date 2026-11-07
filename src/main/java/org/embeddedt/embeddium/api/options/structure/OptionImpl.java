@@ -3,7 +3,7 @@ package org.embeddedt.embeddium.api.options.structure;
 import org.embeddedt.embeddium.api.options.binding.GenericBinding;
 import org.embeddedt.embeddium.api.options.control.Control;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.Validate;
 import org.embeddedt.embeddium.api.options.OptionIdentifier;
 
@@ -146,7 +146,7 @@ public class OptionImpl<S, T> implements Option<T> {
             this.type = type;
         }
 
-        public Builder<S, T> setId(ResourceLocation id) {
+        public Builder<S, T> setId(Identifier id) {
             Validate.notNull(id, "Id must not be null");
 
             this.id = OptionIdentifier.create(id.getNamespace(), id.getPath(), this.type);

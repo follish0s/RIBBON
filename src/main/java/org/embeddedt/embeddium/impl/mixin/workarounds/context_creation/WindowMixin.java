@@ -5,7 +5,7 @@ import org.embeddedt.embeddium.impl.compatibility.checks.ModuleScanner;
 import org.embeddedt.embeddium.impl.compatibility.checks.LateDriverScanner;
 import org.embeddedt.embeddium.impl.compatibility.workarounds.Workarounds;
 import org.embeddedt.embeddium.impl.compatibility.workarounds.nvidia.NvidiaWorkarounds;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.neoforged.fml.loading.FMLConfig;
 import net.neoforged.fml.loading.ImmediateWindowHandler;
 import org.embeddedt.embeddium.impl.bootstrap.EmbeddiumEarlyWindowHacks;

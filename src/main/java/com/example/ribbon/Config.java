@@ -328,7 +328,7 @@ public class Config {
                 .define("memoryPressureAdaptive", true);
         MEMORY_PRESSURE_THRESHOLD = BUILDER.comment("触发内存压力的堆占用百分比").defineInRange("memoryPressureThreshold", 85, 50, 95);
         ITEM_LIGHT_CACHE_ENABLED = BUILDER.comment("缓存动态光源的手持物品光照等级",
-                        "避免每轮更新重复查注册表与拼接 ResourceLocation 字符串")
+                        "避免每轮更新重复查注册表与拼接 Identifier 字符串")
                 .define("itemLightCacheEnabled", true);
         GUI_SEARCH_DEBOUNCE_ENABLED = BUILDER.comment("设置界面搜索防抖",
                         "连续输入时合并 fuzzySearch 与界面重建，静默 80ms 后只重建一次")
@@ -385,7 +385,7 @@ public class Config {
         MEMORY_OPTIMIZATION_ENABLED = BUILDER.comment("启用内存深度优化系统（对标 FerriteCore）", "通过 Mixin 注入对形状、属性表、模型定位符、多部件谓词做全局去重").define("enabled", true);
         MEMORY_SHAPE_DEDUP = BUILDER.comment("碰撞箱/渲染形状全局去重").define("shapeDedup", true);
         MEMORY_PROPERTY_MAP_DEDUP = BUILDER.comment("BlockState 属性表去重").define("propertyMapDedup", true);
-        MEMORY_MODEL_INTERNING = BUILDER.comment("ModelResourceLocation 字符串驻留").define("modelInterning", true);
+        MEMORY_MODEL_INTERNING = BUILDER.comment("ModelIdentifier 字符串驻留").define("modelInterning", true);
         MEMORY_MULTIPART_PREDICATE = BUILDER.comment("多部件模型谓词缓存").define("multipartPredicate", true);
         MEMORY_CHUNK_NBT_TRIM = BUILDER.comment("区块加载后清空待处理方块实体 NBT (高风险，默认关闭)").define("chunkNbtTrim", false);
         MEMORY_SHOW_IN_HUD = BUILDER.comment("在综合信息 HUD 中显示内存优化统计").define("showInHud", true);

@@ -7,7 +7,7 @@ import org.embeddedt.embeddium.impl.gui.widgets.FlatButtonWidget;
 import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +51,7 @@ public class ControlElement<T> extends AbstractWidget implements OptionControlEl
         this.hovered = this.dim.containsCursor(mouseX, mouseY);
 
         // 悬停高亮缓动：玻璃模式下平滑增亮，普通模式保持原版瞬时切换
-        long now = net.minecraft.Util.getMillis();
+        long now = net.minecraft.util.Util.getMillis();
         if (this.lastFrameMs == 0L) {
             this.lastFrameMs = now;
         }

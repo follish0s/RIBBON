@@ -3,11 +3,13 @@ package org.embeddedt.embeddium.impl.gui.frame.components;
 import com.mojang.blaze3d.platform.InputConstants;
 import org.embeddedt.embeddium.impl.gui.widgets.AbstractWidget;
 import org.embeddedt.embeddium.api.math.Dim2i;
-import net.minecraft.client.gui.GuiGraphics;
+import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.util.Mth;
 
 import java.util.function.Consumer;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.KeyEvent;
 
 public class ScrollBarComponent extends AbstractWidget {
 
@@ -67,7 +69,10 @@ public class ScrollBarComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent __evt, boolean __doubleClick) {
+        double mouseX = __evt.x();
+        double mouseY = __evt.y();
+        int button = __evt.input();
         if (this.dim.containsCursor(mouseX, mouseY)) {
             if (this.scrollThumb.containsCursor(mouseX, mouseY)) {
                 if (this.mode == Mode.VERTICAL) {
@@ -93,7 +98,10 @@ public class ScrollBarComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent __evt) {
+        double mouseX = __evt.x();
+        double mouseY = __evt.y();
+        int button = __evt.input();
         if (button == 0) {
             this.isDragging = false;
         }
@@ -101,7 +109,10 @@ public class ScrollBarComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(MouseButtonEvent __evt, double deltaX, double deltaY) {
+        double mouseX = __evt.x();
+        double mouseY = __evt.y();
+        int button = __evt.input();
         if (this.isDragging) {
             int value;
             if (this.mode == Mode.VERTICAL) {
@@ -143,7 +154,10 @@ public class ScrollBarComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent __evt) {
+        int keyCode = __evt.key();
+        int scanCode = 0;
+        int modifiers = __evt.modifiers();
         if (!this.isFocused())
             return false;
 

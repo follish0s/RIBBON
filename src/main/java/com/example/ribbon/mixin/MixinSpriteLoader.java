@@ -2,7 +2,7 @@ package com.example.ribbon.mixin;
 
 import com.example.ribbon.Config;
 import net.minecraft.client.renderer.texture.SpriteLoader;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,7 +16,7 @@ import java.util.concurrent.Executor;
 public class MixinSpriteLoader {
 
     @Inject(method = "loadAndStitch", at = @At("HEAD"))
-    private static void ribbon$onStitch(ResourceManager resourceManager, ResourceLocation resourceLocation,
+    private static void ribbon$onStitch(ResourceManager resourceManager, Identifier resourceLocation,
                                         int mipLevel, Executor executor,
                                         CallbackInfoReturnable<CompletableFuture<SpriteLoader.Preparations>> cir) {
         if (!Config.isFastTextureLoadingEnabled()) return;

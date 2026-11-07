@@ -2,7 +2,7 @@ package org.embeddedt.embeddium.impl.model.quad.properties;
 
 import org.embeddedt.embeddium.api.util.ColorABGR;
 import org.embeddedt.embeddium.impl.model.quad.ModelQuadView;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.Direction;
 
 public class ModelQuadFlags {

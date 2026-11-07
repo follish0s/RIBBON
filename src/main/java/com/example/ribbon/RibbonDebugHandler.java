@@ -23,7 +23,7 @@ public class RibbonDebugHandler {
     @SubscribeEvent
     public static void onDebugText(CustomizeGuiOverlayEvent.DebugText event) {
         Minecraft mc = Minecraft.getInstance();
-        if (!mc.getDebugOverlay().showDebugScreen() || mc.options.hideGui) return;
+        if (!mc.getDebugOverlay().showDebugScreen() || com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc)) return;
         if (!Config.isShowAdvancedDebug()) return;
 
         List<String> left = event.getLeft();
@@ -72,7 +72,7 @@ public class RibbonDebugHandler {
 
             var biome = mc.level.getBiome(pos);
             biome.unwrapKey().ifPresent(key -> {
-                left.add(" §f群系: §a" + key.location());
+                left.add(" §f群系: §a" + key.identifier());
             });
         }
 

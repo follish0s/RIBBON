@@ -75,7 +75,7 @@ public final class McaRegionReader implements AutoCloseable {
             if (in == null) return null;
             try {
                 CompoundTag tag = NbtIo.read(in);
-                return decode(chunkPos.x, chunkPos.z, tag, sourceVersion);
+                return decode(chunkPos.x(), chunkPos.z(), tag, sourceVersion);
             } finally {
                 in.close();
             }
@@ -204,7 +204,7 @@ public final class McaRegionReader implements AutoCloseable {
                 boolean paletteOk = true;
                 for (int p = 0; p < paletteList.size(); p++) {
                     String id = paletteList.getString(p);
-                    var holder = biomeRegistry.getHolder(net.minecraft.resources.ResourceLocation.tryParse(id));
+                    var holder = biomeRegistry.getHolder(net.minecraft.resources.Identifier.tryParse(id));
                     if (holder.isEmpty()) { paletteOk = false; break; }
                     palette[p] = holder.get();
                 }

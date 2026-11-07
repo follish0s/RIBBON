@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.experimental.Accessors;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import org.embeddedt.embeddium.impl.Embeddium;
 import org.embeddedt.embeddium.impl.render.chunk.terrain.material.Material;
 
