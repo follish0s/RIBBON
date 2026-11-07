@@ -34,6 +34,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.40'
     // MixinExtras 由 NeoForge 26.2 自带；若编译报缺类再显式声明版本
     // implementation "io.github.llamalad7:mixinextras-neoforge:<26.2 对应版本>"
+    // Sodium 26.2 配置 API（ConfigEntryPoint / ConfigBuilder）：仅编译期引用，
+    // 运行时由实例内的 Sodium 提供，不进 mod jar。
+    compileOnly files('libs/sodium26-api.jar')
 }
 
 neoForge {
