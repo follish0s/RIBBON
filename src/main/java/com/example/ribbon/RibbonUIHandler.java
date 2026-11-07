@@ -15,6 +15,7 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 import org.embeddedt.embeddium.impl.gui.EmbeddiumVideoOptionsScreen;
 import org.lwjgl.glfw.GLFW;
 
+@EventBusSubscriber(modid = Ribbon.MODID, value = Dist.CLIENT)
 public class RibbonUIHandler {
 
     public static final KeyMapping ZOOM_KEY = new KeyMapping(
