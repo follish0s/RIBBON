@@ -65,11 +65,15 @@ public class RibbonUIHandler {
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!(event.getScreen() instanceof TitleScreen)) return;
         Screen current = event.getScreen();
+        // Init.Post 触发时 screen.width/height 尚未赋值，改用窗口的 GUI 缩放尺寸
+        var window = Minecraft.getInstance().getWindow();
+        int w = window.getGuiScaledWidth();
+        int h = window.getGuiScaledHeight();
         Button button = Button.builder(
                         Component.literal("Ribbon 设置"),
                         b -> Minecraft.getInstance().gui.setScreen(
                                 new EmbeddiumVideoOptionsScreen(current, EmbeddiumVideoOptionsScreen.makePages())))
-                .bounds(current.width - 84, current.height - 26, 80, 20)
+                .bounds(w - 84, h - 26, 80, 20)
                 .build();
         event.addListener(button);
     }

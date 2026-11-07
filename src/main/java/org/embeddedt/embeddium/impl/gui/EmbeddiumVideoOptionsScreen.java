@@ -245,18 +245,8 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
             super.extractBackground(gfx.unwrap(), mouseX, mouseY, partialTick);
         }
 
-        // Render watermarks
-        gfx.setColor(ColorARGB.unpackRed(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackGreen(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackBlue(DefaultColors.ELEMENT_ACTIVATED) / 255f, 0.8F);
-        com.example.ribbon.compat.LegacyRenderState.disableDepthTest();
-        com.example.ribbon.compat.LegacyRenderState.depthMask(false);
-        com.example.ribbon.compat.LegacyRenderState.enableBlend();
-        com.example.ribbon.compat.LegacyRenderState.blendFunc(770, 1);
-        gfx.blit(LOGO_LOCATION, this.logoDim.x(), this.logoDim.y(), this.logoDim.width(), this.logoDim.height(), 0.0F, 0.0F, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE);
-        com.example.ribbon.compat.LegacyRenderState.defaultBlendFunc();
-        com.example.ribbon.compat.LegacyRenderState.disableBlend();
-        com.example.ribbon.compat.LegacyRenderState.depthMask(true);
-        com.example.ribbon.compat.LegacyRenderState.enableDepthTest();
-        gfx.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        // 26.2：SimpleTexture 注册后同帧 blit 会因纹理 view 未初始化而崩溃
+        // （AbstractTexture.getTextureView），且 logo 仅为装饰性水印，此处跳过绘制。
     }
 
     /**
