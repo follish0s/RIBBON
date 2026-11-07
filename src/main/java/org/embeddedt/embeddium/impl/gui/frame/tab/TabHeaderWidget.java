@@ -83,4 +83,10 @@ public class TabHeaderWidget extends FlatButtonWidget {
         int imgY = this.dim.getCenterY() - (fontHeight / 2);
         drawContext.blit(icon, this.dim.x() + 5, imgY, 0.0f, 0.0f, fontHeight, fontHeight, fontHeight, fontHeight);
     }
+
+    /** 26.2：容器事件分发改为 getChildAt 命中判定，控件必须覆盖 isMouseOver 才能接收点击。 */
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        return this.dim.containsCursor(mouseX, mouseY);
+    }
 }

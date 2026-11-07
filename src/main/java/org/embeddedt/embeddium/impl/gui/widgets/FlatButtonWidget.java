@@ -204,4 +204,10 @@ public class FlatButtonWidget extends AbstractWidget implements Renderable {
             return style;
         }
     }
+
+    /** 26.2：容器事件分发改为 getChildAt 命中判定，控件必须覆盖 isMouseOver 才能接收点击。 */
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        return this.dim.containsCursor(mouseX, mouseY);
+    }
 }

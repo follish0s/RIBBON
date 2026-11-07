@@ -279,4 +279,10 @@ public class SearchTextFieldComponent extends AbstractWidget {
     public ScreenRectangle getRectangle() {
         return new ScreenRectangle(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height());
     }
+
+    /** 26.2：容器事件分发改为 getChildAt 命中判定，控件必须覆盖 isMouseOver 才能接收点击。 */
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        return this.dim.containsCursor(mouseX, mouseY);
+    }
 }
