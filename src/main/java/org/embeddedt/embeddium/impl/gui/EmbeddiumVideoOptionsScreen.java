@@ -238,64 +238,37 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
 
     
     public void renderBackground(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
-        if (com.example.ribbon.optimization.RuntimeConfig.liquidGlassEnabled
-                && renderLiquidGlassBackground(gfx, partialTick)) {
-            // 液态玻璃背景已绘制（增强模糊 + 暗化 + 玻璃底板 + sheen）
-        } else {
-            super.extractBackground(gfx.unwrap(), mouseX, mouseY, partialTick);
+        // 26.2 事实：本屏总是从其它屏幕打开，父屏留在 NeoForge 的 screenLayers 中
+        // 同帧提取——它已消耗本帧唯一的 blur 配额并绘制了模糊全景背景。
+        // 本屏再请求 blur 必抛 IllegalStateException（"Can only blur once per frame"），
+        // 重绘 panorama 则会用锐利画面盖掉父屏的模糊背景（玻璃发灰发丑的根源）。
+        // 因此本屏一律不请求 blur、不重绘 panorama：
+        //  - 游戏内：原版透明暗化（与 blur 无关，不冲突）
+        //  - 主菜单：模糊背景由父屏 stratum 提供，本屏只叠暗化/玻璃面板
+        try {
+            if (this.minecraft.level != null) {
+                this.extractTransparentBackground(gfx.unwrap());
+            } else if (!com.example.ribbon.optimization.RuntimeConfig.liquidGlassEnabled) {
+                this.extractMenuBackground(gfx.unwrap());
+            }
+            if (com.example.ribbon.optimization.RuntimeConfig.liquidGlassEnabled) {
+                com.example.ribbon.glass.LiquidGlassTheme.renderScrim(gfx, this.width, this.height);
+                if (this.glassSlabDim != null && com.example.ribbon.glass.LiquidGlassTheme.drawPanel(
+                        gfx, this.glassSlabDim.x(), this.glassSlabDim.y(),
+                        this.glassSlabDim.getLimitX(), this.glassSlabDim.getLimitY(), 1.0F)) {
+                    com.example.ribbon.glass.LiquidGlassTheme.renderSheen(
+                            gfx, this.glassSlabDim.x(), this.glassSlabDim.y(),
+                            this.glassSlabDim.width(), this.glassSlabDim.height());
+                }
+            }
+        } catch (Throwable t) {
+            // GUI 铁律：主题代码绝不允许让设置界面崩溃
+            Embeddium.logger().warn("[Ribbon] backdrop draw failed; using plain scrim", t);
+            gfx.fillGradient(0, 0, this.width, this.height, 0xB0101010, 0xC8101010);
         }
 
         // 26.2：SimpleTexture 注册后同帧 blit 会因纹理 view 未初始化而崩溃
         // （AbstractTexture.getTextureView），且 logo 仅为装饰性水印，此处跳过绘制。
-    }
-
-    /**
-     * 液态玻璃背景：增强背景模糊 → 中性暗化 → 玻璃底板 → 漂移镜面高光。
-     *
-     * <p>模糊复用原版 {@code blur.json} post chain：临时把「菜单背景模糊度」
-     * 提到配置强度后调用原版 {@link #renderBlurredBackground(float)}（强度 ≥6
-     * 时双重调用叠加出毛玻璃效果），调用完立即恢复原值，不污染用户设置。
-     * 任何异常都返回 false 回退原版绘制路径，保证设置界面永不因主题崩溃。</p>
-     */
-    private boolean renderLiquidGlassBackground(GuiGraphics gfx, float partialTick) {
-        try {
-            if (this.minecraft.level == null) {
-                this.extractPanorama(gfx.unwrap(), partialTick);
-            }
-
-            int strength = Math.max(0, com.example.ribbon.optimization.RuntimeConfig.liquidGlassBlur);
-            if (strength > 0) {
-                OptionInstance<Integer> blurOption = this.minecraft.options.menuBackgroundBlurriness();
-                int previous = blurOption.get();
-                try {
-                    // 26.2 约束：GuiRenderState 每帧只允许一次 blur（二次调用直接抛
-                    // IllegalStateException 终止整帧渲染）。改用提高模糊等级补偿，
-                    // 不再像 1.21.1 那样双重叠加。
-                    blurOption.set(Math.max(previous, Math.min(strength, 10)));
-                    try {
-                        this.extractBlurredBackground(gfx.unwrap());
-                    } catch (IllegalStateException blurBusy) {
-                        // 同帧已有其它来源触发过 blur（界面切换首帧等）：
-                        // 跳过模糊继续绘制玻璃层，绝不回退到会再次 blur 的原版路径
-                    }
-                } finally {
-                    blurOption.set(previous);
-                }
-            }
-
-            com.example.ribbon.glass.LiquidGlassTheme.renderScrim(gfx, this.width, this.height);
-            if (this.glassSlabDim != null && com.example.ribbon.glass.LiquidGlassTheme.drawPanel(
-                    gfx, this.glassSlabDim.x(), this.glassSlabDim.y(),
-                    this.glassSlabDim.getLimitX(), this.glassSlabDim.getLimitY(), 1.0F)) {
-                com.example.ribbon.glass.LiquidGlassTheme.renderSheen(
-                        gfx, this.glassSlabDim.x(), this.glassSlabDim.y(),
-                        this.glassSlabDim.width(), this.glassSlabDim.height());
-            }
-            return true;
-        } catch (Throwable t) {
-            Embeddium.logger().warn("[Ribbon] Liquid glass backdrop failed; falling back to vanilla background", t);
-            return false;
-        }
     }
 
     
