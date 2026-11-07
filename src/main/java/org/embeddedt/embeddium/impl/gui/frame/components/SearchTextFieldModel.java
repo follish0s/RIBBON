@@ -94,12 +94,12 @@ public class SearchTextFieldModel {
         if (com.example.ribbon.optimization.RuntimeConfig.guiSearchDebounceEnabled) {
             this.mainScreen.scheduleSearchRebuild();
         } else {
-            Minecraft.getInstance().tell(() -> this.mainScreen.rebuildUI());
+            Minecraft.getInstance().execute(() -> this.mainScreen.rebuildUI());
         }
     }
 
     void erase(int offset) {
-        if (Screen.hasControlDown()) {
+        if (Minecraft.getInstance().hasControlDown()) {
             this.eraseWords(offset);
         } else {
             this.eraseCharacters(offset);

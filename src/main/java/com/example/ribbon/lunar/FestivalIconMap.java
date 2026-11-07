@@ -28,20 +28,20 @@ public final class FestivalIconMap {
             case "xiaonian" -> new ItemStack(Items.SUGAR);
             case "china_new_year" -> new ItemStack(Items.CAKE);
             case "china_labor" -> new ItemStack(Items.IRON_INGOT);
-            case "china_national" -> new ItemStack(Items.RED_BANNER);
+            case "china_national" -> new ItemStack(Items.BANNER.asList().get(14));
 
             // 国际节日
             case "valentine" -> new ItemStack(Items.PINK_TULIP);
             case "halloween" -> new ItemStack(Items.CARVED_PUMPKIN);
             case "easter" -> new ItemStack(Items.EGG);
             case "april_fools" -> new ItemStack(Items.TROPICAL_FISH);
-            case "intl_womens" -> new ItemStack(Items.PINK_DYE);
+            case "intl_womens" -> new ItemStack(Items.DYE.asList().get(6));
             case "intl_labor" -> new ItemStack(Items.GOLDEN_PICKAXE);
             case "intl_children" -> new ItemStack(Items.SLIME_BALL);
-            case "intl_red_cross" -> new ItemStack(Items.RED_DYE);
+            case "intl_red_cross" -> new ItemStack(Items.DYE.asList().get(14));
             case "intl_nurse" -> new ItemStack(Items.POTION);
             case "intl_environment" -> new ItemStack(Items.OAK_SAPLING);
-            case "intl_peace" -> new ItemStack(Items.WHITE_DYE);
+            case "intl_peace" -> new ItemStack(Items.DYE.asList().get(0));
             case "intl_human_rights" -> new ItemStack(Items.BOOK);
 
             // 美国
@@ -66,7 +66,7 @@ public final class FestivalIconMap {
             // 日本
             case "jp_new_year" -> new ItemStack(Items.CAKE);
             case "jp_coming_of_age" -> new ItemStack(Items.GOLDEN_HELMET);
-            case "jp_national_foundation" -> new ItemStack(Items.WHITE_BANNER);
+            case "jp_national_foundation" -> new ItemStack(Items.BANNER.asList().get(0));
             case "jp_showa" -> new ItemStack(Items.SUNFLOWER);
             case "jp_constitution" -> new ItemStack(Items.BOOK);
             case "jp_greenery" -> new ItemStack(Items.OAK_SAPLING);
@@ -76,9 +76,9 @@ public final class FestivalIconMap {
 
             // 韩国
             case "kr_new_year" -> new ItemStack(Items.CAKE);
-            case "kr_independence" -> new ItemStack(Items.WHITE_BANNER);
-            case "kr_liberation" -> new ItemStack(Items.RED_BANNER);
-            case "kr_national_foundation" -> new ItemStack(Items.WHITE_BANNER);
+            case "kr_independence" -> new ItemStack(Items.BANNER.asList().get(0));
+            case "kr_liberation" -> new ItemStack(Items.BANNER.asList().get(14));
+            case "kr_national_foundation" -> new ItemStack(Items.BANNER.asList().get(0));
             case "kr_hangul" -> new ItemStack(Items.BOOK);
 
             default -> ItemStack.EMPTY;

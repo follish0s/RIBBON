@@ -60,10 +60,10 @@ public abstract class AbstractFrame extends AbstractWidget implements ContainerE
     @Deprecated
     public void applyScissor(int x, int y, int width, int height, Runnable action) {
         double scale = Minecraft.getInstance().getWindow().getGuiScale();
-        RenderSystem.enableScissor((int) (x * scale), (int) (Minecraft.getInstance().getWindow().getHeight() - (y + height) * scale),
+        com.example.ribbon.compat.LegacyRenderState.enableScissor((int) (x * scale), (int) (Minecraft.getInstance().getWindow().getHeight() - (y + height) * scale),
                 (int) (width * scale), (int) (height * scale));
         action.run();
-        RenderSystem.disableScissor();
+        com.example.ribbon.compat.LegacyRenderState.disableScissor();
     }
 
     public void registerFocusListener(Consumer<GuiEventListener> focusListener) {

@@ -37,7 +37,7 @@ public final class FocusState {
             lastSampleMs = now;
             try {
                 Minecraft mc = Minecraft.getInstance();
-                long handle = mc == null ? 0L : mc.getWindow().getWindow();
+                long handle = mc == null ? 0L : mc.getWindow().handle();
                 windowFocused = handle == 0L
                         || GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_FOCUSED) != 0;
             } catch (Throwable ignored) {

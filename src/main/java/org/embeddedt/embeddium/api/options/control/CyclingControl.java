@@ -1,5 +1,7 @@
 package org.embeddedt.embeddium.api.options.control;
 
+import net.minecraft.client.Minecraft;
+
 import org.embeddedt.embeddium.api.options.structure.Option;
 import org.embeddedt.embeddium.impl.gui.options.TextProvider;
 import org.embeddedt.embeddium.api.math.Dim2i;

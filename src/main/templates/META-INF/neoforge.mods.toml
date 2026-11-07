@@ -1,47 +1,39 @@
-license="${mod_license}"
-
-# 26.2 起 javafml 有默认值，modLoader / loaderVersion 两行已省略（官方 MDK 做法）
-
-[[mixins]]
-config="embeddium.mixins.json"
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "${mod_license}"
 
 [[mixins]]
-config="ribbon.mixins.json"
+config = "ribbon.mixins.json"
 
 [[mods]]
-modId="ribbon"
-version="${mod_version}"
-displayName="${mod_name}"
-logoFile="icon.png"
-description='''
-Ribbon - Embeddium fork with HUD enhancements, ported to Minecraft 26.2.
+modId = "ribbon"
+version = "${mod_version}"
+displayName = "${mod_name}"
+logoFile = "icon.png"
+description = '''
+Ribbon - client-side HUD, visual and quality-of-life enhancements for Minecraft 26.2.
+Requires Sodium 26.2 as the rendering engine; this mod contains no Sodium source code.
 '''
-credits="follish0s, embeddedt, CaffeineMC"
-authors="follish0s"
+credits = "follish0s, embeddedt"
+authors = "follish0s"
 
 [[dependencies.ribbon]]
-modId="neoforge"
-type="required"
-versionRange="[${neo_version},)"
+modId = "neoforge"
+type = "required"
+versionRange = "[${neo_version},)"
+ordering = "NONE"
+side = "BOTH"
 
 [[dependencies.ribbon]]
-modId="minecraft"
-type="required"
-versionRange="${minecraft_version_range}"
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
 
-# ---------------------------------------------------------------------------
-# 以下两个伪装 id 是 1.21.1 时代为 Iris / Oculus / sodium-extra / monocle
-# 等下游 mod 提供的兼容契约。26.2 生态已完全不同：
-#   - 官方 Sodium 26.2 本身使用 modId "sodium"，同时声明会直接冲突；
-#   - 下游要求的版本区间（sodium 0.8.13 / embeddium 1.0.7）在 26.2 无意义。
-# 全量 fork 移植完成、确定下游组合后再决定是否保留与如何重定版本。
-# ---------------------------------------------------------------------------
-# [[mods]]
-# modId="sodium"
-# version="0.8.13+mc1.21.1"
-# displayName="Ribbon (Sodium-compatible fork)"
-#
-# [[mods]]
-# modId="embeddium"
-# version="1.0.7"
-# displayName="Ribbon (Embeddium-compatible fork)"
+# 渲染器由官方 Sodium 26.2 提供，Ribbon 只作为附加 mod 运行
+[[dependencies.ribbon]]
+modId = "sodium"
+type = "required"
+ordering = "AFTER"
+side = "CLIENT"

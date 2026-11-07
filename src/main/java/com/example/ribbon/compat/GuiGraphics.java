@@ -81,28 +81,34 @@ public final class GuiGraphics {
 
     // ===== 文本 =====
 
-    public void drawString(Font font, String text, int x, int y, int color) {
+    public int drawString(Font font, String text, int x, int y, int color) {
         this.graphics.text(font, text, x, y, tint(color));
+        return x + font.width(text);
     }
 
-    public void drawString(Font font, String text, int x, int y, int color, boolean dropShadow) {
+    public int drawString(Font font, String text, int x, int y, int color, boolean dropShadow) {
         this.graphics.text(font, text, x, y, tint(color), dropShadow);
+        return x + font.width(text);
     }
 
-    public void drawString(Font font, Component text, int x, int y, int color) {
+    public int drawString(Font font, Component text, int x, int y, int color) {
         this.graphics.text(font, text, x, y, tint(color));
+        return x + font.width(text);
     }
 
-    public void drawString(Font font, Component text, int x, int y, int color, boolean dropShadow) {
+    public int drawString(Font font, Component text, int x, int y, int color, boolean dropShadow) {
         this.graphics.text(font, text, x, y, tint(color), dropShadow);
+        return x + font.width(text);
     }
 
-    public void drawString(Font font, FormattedCharSequence text, int x, int y, int color) {
+    public int drawString(Font font, FormattedCharSequence text, int x, int y, int color) {
         this.graphics.text(font, text, x, y, tint(color));
+        return x + font.width(text);
     }
 
-    public void drawString(Font font, FormattedCharSequence text, int x, int y, int color, boolean dropShadow) {
+    public int drawString(Font font, FormattedCharSequence text, int x, int y, int color, boolean dropShadow) {
         this.graphics.text(font, text, x, y, tint(color), dropShadow);
+        return x + font.width(text);
     }
 
     public void drawCenteredString(Font font, String text, int x, int y, int color) {

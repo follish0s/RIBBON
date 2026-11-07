@@ -52,7 +52,7 @@ public final class WindowTitleFps {
         // 1.21.1 的 LWJGL 绑定不含 glfwGetWindowTitle，直接用原版启动时的标题格式还原：
         // modded 环境下标题为 "Minecraft* <版本>"
         try {
-            originalTitle = "Minecraft* " + net.minecraft.SharedConstants.getCurrentVersion().getName();
+            originalTitle = "Minecraft* " + net.minecraft.SharedConstants.getCurrentVersion().name();
         } catch (Throwable t) {
             originalTitle = "Minecraft";
         }

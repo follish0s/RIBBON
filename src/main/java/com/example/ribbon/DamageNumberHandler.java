@@ -94,7 +94,7 @@ public class DamageNumberHandler {
             }
         }
 
-        float damage = event.getNewDamage();
+        float damage = event.getInflictedDamage();
         if (damage <= 0 && !isSpecial) return;
         if (isSpecial && damage <= 0) damage = Float.MAX_VALUE;
 
@@ -226,8 +226,8 @@ public class DamageNumberHandler {
 
             var camera = mc.gameRenderer.mainCamera();
             Vec3 camPos = camera.position();
-            float yawRad = (float) Math.toRadians(camera.getYRot());
-            float pitchRad = (float) Math.toRadians(camera.getXRot());
+            float yawRad = (float) Math.toRadians(camera.yRot());
+            float pitchRad = (float) Math.toRadians(camera.xRot());
 
             double fx = -Math.sin(yawRad) * Math.cos(pitchRad);
             double fy = -Math.sin(pitchRad);

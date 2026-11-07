@@ -38,7 +38,7 @@ public class ClickEffectHandler {
         if (mc.player == null) return;
         if (com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc)) return;
 
-        if (Config.isClickEffectCoverUi() && mc.screen != null) return;
+        if (Config.isClickEffectCoverUi() && mc.gui.screen() != null) return;
 
         trigger(mc, button == GLFW.GLFW_MOUSE_BUTTON_RIGHT, type);
     }

@@ -62,9 +62,9 @@ public class HitParticleHandler {
     private static void spawn(Minecraft mc, ParticleOptions type,
                               double x, double y, double z, int count, double spread) {
         for (int i = 0; i < count; i++) {
-            double vx = (mc.level.random.nextDouble() - 0.5) * spread;
-            double vy = (mc.level.random.nextDouble() - 0.5) * spread + 0.1;
-            double vz = (mc.level.random.nextDouble() - 0.5) * spread;
+            double vx = (mc.level.getRandom().nextDouble() - 0.5) * spread;
+            double vy = (mc.level.getRandom().nextDouble() - 0.5) * spread + 0.1;
+            double vz = (mc.level.getRandom().nextDouble() - 0.5) * spread;
             mc.level.addParticle(type, x, y, z, vx, vy, vz);
         }
     }

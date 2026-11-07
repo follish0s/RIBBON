@@ -49,7 +49,6 @@ public class RibbonUIHandler {
             KeyMapping.Category.MISC
     );
 
-    @EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
     public static class ModBusEvents {
         @SubscribeEvent
         public static void registerKeys(RegisterKeyMappingsEvent event) {

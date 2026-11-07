@@ -6,7 +6,6 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import org.embeddedt.embeddium.impl.Embeddium;
 import org.embeddedt.embeddium.api.OptionGUIConstructionEvent;
-import org.embeddedt.embeddium.impl.data.fingerprint.HashedFingerprint;
 import org.embeddedt.embeddium.impl.gui.console.Console;
 import org.embeddedt.embeddium.impl.gui.console.message.MessageLevel;
 import org.embeddedt.embeddium.api.options.structure.Option;
@@ -33,10 +32,7 @@ import org.embeddedt.embeddium.impl.gui.frame.components.SearchTextFieldComponen
 import org.embeddedt.embeddium.impl.gui.frame.components.SearchTextFieldModel;
 import org.embeddedt.embeddium.impl.gui.frame.tab.Tab;
 import org.embeddedt.embeddium.impl.gui.frame.tab.TabFrame;
-import org.embeddedt.embeddium.impl.gui.screen.PromptScreen;
 import org.embeddedt.embeddium.impl.gui.theme.DefaultColors;
-import org.embeddedt.embeddium.impl.render.ShaderModBridge;
-import org.embeddedt.embeddium.impl.util.PlatformUtil;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
@@ -87,69 +83,16 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     public static List<OptionPage> makePages() {
         List<OptionPage> pages = new ArrayList<>();
 
-        pages.add(EmbeddiumGameOptionPages.general());
-        pages.add(EmbeddiumGameOptionPages.quality());
-        pages.add(EmbeddiumGameOptionPages.performance());
-        pages.add(EmbeddiumGameOptionPages.advanced());
-
         OptionGUIConstructionEvent.BUS.post(new OptionGUIConstructionEvent(pages));
 
         return List.copyOf(pages);
     }
 
-    private void checkPromptTimers() {
-        // Don't show the donation prompt in situations where we know it causes problems.
-        if (PlatformUtil.isDevelopmentEnvironment()) {
-            return;
-        }
-
-        var options = Embeddium.options();
-
-        // If the user has disabled the nags forcefully (by config), or has already seen the prompt, don't show it again.
-        if (options.notifications.hasSeenDonationPrompt) {
-            return;
-        }
-
-        HashedFingerprint fingerprint = null;
-
-        try {
-            fingerprint = HashedFingerprint.loadFromDisk();
-        } catch (Throwable t) {
-            Embeddium.logger()
-                    .error("Failed to read the fingerprint from disk", t);
-        }
-
-        // If the fingerprint doesn't exist, or failed to be loaded, abort.
-        if (fingerprint == null) {
-            return;
-        }
-
-        // The fingerprint records the installation time. If it's been a while since installation, show the user
-        // a prompt asking for them to consider donating.
-        var now = Instant.now();
-        var threshold = Instant.ofEpochSecond(fingerprint.timestamp())
-                .plus(3, ChronoUnit.DAYS);
-
-        if (now.isAfter(threshold)) {
-            this.openDonationPrompt();
-
-            options.notifications.hasSeenDonationPrompt = true;
-
-            try {
-                EmbeddiumOptions.writeToDisk(options);
-            } catch (IOException e) {
-                Embeddium.logger()
-                        .error("Failed to update config file", e);
-            }
-        }
+        private void checkPromptTimers() {
+        // 26.2 addon: no donation prompts.
     }
 
-    private void openDonationPrompt() {
-        var prompt = new PromptScreen(this, DONATION_PROMPT_MESSAGE, 320, 190,
-                new PromptScreen.Action(Component.literal("Support Sodium"), this::openDonationPage));
 
-        this.minecraft.setScreenAndShow(prompt);
-    }
 
 
     private void registerTextures() {
@@ -217,12 +160,12 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         this.donateButton = new FlatButtonWidget(donateButtonDim, donationText, this::openDonationPage);
         this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, Component.literal("x"), this::hideDonationButton);
 
-        if (Embeddium.options().notifications.hasClearedDonationButton) {
+        if (false) {
             this.setDonationButtonVisibility(false);
         }
 
         Dim2i searchTextFieldDim;
-        if (Embeddium.options().notifications.hasClearedDonationButton) {
+        if (false) {
             searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.width(), 20);
         } else {
             searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.width() - (tabFrameDim.getLimitX() - donateButtonDim.x()) - 2, 20);
@@ -256,20 +199,8 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         return false;
     }
 
-    private void createShaderPackButton(Multimap<String, Tab<?>> tabs) {
-        if(this.searchTextModel.getOptionPredicate().test(null) && ShaderModBridge.isShaderModPresent()) {
-            String shaderModId = Stream.of("oculus", "iris").filter(PlatformUtil::modPresent).findFirst().orElse("iris");
-            tabs.put(shaderModId, Tab.createBuilder()
-                    .setTitle(Component.translatable("options.iris.shaderPackSelection"))
-                    .setId(OptionIdentifier.create("iris", "shader_packs"))
-                    .setOnSelectFunction(() -> {
-                        if(ShaderModBridge.openShaderScreen(this) instanceof Screen screen) {
-                            this.minecraft.setScreenAndShow(screen);
-                        }
-                        return false;
-                    })
-                    .build());
-        }
+        private void createShaderPackButton(com.google.common.collect.Multimap<String, org.embeddedt.embeddium.impl.gui.frame.tab.Tab<?>> tabs) {
+        // 26.2 addon: shader pack selection is owned by the shader mod.
     }
 
     private AbstractFrame createTabFrame(Dim2i tabFrameDim) {
@@ -309,20 +240,20 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
                 && renderLiquidGlassBackground(gfx, partialTick)) {
             // 液态玻璃背景已绘制（增强模糊 + 暗化 + 玻璃底板 + sheen）
         } else {
-            super.renderBackground(gfx, mouseX, mouseY, partialTick);
+            super.extractBackground(gfx.unwrap(), mouseX, mouseY, partialTick);
         }
 
         // Render watermarks
         gfx.setColor(ColorARGB.unpackRed(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackGreen(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackBlue(DefaultColors.ELEMENT_ACTIVATED) / 255f, 0.8F);
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(770, 1);
+        com.example.ribbon.compat.LegacyRenderState.disableDepthTest();
+        com.example.ribbon.compat.LegacyRenderState.depthMask(false);
+        com.example.ribbon.compat.LegacyRenderState.enableBlend();
+        com.example.ribbon.compat.LegacyRenderState.blendFunc(770, 1);
         gfx.blit(LOGO_LOCATION, this.logoDim.x(), this.logoDim.y(), this.logoDim.width(), this.logoDim.height(), 0.0F, 0.0F, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE);
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.disableBlend();
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
+        com.example.ribbon.compat.LegacyRenderState.defaultBlendFunc();
+        com.example.ribbon.compat.LegacyRenderState.disableBlend();
+        com.example.ribbon.compat.LegacyRenderState.depthMask(true);
+        com.example.ribbon.compat.LegacyRenderState.enableDepthTest();
         gfx.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
@@ -337,7 +268,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     private boolean renderLiquidGlassBackground(GuiGraphics gfx, float partialTick) {
         try {
             if (this.minecraft.level == null) {
-                this.renderPanorama(gfx, partialTick);
+                this.extractPanorama(gfx.unwrap(), partialTick);
             }
 
             int strength = Math.max(0, com.example.ribbon.optimization.RuntimeConfig.liquidGlassBlur);
@@ -346,10 +277,10 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
                 int previous = blurOption.get();
                 try {
                     blurOption.set(Math.max(previous, Math.min(strength, 10)));
-                    this.renderBlurredBackground(partialTick);
+                    this.extractBlurredBackground(gfx.unwrap());
                     if (strength >= 6) {
                         // 二次叠加：box blur 的卷积近似高斯，两轮后过渡更柔
-                        this.renderBlurredBackground(partialTick);
+                        this.extractBlurredBackground(gfx.unwrap());
                     }
                 } finally {
                     blurOption.set(previous);
@@ -439,19 +370,8 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         this.hideDonateButton.setVisible(value);
     }
 
-    private void hideDonationButton() {
-        EmbeddiumOptions options = Embeddium.options();
-        options.notifications.hasClearedDonationButton = true;
-
-        try {
-            EmbeddiumOptions.writeToDisk(options);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save configuration", e);
-        }
-
+        private void hideDonationButton() {
         this.setDonationButtonVisibility(false);
-
-
         this.rebuildUI();
     }
 
@@ -484,9 +404,9 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
 
         if (client.level != null) {
             if (flags.contains(OptionFlag.REQUIRES_RENDERER_RELOAD)) {
-                client.levelRenderer.allChanged();
+
             } else if (flags.contains(OptionFlag.REQUIRES_RENDERER_UPDATE)) {
-                client.levelRenderer.needsUpdate();
+
             }
         }
 

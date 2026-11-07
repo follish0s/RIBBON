@@ -30,7 +30,7 @@ public class RainbowHealthHandler {
         event.registerAbove(
                 VanillaGuiLayers.PLAYER_HEALTH,
                 Identifier.fromNamespaceAndPath("ribbon", "rainbow_health"),
-                (guiGraphics, deltaTracker) -> renderHealth(guiGraphics)
+                (guiGraphics, deltaTracker) -> renderHealth(com.example.ribbon.compat.GuiGraphics.wrap(guiGraphics))
         );
     }
 

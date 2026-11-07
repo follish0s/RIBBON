@@ -21,7 +21,11 @@ public class Ribbon {
     public Ribbon(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        // 26.2 的 @EventBusSubscriber 不再区分 MOD/GAME 总线，MOD 总线事件显式注册
+        modEventBus.addListener(Config::onLoad);
+        modEventBus.addListener(RibbonUIHandler.ModBusEvents::registerKeys);
+
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             // 1. 初始化 UI 与兼容层
             RibbonOptions.init();
             DistantHorizonsCompat.init();
@@ -33,9 +37,6 @@ public class Ribbon {
 
             // 3. 初始化底层线程池
             TextureThreadPool.init(); // 极速材质加载线程池
-
-            // 4. 初始化光影源码缓存 (本次新增)
-            com.example.ribbon.shadercache.ShaderSourceCache.init();
 
             // 5. 启动异步寻路线程池 (千问写的功能)
             com.example.ribbon.pathfinding.AsyncPathfindingManager.getInstance().start();

@@ -12,7 +12,6 @@ import net.minecraft.client.Minecraft;
 import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
-import org.embeddedt.embeddium.impl.Embeddium;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,10 +68,10 @@ public final class LiquidGlassTheme {
             try {
                 Minecraft mc = Minecraft.getInstance();
                 DynamicTexture panel = new DynamicTexture(() -> "ribbon-dynamic", buildPanelImage());
-                panel.setFilter(true, false);
+
                 mc.getTextureManager().register(PANEL_LOCATION, panel);
                 DynamicTexture sheen = new DynamicTexture(() -> "ribbon-dynamic", buildSheenImage());
-                sheen.setFilter(true, false);
+
                 mc.getTextureManager().register(SHEEN_LOCATION, sheen);
                 initialized = true;
                 LOGGER.info("[Ribbon] Liquid glass textures generated (panel 64x64, sheen 128x128)");

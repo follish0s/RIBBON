@@ -21,7 +21,7 @@ public class RainbowGuiHandler {
         event.registerAbove(
                 VanillaGuiLayers.CROSSHAIR,
                 Identifier.fromNamespaceAndPath("ribbon", "rainbow_crosshair"),
-                (guiGraphics, deltaTracker) -> renderCrosshair(guiGraphics)
+                (guiGraphics, deltaTracker) -> renderCrosshair(com.example.ribbon.compat.GuiGraphics.wrap(guiGraphics))
         );
     }
 

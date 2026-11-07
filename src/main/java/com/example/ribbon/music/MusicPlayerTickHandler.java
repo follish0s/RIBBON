@@ -27,8 +27,8 @@ public final class MusicPlayerTickHandler {
         Minecraft mc = Minecraft.getInstance();
 
         while (RibbonUIHandler.MUSIC_MENU.consumeClick()) {
-            LOGGER.info("[Ribbon] MUSIC_MENU 按下，screen={}", mc.screen);
-            if (mc.screen == null) {
+            LOGGER.info("[Ribbon] MUSIC_MENU 按下，screen={}", mc.gui.screen());
+            if (mc.gui.screen() == null) {
                 try {
                     MusicPlayerScreen screen = new MusicPlayerScreen();
                     mc.setScreenAndShow(screen);

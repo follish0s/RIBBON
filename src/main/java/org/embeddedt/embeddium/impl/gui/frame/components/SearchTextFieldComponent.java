@@ -86,7 +86,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         }
         // Cursor
         if (this.isFocused()) {
-            context.fill(RenderType.guiOverlay(), o, m - 1, o + 1, m + 1 + this.textRenderer.lineHeight, -3092272);
+            context.fill(o, m - 1, o + 1, m + 1 + this.textRenderer.lineHeight, -3092272);
         }
         // Highlighted text
         if (k != j) {
@@ -132,7 +132,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (x1 > this.dim.x() + this.dim.width()) {
             x1 = this.dim.x() + this.dim.width();
         }
-        context.fill(RenderType.guiTextHighlight(), x1, y1, x2, y2, -16776961);
+        context.fill(x1, y1, x2, y2, -16776961);
     }
     
 
@@ -177,20 +177,20 @@ public class SearchTextFieldComponent extends AbstractWidget {
             return false;
         } else {
             this.model.selecting = Minecraft.getInstance().hasShiftDown();
-            if (Screen.isSelectAll(keyCode)) {
+            if (com.example.ribbon.compat.KeyCompat.isSelectAll(__evt)) {
                 this.model.setCursorToEnd();
                 this.model.setSelectionEnd(0);
                 return true;
-            } else if (Screen.isCopy(keyCode)) {
+            } else if (com.example.ribbon.compat.KeyCompat.isCopy(__evt)) {
                 Minecraft.getInstance().keyboardHandler.setClipboard(this.model.getSelectedText());
                 return true;
-            } else if (Screen.isPaste(keyCode)) {
+            } else if (com.example.ribbon.compat.KeyCompat.isPaste(__evt)) {
                 if (this.model.editable) {
                     this.model.write(Minecraft.getInstance().keyboardHandler.getClipboard());
                 }
 
                 return true;
-            } else if (Screen.isCut(keyCode)) {
+            } else if (com.example.ribbon.compat.KeyCompat.isCut(__evt)) {
                 Minecraft.getInstance().keyboardHandler.setClipboard(this.model.getSelectedText());
                 if (this.model.editable) {
                     this.model.write("");
@@ -216,7 +216,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         return true;
                     }
                     case GLFW.GLFW_KEY_RIGHT -> {
-                        if (Screen.hasControlDown()) {
+                        if (com.example.ribbon.compat.KeyCompat.hasControlDown(__evt)) {
                             this.model.setCursor(this.model.getWordSkipPosition(1));
                         } else {
                             this.model.moveCursor(1);
@@ -226,7 +226,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         return state;
                     }
                     case GLFW.GLFW_KEY_LEFT -> {
-                        if (Screen.hasControlDown()) {
+                        if (com.example.ribbon.compat.KeyCompat.hasControlDown(__evt)) {
                             this.model.setCursor(this.model.getWordSkipPosition(-1));
                         } else {
                             this.model.moveCursor(-1);
