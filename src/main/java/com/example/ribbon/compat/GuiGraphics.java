@@ -59,6 +59,10 @@ public final class GuiGraphics {
         this.graphics.fill(x0, y0, x1, y1, tint(color));
     }
 
+    public void outline(int x, int y, int width, int height, int color) {
+        this.graphics.outline(x, y, width, height, tint(color));
+    }
+
     public void fillGradient(int x0, int y0, int x1, int y1, int colorFrom, int colorTo) {
         this.graphics.fillGradient(x0, y0, x1, y1, tint(colorFrom), tint(colorTo));
     }

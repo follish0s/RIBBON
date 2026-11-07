@@ -146,26 +146,33 @@ public final class LiquidGlassTheme {
      * @param alphaMul 整体透明度倍率（悬停增强 / 禁用减弱）
      * @return 是否成功绘制（false = 纹理未就绪，调用方应走原版路径）
      */
+    /**
+     * 26.2 玻璃底板：纯 fill 语义（GUI pipeline 自带混合，alpha 写进 ARGB，
+     * 不再依赖 1.21.1 的贴图 + GL 状态控制——那些在 26.2 全部失效且观感发灰）。
+     * 分层：投影 → 渐变底板 → 顶部高光 → 1px 亮边框。
+     */
     public static boolean drawPanel(GuiGraphics gfx, int x1, int y1, int x2, int y2, float alphaMul) {
-        ensureInitialized();
-        if (!initialized) {
-            return false;
-        }
         int width = x2 - x1;
         int height = y2 - y1;
         if (width <= 0 || height <= 0) {
             return true;
         }
-        float alpha = Math.min(Math.max(alphaMul, 0.0f), 1.8f);
-        com.example.ribbon.compat.LegacyRenderState.enableBlend();
-        com.example.ribbon.compat.LegacyRenderState.defaultBlendFunc();
-        if (width < 2 * CORNER || height < 2 * CORNER) {
-            gfx.fill(x1, y1, x2, y2, scaleAlpha(0x32FFFFFF, alpha));
-            return true;
-        }
-        gfx.setColor(1.0f, 1.0f, 1.0f, alpha);
-        blitNineSlice(gfx, PANEL_LOCATION, x1, y1, width, height);
-        gfx.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        float a = Math.min(Math.max(alphaMul, 0.0f), 1.8f);
+        int base = (int) (0xFF * Math.min(a, 1.0f));
+
+        // 投影：右下错位的深色层
+        gfx.fill(x1 + 2, y1 + 3, x2 + 2, y2 + 3, (base / 6 << 24)); // ~4% 黑
+        // 底板：上亮下暗的白色渐变（玻璃厚度感）
+        gfx.fillGradient(x1, y1, x2, y2,
+                (int) (base * 0.14f) << 24 | 0xFFFFFF,   // ~14% 白
+                (int) (base * 0.06f) << 24 | 0xFFFFFF);  // ~6% 白
+        // 顶部高光条：入射光
+        gfx.fillGradient(x1, y1, x2, y1 + Math.min(10, height / 4),
+                (int) (base * 0.26f) << 24 | 0xFFFFFF,
+                0x00FFFFFF);
+        // 边框：1px 亮边 + 底部暗边（厚度）
+        gfx.outline(x1, y1, width, height, (int) (base * 0.30f) << 24 | 0xFFFFFF);
+        gfx.fill(x1, y2 - 1, x2, y2, (int) (base * 0.12f) << 24);
         return true;
     }
 
@@ -174,22 +181,24 @@ public final class LiquidGlassTheme {
      * 光带位置按 16s 周期沿对角往返，安静不抢眼。
      */
     public static void renderSheen(GuiGraphics gfx, int x, int y, int width, int height) {
-        if (!initialized || width <= 0 || height <= 0) {
+        if (width <= 0 || height <= 0) {
             return;
         }
         float phase = 0.5f + 0.5f * (float) Math.sin(Util.getMillis() * (Math.PI * 2.0 / 16000.0));
-        int size = (int) (Math.max(width, height) * 2.2f);
-        int sx = x + (int) ((width - size) * phase);
-        int sy = y + (int) ((height - size) * (1.0f - phase));
+        int band = Math.max(40, width / 4);
+        int bx = x + (int) ((width + band - band) * phase) - band / 2;
+        bx = x - band / 2 + (int) ((width + band) * phase) - band;
         gfx.enableScissor(x, y, x + width, y + height);
-        com.example.ribbon.compat.LegacyRenderState.enableBlend();
-        com.example.ribbon.compat.LegacyRenderState.blendFunc(org.lwjgl.opengl.GL11.GL_SRC_ALPHA, org.lwjgl.opengl.GL11.GL_ONE);
-        gfx.setColor(1.0f, 1.0f, 1.0f, 0.55f);
-        gfx.blit(SHEEN_LOCATION, sx, sy, size, size, 0.0f, 0.0f, SHEEN_SIZE, SHEEN_SIZE, SHEEN_SIZE, SHEEN_SIZE);
-        com.example.ribbon.compat.LegacyRenderState.defaultBlendFunc();
-        gfx.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        // 移动柔光带：左透明 → 峰值 10% 白 → 右透明，三条渐变拼成柔边
+        int peak = (int) (0xFF * 0.10f) << 24 | 0xFFFFFF;
+        int fade = (int) (0xFF * 0.04f) << 24 | 0xFFFFFF;
+        gfx.fillGradient(bx, y, bx + band / 3, y + height, 0x00FFFFFF, peak);
+        gfx.fillGradient(bx + band / 3, y, bx + band * 2 / 3, y + height, peak, peak);
+        gfx.fillGradient(bx + band * 2 / 3, y, bx + band, y + height, peak, 0x00FFFFFF);
         gfx.disableScissor();
     }
+
+
 
     /**
      * 玻璃背后的中性暗化层（约 27% → 18% 垂直渐变），

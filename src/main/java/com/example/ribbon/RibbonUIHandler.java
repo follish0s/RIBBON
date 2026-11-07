@@ -63,17 +63,23 @@ public class RibbonUIHandler {
      */
     @SubscribeEvent
     public static void onScreenInit(ScreenEvent.Init.Post event) {
-        if (!(event.getScreen() instanceof TitleScreen)) return;
         Screen current = event.getScreen();
+        boolean titleMenu = current instanceof TitleScreen;
+        boolean videoSettings = current.getClass().getName().equals(
+                "net.minecraft.client.gui.screens.options.VideoSettingsScreen");
+        if (!titleMenu && !videoSettings) return;
+
         // Init.Post 触发时 screen.width/height 尚未赋值，改用窗口的 GUI 缩放尺寸
         var window = Minecraft.getInstance().getWindow();
         int w = window.getGuiScaledWidth();
         int h = window.getGuiScaledHeight();
+        int bx = titleMenu ? w - 84 : 4;      // 主菜单放右下，视频设置放左下
+        int by = h - 26;
         Button button = Button.builder(
                         Component.literal("Ribbon 设置"),
                         b -> Minecraft.getInstance().gui.setScreen(
                                 new EmbeddiumVideoOptionsScreen(current, EmbeddiumVideoOptionsScreen.makePages())))
-                .bounds(w - 84, h - 26, 80, 20)
+                .bounds(bx, by, 80, 20)
                 .build();
         event.addListener(button);
     }
