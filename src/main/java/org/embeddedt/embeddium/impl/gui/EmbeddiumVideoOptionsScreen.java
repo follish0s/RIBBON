@@ -278,12 +278,11 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
                 OptionInstance<Integer> blurOption = this.minecraft.options.menuBackgroundBlurriness();
                 int previous = blurOption.get();
                 try {
+                    // 26.2 约束：GuiRenderState 每帧只允许一次 blur（二次调用直接抛
+                    // IllegalStateException 终止整帧渲染）。改用提高模糊等级补偿，
+                    // 不再像 1.21.1 那样双重叠加。
                     blurOption.set(Math.max(previous, Math.min(strength, 10)));
                     this.extractBlurredBackground(gfx.unwrap());
-                    if (strength >= 6) {
-                        // 二次叠加：box blur 的卷积近似高斯，两轮后过渡更柔
-                        this.extractBlurredBackground(gfx.unwrap());
-                    }
                 } finally {
                     blurOption.set(previous);
                 }
