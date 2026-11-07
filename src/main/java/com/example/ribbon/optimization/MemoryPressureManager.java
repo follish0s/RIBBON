@@ -4,10 +4,6 @@
  */
 package com.example.ribbon.optimization;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 /**
  * 堆内存压力自适应。
@@ -17,7 +13,6 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
  * （EMA 平滑，避免 GC 前后数值跳动），供粒子预算、剔除距离、HUD 刷新间隔
  * 共同收紧；堆回落后自动放开。纯客户端启发式，不改变任何游戏逻辑。</p>
  */
-@EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public final class MemoryPressureManager {
 
     private static final long SAMPLE_INTERVAL_MS = 2_000L;
@@ -28,8 +23,7 @@ public final class MemoryPressureManager {
     private MemoryPressureManager() {
     }
 
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick() {
         if (FocusState.shouldPauseBackgroundWork()) return;
         if (!RuntimeConfig.memoryPressureAdaptive) {
             pressure = 0.0;

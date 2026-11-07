@@ -4,15 +4,10 @@ import com.example.ribbon.Config;
 import net.minecraft.client.Minecraft;
 import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 /**
  * 节日当天在屏幕角落显示物品图标徽章。
  */
-@EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public final class FestivalBadgeHandler {
 
     private static final int ICON_SIZE = 16;
@@ -20,8 +15,7 @@ public final class FestivalBadgeHandler {
 
     private FestivalBadgeHandler() {}
 
-    @SubscribeEvent
-    public static void onRender(RenderGuiEvent.Post event) {
+    public static void onRender(com.example.ribbon.compat.GuiGraphics g) {
         if (!Config.isFestivalBadgeEnabled()) return;
 
         Minecraft mc = Minecraft.getInstance();
@@ -33,8 +27,6 @@ public final class FestivalBadgeHandler {
 
         ItemStack icon = FestivalIconMap.getIcon(info.festivalId);
         if (icon.isEmpty()) return;
-
-        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         int sw = mc.getWindow().getGuiScaledWidth();
         int sh = mc.getWindow().getGuiScaledHeight();
 

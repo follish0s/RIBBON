@@ -156,11 +156,8 @@ public class DamageNumberHandler {
         return COLOR_NORMAL;
     }
 
-    @SubscribeEvent
-    public static void onRenderGui(RenderGuiEvent.Post event) {
+    public static void onRenderGui(com.example.ribbon.compat.GuiGraphics gui) {
         if (!Config.isDamageNumbersEnabled()) return;
-
-        GuiGraphics gui = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 

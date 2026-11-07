@@ -5,21 +5,15 @@ import com.example.ribbon.optimization.RuntimeConfig;
 import com.example.ribbon.ShadowRendererDetector;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 /**
  * 每 tick 提交一批实体做遮挡检测。
  */
-@EventBusSubscriber(value = Dist.CLIENT, modid = "ribbon")
 public final class EntityCullingTickHandler {
 
     private EntityCullingTickHandler() {}
 
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick() {
         if (!RuntimeConfig.entityCullingEnabled) return;
 
         // 影子渲染阶段不提交任务

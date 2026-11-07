@@ -1,6 +1,5 @@
 package com.example.ribbon.music;
 
-import net.neoforged.fml.loading.FMLPaths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +16,8 @@ public final class MusicLibrary {
     private MusicLibrary() {}
 
     public static File getMusicDir() {
-        // mod 构造期 Minecraft 实例尚未创建，必须用 FML 提供的游戏目录
-        File dir = FMLPaths.GAMEDIR.get().resolve("ribbon_music").toFile();
+        // mod 构造期 Minecraft 实例尚未创建，游戏目录由平台入口注入
+        File dir = com.example.ribbon.platform.PlatformInfo.gameDir().resolve("ribbon_music").toFile();
         if (!dir.exists()) dir.mkdirs();
         return dir;
     }

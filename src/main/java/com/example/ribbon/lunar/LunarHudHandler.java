@@ -3,21 +3,15 @@ package com.example.ribbon.lunar;
 import com.example.ribbon.Config;
 import net.minecraft.client.Minecraft;
 import com.example.ribbon.compat.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 /**
  * 农历 HUD 常驻显示。
  */
-@EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public final class LunarHudHandler {
 
     private LunarHudHandler() {}
 
-    @SubscribeEvent
-    public static void onRender(RenderGuiEvent.Post event) {
+    public static void onRender(com.example.ribbon.compat.GuiGraphics g) {
         if (!Config.isLunarHudEnabled()) return;
 
         Minecraft mc = Minecraft.getInstance();
@@ -40,7 +34,6 @@ public final class LunarHudHandler {
         String text = sb.toString();
 
         int color = pickColor(info);
-        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         int sw = mc.getWindow().getGuiScaledWidth();
         int sh = mc.getWindow().getGuiScaledHeight();
         int tw = mc.font.width(text);

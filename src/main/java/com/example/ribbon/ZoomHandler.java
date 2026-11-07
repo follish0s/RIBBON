@@ -15,15 +15,14 @@ public class ZoomHandler {
     private static float currentZoom = 1.0f;
 
     // 1. 事件改为 ClientTickEvent.Post
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) {
             zooming = false;
             currentZoom = 1.0f;
             return;
         }
-        zooming = RibbonUIHandler.ZOOM_KEY.isDown();
+        zooming = RibbonKeys.ZOOM_KEY.isDown();
     }
 
     @SubscribeEvent

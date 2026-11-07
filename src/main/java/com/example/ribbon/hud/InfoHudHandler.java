@@ -12,11 +12,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -25,7 +20,6 @@ import java.util.Deque;
  * 综合信息 HUD：坐标、群系、左右键 CPS、装备耐久。
  * 监听 RenderGuiEvent.Post，在 HUD 最上层绘制。
  */
-@EventBusSubscriber(modid = Ribbon.MODID, value = Dist.CLIENT)
 public final class InfoHudHandler {
 
     // ==================== CPS 追踪 ====================
@@ -44,8 +38,7 @@ public final class InfoHudHandler {
 
     // ==================== Tick：采样鼠标点击 ====================
 
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) return;
         if (!Config.isInfoHudEnabled()) return;
@@ -79,14 +72,11 @@ public final class InfoHudHandler {
 
     // ==================== 渲染 ====================
 
-    @SubscribeEvent
-    public static void onRenderGui(RenderGuiEvent.Post event) {
+    public static void onRenderGui(com.example.ribbon.compat.GuiGraphics g) {
         Minecraft mc = Minecraft.getInstance();
         if (com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc) || mc.level == null || mc.player == null) return;
         if (!Config.isInfoHudEnabled()) return;
         if (com.example.ribbon.optimization.FocusState.shouldPauseBackgroundWork()) return;
-
-        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         float scale = (float) Config.getInfoHudScale();
         int sw = mc.getWindow().getGuiScaledWidth();
         int sh = mc.getWindow().getGuiScaledHeight();

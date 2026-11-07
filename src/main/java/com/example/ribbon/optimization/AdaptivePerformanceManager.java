@@ -6,10 +6,6 @@ package com.example.ribbon.optimization;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 import org.slf4j.Logger;
 
 /**
@@ -27,7 +23,6 @@ import org.slf4j.Logger;
  *   <li>开关关闭时所有 {@code get*} 返回中性值，行为与原版完全一致。</li>
  * </ul>
  */
-@EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public final class AdaptivePerformanceManager {
 
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -51,8 +46,7 @@ public final class AdaptivePerformanceManager {
     private AdaptivePerformanceManager() {
     }
 
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick() {
         boolean enabled = RuntimeConfig.adaptivePerformanceEnabled;
         if (enabled != lastEnabledState) {
             lastEnabledState = enabled;

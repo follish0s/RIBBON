@@ -9,10 +9,6 @@ import net.minecraft.client.gui.Font;
 import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +21,6 @@ import java.util.List;
  * 颜色按效果分类：有益绿 / 有害红 / 中性黄。F3 调试屏打开时自动隐藏。
  * 背景跟随液态玻璃主题（未启用时退化为半透明黑底）。</p>
  */
-@EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public final class PotionTimerHud {
 
     private record Line(String text, int color) {
@@ -41,8 +36,7 @@ public final class PotionTimerHud {
     private PotionTimerHud() {
     }
 
-    @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiEvent.Post event) {
+    public static void onRenderOverlay(com.example.ribbon.compat.GuiGraphics g) {
         if (!com.example.ribbon.optimization.RuntimeConfig.potionHudEnabled) return;
         if (com.example.ribbon.optimization.FocusState.shouldPauseBackgroundWork()) return;
 
@@ -100,8 +94,6 @@ public final class PotionTimerHud {
             case BOTTOM_RIGHT -> { tx = sw - margin - blockW * scale; ty = sh - margin - blockH * scale; }
             default           -> { tx = margin;                       ty = margin; }
         }
-
-        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         int x1 = (int) (tx - 3);
         int y1 = (int) (ty - 3);
         int x2 = (int) (tx + blockW * scale + 3);

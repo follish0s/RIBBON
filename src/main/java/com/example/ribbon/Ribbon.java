@@ -3,10 +3,10 @@ package com.example.ribbon;
 import com.example.ribbon.entityculling.EntityCullingManager;
 import com.example.ribbon.util.TextureThreadPool;
 import com.mojang.logging.LogUtils;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -21,6 +21,11 @@ public class Ribbon {
     public Ribbon(IEventBus modEventBus, ModContainer modContainer) {
         // 配置：由平台无关的 Setting 定义程序化生成 ModConfigSpec（键名/默认值/范围与原 TOML 一致）
         com.example.ribbon.config.ConfigNeoForge.install(modContainer);
+
+        // 平台信息（游戏目录 / mod 加载查询）注入，共享代码不再直接依赖 FML API
+        com.example.ribbon.platform.PlatformInfo.init(
+                net.neoforged.fml.loading.FMLPaths.GAMEDIR.get(),
+                id -> net.neoforged.fml.ModList.get().isLoaded(id));
 
         // 26.2 的 @EventBusSubscriber 不再区分 MOD/GAME 总线，MOD 总线事件显式注册
         modContainer.registerExtensionPoint(net.neoforged.neoforge.client.gui.IConfigScreenFactory.class,

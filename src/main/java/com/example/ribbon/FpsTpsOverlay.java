@@ -2,11 +2,6 @@ package com.example.ribbon;
 
 import net.minecraft.client.Minecraft;
 import com.example.ribbon.compat.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.Locale;
@@ -15,7 +10,6 @@ import java.util.Locale;
  * FPS/TPS 悬浮层。开启「增强悬浮层」后，在 FPS/TPS 行下方追加：
  * 帧时间曲线（最近 120 帧，绿 ≤17ms / 橙 ≤33ms / 红 >33ms）、内存占用、实体/粒子数量。
  */
-@EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public class FpsTpsOverlay {
 
     private static long lastServerTick = 0L;
@@ -33,8 +27,7 @@ public class FpsTpsOverlay {
     private static String cachedEntText;
     private static int cachedBlockW;
 
-    @SubscribeEvent
-    public static void onServerTick(ServerTickEvent.Post event) {
+    public static void onServerTick() {
         long now = System.nanoTime();
         if (lastServerTick != 0L) {
             double tps = 1_000_000_000.0 / (now - lastServerTick);
@@ -45,8 +38,7 @@ public class FpsTpsOverlay {
 
     private static boolean loggedFirstFrame;
 
-    @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiEvent.Post event) {
+    public static void onRenderOverlay(com.example.ribbon.compat.GuiGraphics g) {
         if (!loggedFirstFrame) {
             loggedFirstFrame = true;
             com.mojang.logging.LogUtils.getLogger().info("[Ribbon] FPS 悬浮层进入渲染循环");
@@ -67,8 +59,6 @@ public class FpsTpsOverlay {
         if (com.example.ribbon.optimization.FocusState.shouldPauseBackgroundWork()) return;
 
         boolean enhanced = com.example.ribbon.optimization.RuntimeConfig.overlayEnhanced;
-
-        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         var font = mc.font;
 
         // ===== 文本节流：字符串构造 / 实体计数 / 字体宽度只在间隔到期时执行 =====

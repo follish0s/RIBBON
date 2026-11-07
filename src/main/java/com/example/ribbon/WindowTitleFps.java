@@ -5,10 +5,6 @@
 package com.example.ribbon;
 
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 /**
  * 在窗口标题栏显示当前 FPS：{@code 原标题 | 123 FPS}。
@@ -17,7 +13,6 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
  * 离开世界或关闭开关时立即恢复原标题。任何 GLFW 异常都静默降级，
  * 不影响游戏运行。</p>
  */
-@EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public final class WindowTitleFps {
 
     private static String originalTitle;
@@ -27,8 +22,7 @@ public final class WindowTitleFps {
     private WindowTitleFps() {
     }
 
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick() {
         Minecraft mc = Minecraft.getInstance();
         boolean want = com.example.ribbon.optimization.RuntimeConfig.showFpsInTitle
                 && mc.level != null

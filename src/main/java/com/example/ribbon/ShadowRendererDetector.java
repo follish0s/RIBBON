@@ -1,7 +1,5 @@
 package com.example.ribbon;
 
-import net.neoforged.fml.ModList;
-
 import java.lang.reflect.Method;
 
 public class ShadowRendererDetector {
@@ -20,7 +18,7 @@ public class ShadowRendererDetector {
 
     private static void init() {
         initialized = true;
-        if (!ModList.get().isLoaded("iris")) return;
+        if (!com.example.ribbon.platform.PlatformInfo.isModLoaded("iris")) return;
 
         String[] apiClassNames = new String[]{
                 "net.irisshaders.iris.api.v0.IrisApi",

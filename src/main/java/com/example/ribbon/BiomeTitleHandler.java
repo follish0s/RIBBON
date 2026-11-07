@@ -7,13 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-@EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public class BiomeTitleHandler {
 
     private static Identifier lastBiomeId = null;
@@ -29,8 +23,7 @@ public class BiomeTitleHandler {
     private static final long TRIGGER_COOLDOWN_MS = 3000;
 
     // 1. 事件改为 PlayerTickEvent.Post
-    @SubscribeEvent
-    public static void onPlayerTick(PlayerTickEvent.Post event) {
+    public static void onPlayerTick() {
         if (!Config.BIOME_TITLE.get()) return;
 
         Minecraft mc = Minecraft.getInstance();
@@ -68,8 +61,7 @@ public class BiomeTitleHandler {
         titleVisible = true;
     }
 
-    @SubscribeEvent
-    public static void onRenderGui(RenderGuiEvent.Post event) {
+    public static void onRenderGui(com.example.ribbon.compat.GuiGraphics gui) {
         if (!titleVisible || currentBiomeName == null) return;
         if (!Config.BIOME_TITLE.get()) return;
 
@@ -80,8 +72,6 @@ public class BiomeTitleHandler {
             titleVisible = false;
             return;
         }
-
-        GuiGraphics gui = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 

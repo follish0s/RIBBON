@@ -5,14 +5,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 import java.util.Random;
 
-@EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public final class FestivalEffectHandler {
 
     private static final Random RANDOM = new Random();
@@ -20,8 +15,7 @@ public final class FestivalEffectHandler {
 
     private FestivalEffectHandler() {}
 
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick() {
         if (!Config.isFestivalEffectEnabled()) return;
 
         Minecraft mc = Minecraft.getInstance();

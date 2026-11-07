@@ -2,25 +2,17 @@ package com.example.ribbon;
 
 import net.minecraft.client.Minecraft;
 import com.example.ribbon.compat.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
-@EventBusSubscriber(value = Dist.CLIENT, modid = Ribbon.MODID)
 public final class ShaderpackWarningHandler {
 
     private ShaderpackWarningHandler() {}
 
-    @SubscribeEvent
-    public static void onRenderGui(RenderGuiEvent.Post event) {
+    public static void onRenderGui(com.example.ribbon.compat.GuiGraphics graphics) {
         if (!Config.isShaderCompatibilityWarningEnabled()) return;
         if (!ShaderpackInterceptor.hasBlockedShaderpack()) return;
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
-
-        GuiGraphics graphics = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 

@@ -46,11 +46,8 @@ public class RainbowGuiHandler {
     }
 
     // 2. 快捷栏高亮仍使用 RenderGuiEvent.Post
-    @SubscribeEvent
-    public static void onRenderHotbar(RenderGuiEvent.Post event) {
+    public static void onRenderHotbar(com.example.ribbon.compat.GuiGraphics gui) {
         if (!Config.HOTBAR_HIGHLIGHT.get()) return;
-
-        GuiGraphics gui = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 

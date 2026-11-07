@@ -4,23 +4,17 @@ import com.example.ribbon.Config;
 import com.example.ribbon.LangUtil;
 import net.minecraft.client.Minecraft;
 import com.example.ribbon.compat.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 import java.util.List;
 
 /**
  * HUD 显示距离下一个节日还有几天。
  */
-@EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public final class FestivalCountdownHandler {
 
     private FestivalCountdownHandler() {}
 
-    @SubscribeEvent
-    public static void onRender(RenderGuiEvent.Post event) {
+    public static void onRender(com.example.ribbon.compat.GuiGraphics g) {
         if (!Config.isFestivalCountdownEnabled()) return;
 
         Minecraft mc = Minecraft.getInstance();
@@ -34,8 +28,6 @@ public final class FestivalCountdownHandler {
 
         String name = LangUtil.trHoliday(next.festivalId);
         String text = "距 " + name + " " + next.daysAway + " 天";
-
-        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         int sw = mc.getWindow().getGuiScaledWidth();
         int sh = mc.getWindow().getGuiScaledHeight();
         int tw = mc.font.width(text);

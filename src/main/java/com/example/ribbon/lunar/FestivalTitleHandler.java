@@ -5,15 +5,9 @@ import net.minecraft.client.Minecraft;
 import com.example.ribbon.compat.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 import java.time.LocalDate;
 
-@EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public final class FestivalTitleHandler {
 
     private static LocalDate lastShownDate = null;
@@ -25,8 +19,7 @@ public final class FestivalTitleHandler {
 
     private FestivalTitleHandler() {}
 
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick() {
         if (!Config.isFestivalTitleEnabled()) return;
 
         Minecraft mc = Minecraft.getInstance();
@@ -49,8 +42,7 @@ public final class FestivalTitleHandler {
         visible = true;
     }
 
-    @SubscribeEvent
-    public static void onRender(RenderGuiEvent.Post event) {
+    public static void onRender(com.example.ribbon.compat.GuiGraphics g) {
         if (!visible || currentTitle == null) return;
         if (!Config.isFestivalTitleEnabled()) return;
 
@@ -59,8 +51,6 @@ public final class FestivalTitleHandler {
             visible = false;
             return;
         }
-
-        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 

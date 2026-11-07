@@ -67,12 +67,9 @@ public class ClickEffectHandler {
         }
     }
 
-    @SubscribeEvent
-    public static void onRender(RenderGuiEvent.Post event) {
+    public static void onRender(com.example.ribbon.compat.GuiGraphics gui) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
-
-        GuiGraphics gui = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         long now = System.currentTimeMillis();
 
         Iterator<ClickEffect> it = EFFECTS.iterator();

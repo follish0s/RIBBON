@@ -1,16 +1,11 @@
 package com.example.ribbon;
 
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
-@EventBusSubscriber(value = Dist.CLIENT, modid = Ribbon.MODID)
 public final class ShaderpackMonitor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("Ribbon/ShaderpackMonitor");
@@ -21,8 +16,7 @@ public final class ShaderpackMonitor {
 
     private ShaderpackMonitor() {}
 
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick() {
         if (!Config.isShaderCompatibilityWarningEnabled()) {
             ShaderpackInterceptor.clearBlocked();
             lastShadersEnabled = false;

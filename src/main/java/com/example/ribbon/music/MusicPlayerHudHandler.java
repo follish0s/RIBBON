@@ -4,20 +4,14 @@ import com.example.ribbon.Config;
 import com.example.ribbon.LangUtil;
 import net.minecraft.client.Minecraft;
 import com.example.ribbon.compat.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 import java.io.File;
 
-@EventBusSubscriber(modid = "ribbon", value = Dist.CLIENT)
 public final class MusicPlayerHudHandler {
 
     private MusicPlayerHudHandler() {}
 
-    @SubscribeEvent
-    public static void onRender(RenderGuiEvent.Post event) {
+    public static void onRender(com.example.ribbon.compat.GuiGraphics g) {
         if (!Config.isMusicPlayerEnabled()) return;
         if (!Config.isMusicHudEnabled()) return;
 
@@ -26,8 +20,6 @@ public final class MusicPlayerHudHandler {
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || com.example.ribbon.compat.LegacyRenderState.isGuiHidden(mc)) return;
-
-        GuiGraphics g = com.example.ribbon.compat.GuiGraphics.wrap(event.getGuiGraphics());
         int sw = mc.getWindow().getGuiScaledWidth();
         int sh = mc.getWindow().getGuiScaledHeight();
 

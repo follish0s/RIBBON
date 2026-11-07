@@ -39,6 +39,9 @@ public final class RibbonFabricClient implements ClientModInitializer {
         // 配置：properties 后端 → 刷新热路径快照 → 注册设置页 → 自检
         // （对应 NeoForge 侧 ModConfigEvent 的加载链）
         try {
+            com.example.ribbon.platform.PlatformInfo.init(
+                    net.fabricmc.loader.api.FabricLoader.getInstance().getGameDir(),
+                    id -> net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded(id));
             ConfigFabric.init();
             com.example.ribbon.optimization.RuntimeConfig.refresh();
             com.example.ribbon.RibbonOptions.init();
@@ -49,6 +52,13 @@ public final class RibbonFabricClient implements ClientModInitializer {
             com.example.ribbon.RibbonOptions.selfCheck();
         } catch (Throwable t) {
             LOGGER.warn("[Ribbon] Fabric 设置页自检异常", t);
+        }
+
+        // 游戏内功能：HUD 渲染 + 客户端/服务端 tick（与 NeoForgeBridge 对应的另一半）
+        try {
+            RibbonFabricHooks.register();
+        } catch (Throwable t) {
+            LOGGER.warn("[Ribbon] Fabric HUD/tick 钩子注册失败", t);
         }
 
         // 主菜单右下角入口。Fabric 没有 NeoForge 的 ScreenEvent.Init.Post.addListener，
