@@ -37,6 +37,21 @@ dependencies {
     // Sodium 26.2 配置 API（ConfigEntryPoint / ConfigBuilder）：仅编译期引用，
     // 运行时由实例内的 Sodium 提供，不进 mod jar。
     compileOnly files('libs/sodium26-api.jar')
+    // Fabric 侧 API：仅编译期引用，运行时由 fabric-loader / fabric-api 提供。
+    // 26.2 起游戏不再混淆（无 intermediary），两侧运行时均为官方映射，因此同一份
+    // 字节码可以同时在 NeoForge 与 Fabric 上运行 —— 这是「单 jar 双平台」的前提。
+    compileOnly "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    compileOnly "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+}
+
+// Fabric 平台实现单独一个源集：只有 fabric.mod.json 声明的入口类会碰 fabric API，
+// NeoForge 侧永远不会加载它们，反之亦然。
+sourceSets {
+    fabric {
+        // 默认源目录即 src/fabric/java 与 src/fabric/resources
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
 }
 
 neoForge {
@@ -85,6 +100,8 @@ neoForge.ideSyncTask generateModMetadata
 // 必须用 from({ ... }) 延迟求值（1.21.1 版的配置期写法在 Gradle 9 会直接报错）。
 tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    // 双平台通用 jar：Fabric 平台实现（入口类 + fabric.mod.json）打进同一个 jar。
+    from(sourceSets.fabric.output)
     from({
         configurations.runtimeClasspath
                 .filter { it.name.startsWith('jlayer') }
