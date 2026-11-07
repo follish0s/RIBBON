@@ -1,0 +1,94 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.148'
+    id 'idea'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = 'ribbon'
+}
+
+// Minecraft 26.2 随附 Java 25
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://libraries.minecraft.net' }
+    maven { url = 'https://neoforged.forgecdn.net/releases' }
+    // NeoForm 26.2 依赖的 minecraft-dependencies BOM 在该镜像的根 mojang-meta 路径
+    maven { url = 'https://neoforged.forgecdn.net/mojang-meta' }
+    maven { url = 'https://maven.fabricmc.net' }
+    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+}
+
+dependencies {
+    // 音乐播放器需要 JLayer，打包进 jar
+    implementation 'com.googlecode.soundlibs:jlayer:1.0.1.4'
+    // Lombok 1.18.30 不兼容 Java 25（注解处理器 ExceptionInInitializerError），
+    // 且本代码库未实际使用 Lombok 注解，26.2 移植版移除
+    // MixinExtras 由 NeoForge 26.2 自带；若编译报缺类再显式声明版本
+    // implementation "io.github.llamalad7:mixinextras-neoforge:<26.2 对应版本>"
+}
+
+neoForge {
+    version = project.neo_version
+
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        configureEach {
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+// 26.2 MDK 官方做法：从 src/main/templates 生成简化版 neoforge.mods.toml
+def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    def replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from 'src/main/templates'
+    into 'build/generated/sources/modMetadata'
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+// JLayer 打包进 jar 先延后：Gradle 9 不允许在配置阶段解析 runtimeClasspath。
+// 等 26.2 首个可编译版本稳定后，改用 from({ ... zipTree(...) }) 延迟求值方式加回。
+// （音乐播放器代码仍保留，运行时由 JLayer 依赖提供）
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    // 移植阶段需要完整错误清单，javac 默认只报 100 个
+    options.compilerArgs += ['-Xmaxerrs', '2000']
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}

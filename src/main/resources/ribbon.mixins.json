@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.example.ribbon.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "com.example.ribbon.mixin.RibbonCompatMixinPlugin",
+  "mixins": [],
+  "client": [
+    "MixinEntityHit",
+    "MixinGameRendererJitter",
+    "MixinLevelRendererFsr2",
+    "MixinLODLifecycle",
+    "MixinLevelBrightness",
+    "MixinEntityRenderer",
+    "MixinBlockEntityRenderer",
+    "MixinParticleEngine",
+    "MixinLightTexture",
+    "MixinScreenIme",
+    "pathfinding.MixinPathNavigation",
+    "shadercache.MixinShaderInstance"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

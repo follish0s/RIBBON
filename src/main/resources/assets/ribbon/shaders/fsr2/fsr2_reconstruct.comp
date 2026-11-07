@@ -1,0 +1,42 @@
+#version 460 core
+// Ribbon FSR 2.2 — 重建 / 锐化 Pass（RCAS 风格）
+// 输入：累积后的历史纹理；输出：锐化后的中间纹理（RGBA16F，显示分辨率）
+// 由 Fsr2Renderer 在本 Pass 结束后用 glBlitFramebuffer 拷贝进主帧缓冲。
+
+layout(local_size_x = 8, local_size_y = 8) in;
+
+layout(binding = 0, rgba16f) writeonly uniform image2D u_out;
+
+uniform sampler2D u_history;   // texture unit 0，累积结果
+uniform vec2  u_displaySize;
+uniform float u_sharpness;     // [0,1]
+
+void main() {
+    ivec2 pix = ivec2(gl_GlobalInvocationID.xy);
+    if (any(greaterThanEqual(pix, ivec2(u_displaySize)))) return;
+
+    vec2 uv = (vec2(pix) + 0.5) / u_displaySize;
+    vec2 texel = 1.0 / u_displaySize;
+
+    vec3 c = texture(u_history, uv).rgb;
+
+    // 3x3 盒状模糊作为"低频"基线
+    vec3 blur = vec3(0.0);
+    for (int j = -1; j <= 1; ++j)
+        for (int i = -1; i <= 1; ++i)
+            blur += texture(u_history, uv + vec2(float(i), float(j)) * texel).rgb;
+    blur /= 9.0;
+
+    // 非锐化掩模：高频 = c - blur；锐化 = c + k * 高频
+    // sharpness=0 → 不锐化；sharpness=1 → 明显锐化但不过曝。
+    float k = u_sharpness * 4.0;
+    vec3 sharp = c + k * (c - blur);
+
+    // HDR 防爆：仅裁掉负值与极端正值，保留合理高光
+    sharp = max(sharp, vec3(0.0));
+    sharp = min(sharp, vec3(65504.0));
+
+    if (any(isnan(sharp)) || any(isinf(sharp))) sharp = c;
+
+    imageStore(u_out, pix, vec4(sharp, 1.0));
+}

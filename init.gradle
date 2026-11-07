@@ -1,0 +1,20 @@
+gradle.beforeProject { project ->
+    project.repositories.all { repo ->
+        try {
+            def urlVal = null
+            try { urlVal = repo.url } catch (Throwable t) {}
+            if (urlVal != null) {
+                def oldUrl = urlVal.toString()
+                if (oldUrl.startsWith("https://maven.neoforged.net/mojang-meta")) {
+                    // minecraft-dependencies 在镜像根路径 /mojang-meta，不带 /releases
+                    repo.setUrl("https://neoforged.forgecdn.net/mojang-meta")
+                } else if (oldUrl.startsWith("https://maven.neoforged.net")) {
+                    def suffix = oldUrl.substring("https://maven.neoforged.net".length())
+                    suffix = suffix.replaceFirst("^/releases", "")
+                    def newUrl = "https://neoforged.forgecdn.net/releases" + suffix
+                    repo.setUrl(newUrl)
+                }
+            }
+        } catch (Throwable t) {}
+    }
+}

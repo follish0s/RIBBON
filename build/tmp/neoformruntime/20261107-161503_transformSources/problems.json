@@ -1,0 +1,178 @@
+[
+  {
+    "problemId": {
+      "id": "invalid-at",
+      "displayName": "Invalid",
+      "group": {
+        "id": "access-transformer",
+        "displayName": "Access Transformers"
+      }
+    },
+    "severity": "WARNING",
+    "location": {
+      "file": "D:\\26.2neoforge_ribbon\\src\\main\\resources\\META-INF\\accesstransformer.cfg",
+      "line": 7
+    },
+    "contextualLabel": "Access transformer targeting record class net.minecraft.world.level.chunk.PalettedContainer$Data attempts to widen its access without widening the constructor\u0027s access. You must AT the constructor too: \"public net.minecraft.world.level.chunk.PalettedContainer$Data \u003cinit\u003e(Lnet/minecraft/world/level/chunk/Configuration;Lnet/minecraft/util/BitStorage;Lnet/minecraft/world/level/chunk/Palette;)V\""
+  },
+  {
+    "problemId": {
+      "id": "invalid-at",
+      "displayName": "Invalid",
+      "group": {
+        "id": "access-transformer",
+        "displayName": "Access Transformers"
+      }
+    },
+    "severity": "WARNING",
+    "location": {
+      "file": "D:\\26.2neoforge_ribbon\\src\\main\\resources\\META-INF\\accesstransformer.cfg",
+      "line": 11
+    },
+    "contextualLabel": "Access transformer targeting record class net.minecraft.client.renderer.texture.Stitcher$Holder attempts to widen its access without widening the constructor\u0027s access. You must AT the constructor too: \"public net.minecraft.client.renderer.texture.Stitcher$Holder \u003cinit\u003e(Lnet/minecraft/client/renderer/texture/Stitcher$Entry;II)V\""
+  },
+  {
+    "problemId": {
+      "id": "invalid-at",
+      "displayName": "Invalid",
+      "group": {
+        "id": "access-transformer",
+        "displayName": "Access Transformers"
+      }
+    },
+    "severity": "WARNING",
+    "location": {
+      "file": "D:\\26.2neoforge_ribbon\\src\\main\\resources\\META-INF\\accesstransformer.cfg",
+      "line": 5
+    },
+    "contextualLabel": "Access transformer targeting record class net.minecraft.client.renderer.texture.SpriteContents$FrameInfo attempts to widen its access without widening the constructor\u0027s access. You must AT the constructor too: \"public net.minecraft.client.renderer.texture.SpriteContents$FrameInfo \u003cinit\u003e(II)V\""
+  },
+  {
+    "problemId": {
+      "id": "missing-target",
+      "displayName": "Missing Target",
+      "group": {
+        "id": "access-transformer",
+        "displayName": "Access Transformers"
+      }
+    },
+    "severity": "ERROR",
+    "location": {
+      "file": "D:\\26.2neoforge_ribbon\\src\\main\\resources\\META-INF\\accesstransformer.cfg",
+      "line": 10
+    },
+    "contextualLabel": "The target net.minecraft.client.renderer.FogRenderer INNERCLASS MobEffectFogFunction does not exist."
+  },
+  {
+    "problemId": {
+      "id": "missing-target",
+      "displayName": "Missing Target",
+      "group": {
+        "id": "access-transformer",
+        "displayName": "Access Transformers"
+      }
+    },
+    "severity": "ERROR",
+    "location": {
+      "file": "D:\\26.2neoforge_ribbon\\src\\main\\resources\\META-INF\\accesstransformer.cfg",
+      "line": 3
+    },
+    "contextualLabel": "The target net.minecraft.client.renderer.texture.SpriteContents INNERCLASS InterpolationData does not exist."
+  },
+  {
+    "problemId": {
+      "id": "missing-target",
+      "displayName": "Missing Target",
+      "group": {
+        "id": "access-transformer",
+        "displayName": "Access Transformers"
+      }
+    },
+    "severity": "ERROR",
+    "location": {
+      "file": "D:\\26.2neoforge_ribbon\\src\\main\\resources\\META-INF\\accesstransformer.cfg",
+      "line": 9
+    },
+    "contextualLabel": "The target net.minecraft.client.renderer.FogRenderer INNERCLASS FogData does not exist."
+  },
+  {
+    "problemId": {
+      "id": "missing-target",
+      "displayName": "Missing Target",
+      "group": {
+        "id": "access-transformer",
+        "displayName": "Access Transformers"
+      }
+    },
+    "severity": "ERROR",
+    "location": {
+      "file": "D:\\26.2neoforge_ribbon\\src\\main\\resources\\META-INF\\accesstransformer.cfg",
+      "line": 22
+    },
+    "contextualLabel": "The target net.minecraft.client.renderer.FogRenderer METHOD getPriorityFogFunction(Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/FogRenderer$MobEffectFogFunction; does not exist."
+  },
+  {
+    "problemId": {
+      "id": "missing-target",
+      "displayName": "Missing Target",
+      "group": {
+        "id": "access-transformer",
+        "displayName": "Access Transformers"
+      }
+    },
+    "severity": "ERROR",
+    "location": {
+      "file": "D:\\26.2neoforge_ribbon\\src\\main\\resources\\META-INF\\accesstransformer.cfg",
+      "line": 14
+    },
+    "contextualLabel": "The target com.mojang.blaze3d.vertex.PoseStack$Pose METHOD \u003cinit\u003e(Lorg/joml/Matrix4f;Lorg/joml/Matrix3f;)V does not exist."
+  },
+  {
+    "problemId": {
+      "id": "missing-target",
+      "displayName": "Missing Target",
+      "group": {
+        "id": "access-transformer",
+        "displayName": "Access Transformers"
+      }
+    },
+    "severity": "ERROR",
+    "location": {
+      "file": "D:\\26.2neoforge_ribbon\\src\\main\\resources\\META-INF\\accesstransformer.cfg",
+      "line": 8
+    },
+    "contextualLabel": "The target net.minecraft.world.level.chunk.PalettedContainer INNERCLASS Configuration does not exist."
+  },
+  {
+    "problemId": {
+      "id": "missing-target",
+      "displayName": "Missing Target",
+      "group": {
+        "id": "access-transformer",
+        "displayName": "Access Transformers"
+      }
+    },
+    "severity": "ERROR",
+    "location": {
+      "file": "D:\\26.2neoforge_ribbon\\src\\main\\resources\\META-INF\\accesstransformer.cfg",
+      "line": 6
+    },
+    "contextualLabel": "The target net.minecraft.client.renderer.texture.SpriteContents INNERCLASS Ticker does not exist."
+  },
+  {
+    "problemId": {
+      "id": "missing-target",
+      "displayName": "Missing Target",
+      "group": {
+        "id": "access-transformer",
+        "displayName": "Access Transformers"
+      }
+    },
+    "severity": "ERROR",
+    "location": {
+      "file": "D:\\26.2neoforge_ribbon\\src\\main\\resources\\META-INF\\accesstransformer.cfg",
+      "line": 15
+    },
+    "contextualLabel": "The target net.minecraft.client.gui.font.FontSet INNERCLASS GlyphInfoFilter does not exist."
+  }
+]
