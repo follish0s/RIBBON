@@ -3,3 +3,8 @@
 _ref/
 build/
 .gradle/
+
+# 第三方 jar 与本地日志（不纳入公开版本库）
+/libs/*.jar
+PORTING_ERRORS.log
+*.log
