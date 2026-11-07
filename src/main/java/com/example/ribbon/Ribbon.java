@@ -19,7 +19,8 @@ public class Ribbon {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public Ribbon(IEventBus modEventBus, ModContainer modContainer) {
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        // 配置：由平台无关的 Setting 定义程序化生成 ModConfigSpec（键名/默认值/范围与原 TOML 一致）
+        com.example.ribbon.config.ConfigNeoForge.install(modContainer);
 
         // 26.2 的 @EventBusSubscriber 不再区分 MOD/GAME 总线，MOD 总线事件显式注册
         modContainer.registerExtensionPoint(net.neoforged.neoforge.client.gui.IConfigScreenFactory.class,
@@ -28,7 +29,7 @@ public class Ribbon {
                     return new org.embeddedt.embeddium.impl.gui.EmbeddiumVideoOptionsScreen(
                             screen, org.embeddedt.embeddium.impl.gui.EmbeddiumVideoOptionsScreen.makePages());
                 });
-        modEventBus.addListener(Config::onLoad);
+        modEventBus.addListener(com.example.ribbon.config.ConfigNeoForge::onConfigLoad);
         modEventBus.addListener(RibbonUIHandler.ModBusEvents::registerKeys);
 
         if (FMLEnvironment.getDist() == Dist.CLIENT) {

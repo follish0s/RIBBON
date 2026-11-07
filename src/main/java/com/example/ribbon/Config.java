@@ -1,196 +1,195 @@
 package com.example.ribbon;
 
+import com.example.ribbon.config.ConfigSpec;
+import com.example.ribbon.config.ConfigSpecBuilder;
+import com.example.ribbon.config.Setting;
 import com.example.ribbon.optimization.RuntimeConfig;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class Config {
 
-    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final ConfigSpecBuilder BUILDER = new ConfigSpecBuilder();
 
-    public static final ModConfigSpec.BooleanValue SHOW_OVERLAY;
-    public static final ModConfigSpec.EnumValue<OverlayCorner> OVERLAY_CORNER;
-    public static final ModConfigSpec.DoubleValue OVERLAY_SCALE;
+    public static final Setting<Boolean> SHOW_OVERLAY;
+    public static final Setting<OverlayCorner> OVERLAY_CORNER;
+    public static final Setting<Double> OVERLAY_SCALE;
 
-    public static final ModConfigSpec.BooleanValue RAINBOW_BLOCK_OUTLINE;
-    public static final ModConfigSpec.EnumValue<OutlineColorMode> OUTLINE_COLOR_MODE;
+    public static final Setting<Boolean> RAINBOW_BLOCK_OUTLINE;
+    public static final Setting<OutlineColorMode> OUTLINE_COLOR_MODE;
 
-    public static final ModConfigSpec.BooleanValue RAINBOW_CROSSHAIR;
-    public static final ModConfigSpec.BooleanValue HOTBAR_HIGHLIGHT;
-    public static final ModConfigSpec.BooleanValue DAMAGE_NUMBERS;
-    public static final ModConfigSpec.DoubleValue DAMAGE_NUMBER_SCALE;
-    public static final ModConfigSpec.IntValue DAMAGE_NUMBER_LIFETIME;
-    public static final ModConfigSpec.IntValue DAMAGE_NUMBER_MERGE_WINDOW;
+    public static final Setting<Boolean> RAINBOW_CROSSHAIR;
+    public static final Setting<Boolean> HOTBAR_HIGHLIGHT;
+    public static final Setting<Boolean> DAMAGE_NUMBERS;
+    public static final Setting<Double> DAMAGE_NUMBER_SCALE;
+    public static final Setting<Integer> DAMAGE_NUMBER_LIFETIME;
+    public static final Setting<Integer> DAMAGE_NUMBER_MERGE_WINDOW;
 
-    public static final ModConfigSpec.BooleanValue BIOME_TITLE;
-    public static final ModConfigSpec.IntValue BIOME_TITLE_DURATION;
+    public static final Setting<Boolean> BIOME_TITLE;
+    public static final Setting<Integer> BIOME_TITLE_DURATION;
 
     // ===== 液态玻璃 GUI 主题 =====
-    public static final ModConfigSpec.BooleanValue LIQUID_GLASS;
-    public static final ModConfigSpec.IntValue LIQUID_GLASS_BLUR;
+    public static final Setting<Boolean> LIQUID_GLASS;
+    public static final Setting<Integer> LIQUID_GLASS_BLUR;
 
-    public static final ModConfigSpec.EnumValue<ClickEffectType> CLICK_EFFECT_TYPE;
+    public static final Setting<ClickEffectType> CLICK_EFFECT_TYPE;
 
-    public static final ModConfigSpec.BooleanValue RAINBOW_HEALTH;
-    public static final ModConfigSpec.EnumValue<HealthColorMode> HEALTH_COLOR_MODE;
-    public static final ModConfigSpec.ConfigValue<String> HEALTH_CUSTOM_COLOR;
-    public static final ModConfigSpec.DoubleValue HEALTH_RAINBOW_SPEED;
-    public static final ModConfigSpec.BooleanValue HEALTH_LOW_SHAKE;
-    public static final ModConfigSpec.IntValue HEALTH_LOW_SHAKE_THRESHOLD;
+    public static final Setting<Boolean> RAINBOW_HEALTH;
+    public static final Setting<HealthColorMode> HEALTH_COLOR_MODE;
+    public static final Setting<String> HEALTH_CUSTOM_COLOR;
+    public static final Setting<Double> HEALTH_RAINBOW_SPEED;
+    public static final Setting<Boolean> HEALTH_LOW_SHAKE;
+    public static final Setting<Integer> HEALTH_LOW_SHAKE_THRESHOLD;
 
-    public static final ModConfigSpec.BooleanValue ZOOM_ENABLED;
-    public static final ModConfigSpec.DoubleValue ZOOM_FOV_MULTIPLIER;
-    public static final ModConfigSpec.BooleanValue ZOOM_SMOOTH;
+    public static final Setting<Boolean> ZOOM_ENABLED;
+    public static final Setting<Double> ZOOM_FOV_MULTIPLIER;
+    public static final Setting<Boolean> ZOOM_SMOOTH;
 
-    public static final ModConfigSpec.EnumValue<Language> LANGUAGE;
+    public static final Setting<Language> LANGUAGE;
 
-    public static final ModConfigSpec.BooleanValue SHADER_COMPATIBILITY_WARNING;
-    public static final ModConfigSpec.BooleanValue SHOW_ADVANCED_DEBUG;
+    public static final Setting<Boolean> SHADER_COMPATIBILITY_WARNING;
+    public static final Setting<Boolean> SHOW_ADVANCED_DEBUG;
 
-    public static final ModConfigSpec.BooleanValue HIT_PARTICLES;
-    public static final ModConfigSpec.IntValue HIT_PARTICLE_INTENSITY;
+    public static final Setting<Boolean> HIT_PARTICLES;
+    public static final Setting<Integer> HIT_PARTICLE_INTENSITY;
 
-    public static final ModConfigSpec.BooleanValue CLICK_EFFECT_COVER_UI;
-    public static final ModConfigSpec.BooleanValue CLICK_EFFECT_UI_ONLY_ON_WIDGETS;
-    public static final ModConfigSpec.BooleanValue CLICK_EFFECT_MUTE_VANILLA;
+    public static final Setting<Boolean> CLICK_EFFECT_COVER_UI;
+    public static final Setting<Boolean> CLICK_EFFECT_UI_ONLY_ON_WIDGETS;
+    public static final Setting<Boolean> CLICK_EFFECT_MUTE_VANILLA;
 
-    public static final ModConfigSpec.BooleanValue ENTITY_CULLING_ENABLED;
-    public static final ModConfigSpec.IntValue ENTITY_CULLING_RANGE;
-    public static final ModConfigSpec.BooleanValue PARTICLE_CULLING_ENABLED;
-    public static final ModConfigSpec.IntValue PARTICLE_CULLING_RANGE;
-    public static final ModConfigSpec.BooleanValue BLOCK_ENTITY_CULLING_ENABLED;
-    public static final ModConfigSpec.IntValue BLOCK_ENTITY_CULLING_RANGE;
-    public static final ModConfigSpec.BooleanValue ITEM_ENTITY_CULLING_ENABLED;
-    public static final ModConfigSpec.IntValue ITEM_ENTITY_MAX_DISTANCE;
+    public static final Setting<Boolean> ENTITY_CULLING_ENABLED;
+    public static final Setting<Integer> ENTITY_CULLING_RANGE;
+    public static final Setting<Boolean> PARTICLE_CULLING_ENABLED;
+    public static final Setting<Integer> PARTICLE_CULLING_RANGE;
+    public static final Setting<Boolean> BLOCK_ENTITY_CULLING_ENABLED;
+    public static final Setting<Integer> BLOCK_ENTITY_CULLING_RANGE;
+    public static final Setting<Boolean> ITEM_ENTITY_CULLING_ENABLED;
+    public static final Setting<Integer> ITEM_ENTITY_MAX_DISTANCE;
 
     // ===== 极速材质加载配置 =====
-    public static final ModConfigSpec.BooleanValue FAST_TEXTURE_LOADING;
-    public static final ModConfigSpec.IntValue TEXTURE_LOADING_THREADS;
-    public static final ModConfigSpec.BooleanValue TEXTURE_DEBUG_LOG;
+    public static final Setting<Boolean> FAST_TEXTURE_LOADING;
+    public static final Setting<Integer> TEXTURE_LOADING_THREADS;
+    public static final Setting<Boolean> TEXTURE_DEBUG_LOG;
 
     // ===== 光影源码缓存（声明移到此处） =====
-    public static final ModConfigSpec.BooleanValue SHADER_CACHE_ENABLED;
+    public static final Setting<Boolean> SHADER_CACHE_ENABLED;
 
     // ===== 异步寻路配置 =====
-    public static final ModConfigSpec.BooleanValue ASYNC_PATHFINDING_ENABLED;
-    public static final ModConfigSpec.IntValue ASYNC_PATHFINDING_THREADS;
-    public static final ModConfigSpec.IntValue ASYNC_PATHFINDING_CACHE_TICKS;
-    public static final ModConfigSpec.IntValue ASYNC_PATHFINDING_HOT_THRESHOLD;
-    public static final ModConfigSpec.IntValue ASYNC_PATHFINDING_MAX_IN_FLIGHT;
-    public static final ModConfigSpec.IntValue ASYNC_PATHFINDING_SNAPSHOT_RANGE;
+    public static final Setting<Boolean> ASYNC_PATHFINDING_ENABLED;
+    public static final Setting<Integer> ASYNC_PATHFINDING_THREADS;
+    public static final Setting<Integer> ASYNC_PATHFINDING_CACHE_TICKS;
+    public static final Setting<Integer> ASYNC_PATHFINDING_HOT_THRESHOLD;
+    public static final Setting<Integer> ASYNC_PATHFINDING_MAX_IN_FLIGHT;
+    public static final Setting<Integer> ASYNC_PATHFINDING_SNAPSHOT_RANGE;
 
-    public static final ModConfigSpec.BooleanValue LUNAR_HUD_ENABLED;
-    public static final ModConfigSpec.EnumValue<OverlayCorner> LUNAR_HUD_CORNER;
-    public static final ModConfigSpec.DoubleValue LUNAR_HUD_SCALE;
-    public static final ModConfigSpec.BooleanValue LUNAR_SHOW_TERM;
-    public static final ModConfigSpec.BooleanValue LUNAR_SHOW_FESTIVAL;
-    public static final ModConfigSpec.BooleanValue LUNAR_FESTIVAL_TITLE;
-    public static final ModConfigSpec.BooleanValue LUNAR_FESTIVAL_EFFECT;
-    public static final ModConfigSpec.EnumValue<HolidayScope> LUNAR_HOLIDAY_SCOPE;
-    public static final ModConfigSpec.BooleanValue LUNAR_FESTIVAL_BADGE;
-    public static final ModConfigSpec.EnumValue<OverlayCorner> LUNAR_FESTIVAL_BADGE_CORNER;
-    public static final ModConfigSpec.BooleanValue LUNAR_FESTIVAL_COUNTDOWN;
+    public static final Setting<Boolean> LUNAR_HUD_ENABLED;
+    public static final Setting<OverlayCorner> LUNAR_HUD_CORNER;
+    public static final Setting<Double> LUNAR_HUD_SCALE;
+    public static final Setting<Boolean> LUNAR_SHOW_TERM;
+    public static final Setting<Boolean> LUNAR_SHOW_FESTIVAL;
+    public static final Setting<Boolean> LUNAR_FESTIVAL_TITLE;
+    public static final Setting<Boolean> LUNAR_FESTIVAL_EFFECT;
+    public static final Setting<HolidayScope> LUNAR_HOLIDAY_SCOPE;
+    public static final Setting<Boolean> LUNAR_FESTIVAL_BADGE;
+    public static final Setting<OverlayCorner> LUNAR_FESTIVAL_BADGE_CORNER;
+    public static final Setting<Boolean> LUNAR_FESTIVAL_COUNTDOWN;
 
-    public static final ModConfigSpec.BooleanValue LIGHT_LEVEL_HUD_ENABLED;
-    public static final ModConfigSpec.EnumValue<OverlayCorner> LIGHT_LEVEL_HUD_CORNER;
-    public static final ModConfigSpec.DoubleValue LIGHT_LEVEL_HUD_SCALE;
+    public static final Setting<Boolean> LIGHT_LEVEL_HUD_ENABLED;
+    public static final Setting<OverlayCorner> LIGHT_LEVEL_HUD_CORNER;
+    public static final Setting<Double> LIGHT_LEVEL_HUD_SCALE;
 
     // ===== 输入法（IME）兼容修复 =====
-    public static final ModConfigSpec.BooleanValue IME_FIX_ENABLED;
-    public static final ModConfigSpec.BooleanValue IME_COMPOSITION_GUARD;
+    public static final Setting<Boolean> IME_FIX_ENABLED;
+    public static final Setting<Boolean> IME_COMPOSITION_GUARD;
 
     // ===== GUI 防抖 / 失焦暂停 =====
-    public static final ModConfigSpec.BooleanValue GUI_SEARCH_DEBOUNCE_ENABLED;
-    public static final ModConfigSpec.BooleanValue PAUSE_WHEN_UNFOCUSED;
+    public static final Setting<Boolean> GUI_SEARCH_DEBOUNCE_ENABLED;
+    public static final Setting<Boolean> PAUSE_WHEN_UNFOCUSED;
 
     // ===== 悬浮层增强 / 药水计时 / 夜视 / 窗口标题 FPS =====
-    public static final ModConfigSpec.BooleanValue OVERLAY_ENHANCED;
-    public static final ModConfigSpec.BooleanValue POTION_HUD_ENABLED;
-    public static final ModConfigSpec.EnumValue<OverlayCorner> POTION_HUD_CORNER;
-    public static final ModConfigSpec.DoubleValue POTION_HUD_SCALE;
-    public static final ModConfigSpec.BooleanValue NIGHT_VISION_ENABLED;
-    public static final ModConfigSpec.IntValue NIGHT_VISION_STRENGTH;
-    public static final ModConfigSpec.BooleanValue SHOW_FPS_IN_TITLE;
+    public static final Setting<Boolean> OVERLAY_ENHANCED;
+    public static final Setting<Boolean> POTION_HUD_ENABLED;
+    public static final Setting<OverlayCorner> POTION_HUD_CORNER;
+    public static final Setting<Double> POTION_HUD_SCALE;
+    public static final Setting<Boolean> NIGHT_VISION_ENABLED;
+    public static final Setting<Integer> NIGHT_VISION_STRENGTH;
+    public static final Setting<Boolean> SHOW_FPS_IN_TITLE;
 
-    public static final ModConfigSpec.BooleanValue DYNAMIC_LIGHT_ENABLED;
-    public static final ModConfigSpec.BooleanValue DYNAMIC_LIGHT_AUTO_DISABLE_WITH_SHADERS;
-    public static final ModConfigSpec.IntValue DYNAMIC_LIGHT_RADIUS;
-    public static final ModConfigSpec.IntValue DYNAMIC_LIGHT_INTENSITY;
-    public static final ModConfigSpec.DoubleValue DYNAMIC_LIGHT_OFFSET_X;
-    public static final ModConfigSpec.DoubleValue DYNAMIC_LIGHT_OFFSET_Y;
-    public static final ModConfigSpec.DoubleValue DYNAMIC_LIGHT_OFFSET_Z;
-    public static final ModConfigSpec.IntValue DYNAMIC_LIGHT_UPDATE_INTERVAL;
-    public static final ModConfigSpec.BooleanValue DYNAMIC_LIGHT_SMOOTH_FADE;
-    public static final ModConfigSpec.DoubleValue DYNAMIC_LIGHT_SMOOTH_SPEED;
-    public static final ModConfigSpec.BooleanValue DYNAMIC_LIGHT_PLAYER_LIGHT;
-    public static final ModConfigSpec.BooleanValue DYNAMIC_LIGHT_ITEM_LIGHT;
-    public static final ModConfigSpec.IntValue DYNAMIC_LIGHT_ITEM_MIN_LIGHT;
+    public static final Setting<Boolean> DYNAMIC_LIGHT_ENABLED;
+    public static final Setting<Boolean> DYNAMIC_LIGHT_AUTO_DISABLE_WITH_SHADERS;
+    public static final Setting<Integer> DYNAMIC_LIGHT_RADIUS;
+    public static final Setting<Integer> DYNAMIC_LIGHT_INTENSITY;
+    public static final Setting<Double> DYNAMIC_LIGHT_OFFSET_X;
+    public static final Setting<Double> DYNAMIC_LIGHT_OFFSET_Y;
+    public static final Setting<Double> DYNAMIC_LIGHT_OFFSET_Z;
+    public static final Setting<Integer> DYNAMIC_LIGHT_UPDATE_INTERVAL;
+    public static final Setting<Boolean> DYNAMIC_LIGHT_SMOOTH_FADE;
+    public static final Setting<Double> DYNAMIC_LIGHT_SMOOTH_SPEED;
+    public static final Setting<Boolean> DYNAMIC_LIGHT_PLAYER_LIGHT;
+    public static final Setting<Boolean> DYNAMIC_LIGHT_ITEM_LIGHT;
+    public static final Setting<Integer> DYNAMIC_LIGHT_ITEM_MIN_LIGHT;
 
-    public static final ModConfigSpec.BooleanValue MUSIC_PLAYER_ENABLED;
-    public static final ModConfigSpec.BooleanValue MUSIC_HUD_ENABLED;
-    public static final ModConfigSpec.EnumValue<OverlayCorner> MUSIC_HUD_CORNER;
+    public static final Setting<Boolean> MUSIC_PLAYER_ENABLED;
+    public static final Setting<Boolean> MUSIC_HUD_ENABLED;
+    public static final Setting<OverlayCorner> MUSIC_HUD_CORNER;
 
     // ===== Info HUD =====
-    public static final ModConfigSpec.BooleanValue INFO_HUD_ENABLED;
-    public static final ModConfigSpec.EnumValue<OverlayCorner> INFO_HUD_CORNER;
-    public static final ModConfigSpec.DoubleValue INFO_HUD_SCALE;
+    public static final Setting<Boolean> INFO_HUD_ENABLED;
+    public static final Setting<OverlayCorner> INFO_HUD_CORNER;
+    public static final Setting<Double> INFO_HUD_SCALE;
 
     // ===== 内存深度优化系统 =====
-    public static final ModConfigSpec.BooleanValue MEMORY_OPTIMIZATION_ENABLED;
-    public static final ModConfigSpec.BooleanValue MEMORY_SHAPE_DEDUP;
-    public static final ModConfigSpec.BooleanValue MEMORY_PROPERTY_MAP_DEDUP;
-    public static final ModConfigSpec.BooleanValue MEMORY_MODEL_INTERNING;
-    public static final ModConfigSpec.BooleanValue MEMORY_MULTIPART_PREDICATE;
-    public static final ModConfigSpec.BooleanValue MEMORY_CHUNK_NBT_TRIM;
-    public static final ModConfigSpec.BooleanValue MEMORY_SHOW_IN_HUD;
+    public static final Setting<Boolean> MEMORY_OPTIMIZATION_ENABLED;
+    public static final Setting<Boolean> MEMORY_SHAPE_DEDUP;
+    public static final Setting<Boolean> MEMORY_PROPERTY_MAP_DEDUP;
+    public static final Setting<Boolean> MEMORY_MODEL_INTERNING;
+    public static final Setting<Boolean> MEMORY_MULTIPART_PREDICATE;
+    public static final Setting<Boolean> MEMORY_CHUNK_NBT_TRIM;
+    public static final Setting<Boolean> MEMORY_SHOW_IN_HUD;
 
     // ===== 零 GC 战斗碰撞优化（对象池已并入 Vec3Pool/MixinEntityHit，无需独立开关） =====
 
     // ===== FSR =====
     // 用枚举取代原 FSR_ENABLED 布尔开关：OFF=关闭, FSR1=空间(1.0), FSR2=时域(2.2)
-    public static final ModConfigSpec.EnumValue<FsrMode> FSR_MODE;
-    public static final ModConfigSpec.DoubleValue FSR_RENDER_SCALE;
-    public static final ModConfigSpec.DoubleValue FSR_SHARPNESS;
-    public static final ModConfigSpec.DoubleValue FSR_HISTORY_WEIGHT;
+    public static final Setting<FsrMode> FSR_MODE;
+    public static final Setting<Double> FSR_RENDER_SCALE;
+    public static final Setting<Double> FSR_SHARPNESS;
+    public static final Setting<Double> FSR_HISTORY_WEIGHT;
 
     // ===== 实验性功能总闸 =====
     // 远景 LOD 已降级为实验性功能：默认关闭，且必须显式打开本总闸才会生效。
-    public static final ModConfigSpec.BooleanValue EXPERIMENTAL_FEATURES_ENABLED;
+    public static final Setting<Boolean> EXPERIMENTAL_FEATURES_ENABLED;
 
     // ===== 自适应性能 / 剔除精简开销 =====
-    public static final ModConfigSpec.BooleanValue ADAPTIVE_PERFORMANCE_ENABLED;
-    public static final ModConfigSpec.IntValue ADAPTIVE_TARGET_FPS;
-    public static final ModConfigSpec.BooleanValue SMART_CULLING_ENABLED;
-    public static final ModConfigSpec.IntValue CULLING_CACHE_MAX_ENTRIES;
-    public static final ModConfigSpec.BooleanValue ENTITY_DISTANCE_CULLING_ENABLED;
-    public static final ModConfigSpec.IntValue ENTITY_DISTANCE_CULLING_RANGE;
-    public static final ModConfigSpec.BooleanValue ENTITY_CULLING_WHITELIST;
-    public static final ModConfigSpec.BooleanValue PARTICLE_SPAWN_BUDGET_ENABLED;
-    public static final ModConfigSpec.IntValue PARTICLE_SPAWN_BUDGET_PER_FRAME;
-    public static final ModConfigSpec.BooleanValue ADAPTIVE_CULLING_DISTANCE;
+    public static final Setting<Boolean> ADAPTIVE_PERFORMANCE_ENABLED;
+    public static final Setting<Integer> ADAPTIVE_TARGET_FPS;
+    public static final Setting<Boolean> SMART_CULLING_ENABLED;
+    public static final Setting<Integer> CULLING_CACHE_MAX_ENTRIES;
+    public static final Setting<Boolean> ENTITY_DISTANCE_CULLING_ENABLED;
+    public static final Setting<Integer> ENTITY_DISTANCE_CULLING_RANGE;
+    public static final Setting<Boolean> ENTITY_CULLING_WHITELIST;
+    public static final Setting<Boolean> PARTICLE_SPAWN_BUDGET_ENABLED;
+    public static final Setting<Integer> PARTICLE_SPAWN_BUDGET_PER_FRAME;
+    public static final Setting<Boolean> ADAPTIVE_CULLING_DISTANCE;
 
     // ===== HUD 节流 / 光影状态缓存 / 内存压力 / 物品光缓存 =====
-    public static final ModConfigSpec.BooleanValue HUD_TEXT_CACHE_ENABLED;
-    public static final ModConfigSpec.IntValue HUD_REFRESH_INTERVAL_MS;
-    public static final ModConfigSpec.BooleanValue SHADER_STATE_CACHE_ENABLED;
-    public static final ModConfigSpec.BooleanValue MEMORY_PRESSURE_ADAPTIVE;
-    public static final ModConfigSpec.IntValue MEMORY_PRESSURE_THRESHOLD;
-    public static final ModConfigSpec.BooleanValue ITEM_LIGHT_CACHE_ENABLED;
+    public static final Setting<Boolean> HUD_TEXT_CACHE_ENABLED;
+    public static final Setting<Integer> HUD_REFRESH_INTERVAL_MS;
+    public static final Setting<Boolean> SHADER_STATE_CACHE_ENABLED;
+    public static final Setting<Boolean> MEMORY_PRESSURE_ADAPTIVE;
+    public static final Setting<Integer> MEMORY_PRESSURE_THRESHOLD;
+    public static final Setting<Boolean> ITEM_LIGHT_CACHE_ENABLED;
 
     // ===== 远景 LOD（实验性，默认关闭） =====
-    public static final ModConfigSpec.BooleanValue LOD_ENABLED;
-    public static final ModConfigSpec.IntValue LOD_RADIUS_CHUNKS;
-    public static final ModConfigSpec.IntValue LOD_WORKER_THREADS;
-    public static final ModConfigSpec.IntValue LOD_REQUEST_INTERVAL_TICKS;
-    public static final ModConfigSpec.BooleanValue LOD_WATER_SURFACE;
-    public static final ModConfigSpec.BooleanValue LOD_FRUSTUM_CULLING;
-    public static final ModConfigSpec.DoubleValue LOD_VERTICAL_BIAS;
-    public static final ModConfigSpec.IntValue LOD_VIEW_DISTANCE_BLOCKS;
-    public static final ModConfigSpec.EnumValue<LodQuality> LOD_QUALITY;
+    public static final Setting<Boolean> LOD_ENABLED;
+    public static final Setting<Integer> LOD_RADIUS_CHUNKS;
+    public static final Setting<Integer> LOD_WORKER_THREADS;
+    public static final Setting<Integer> LOD_REQUEST_INTERVAL_TICKS;
+    public static final Setting<Boolean> LOD_WATER_SURFACE;
+    public static final Setting<Boolean> LOD_FRUSTUM_CULLING;
+    public static final Setting<Double> LOD_VERTICAL_BIAS;
+    public static final Setting<Integer> LOD_VIEW_DISTANCE_BLOCKS;
+    public static final Setting<LodQuality> LOD_QUALITY;
 
-    public static final ModConfigSpec SPEC;
+    public static final ConfigSpec SPEC;
 
     static {
         BUILDER.push("fps_tps_overlay");
@@ -472,15 +471,6 @@ public class Config {
         SPEC = BUILDER.build();
     }
 
-    @SubscribeEvent
-    static void onLoad(final ModConfigEvent event) {
-        // 配置就绪/重载后刷新热路径快照（SPEC.save() 不会触发本事件，GUI 保存由 RibbonOptions 显式刷新）
-        RuntimeConfig.refresh();
-        // 配置值已可用后才做设置页自检：更早调用会因 ConfigValue.get() 未就绪而误报
-        if (event instanceof ModConfigEvent.Loading || event instanceof ModConfigEvent.Reloading) {
-            RibbonOptions.selfCheck();
-        }
-    }
 
     // ================= 各种 get 方法 =================
     public static boolean isShaderCompatibilityWarningEnabled() { try { return SHADER_COMPATIBILITY_WARNING.get(); } catch (IllegalStateException e) { return true; } }

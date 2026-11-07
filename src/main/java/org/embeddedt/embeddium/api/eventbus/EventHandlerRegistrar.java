@@ -1,12 +1,13 @@
 package org.embeddedt.embeddium.api.eventbus;
 
-import net.neoforged.neoforge.common.NeoForge;
-
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Holds a list of event handlers and handles event dispatching.
+ *
+ * <p>26.2 双平台版：移除向平台事件总线的二次分发（{@code NeoForge.EVENT_BUS}），
+ * 否则 Fabric 侧加载本类即 {@code NoClassDefFoundError}。</p>
  */
 public class EventHandlerRegistrar<T extends EmbeddiumEvent> {
     private final List<Handler<T>> handlerList = new CopyOnWriteArrayList<>();
@@ -36,14 +37,7 @@ public class EventHandlerRegistrar<T extends EmbeddiumEvent> {
             }
         }
 
-        // Dispatch to the platform event bus as well (currently only used on Forge)
-        canceled |= postPlatformSpecificEvent(event);
         return canceled;
-    }
-
-    private static <T extends EmbeddiumEvent> boolean postPlatformSpecificEvent(T event) {
-        NeoForge.EVENT_BUS.post(event);
-        return event.isCanceled();
     }
 
     @FunctionalInterface

@@ -15,8 +15,6 @@ import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.IoSupplier;
-import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.resource.ResourcePackLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,26 +39,9 @@ public class TabHeaderWidget extends FlatButtonWidget {
 
     public TabHeaderWidget(Dim2i dim, String modId) {
         super(dim, getLabel(modId), () -> {});
-        Optional<String> logoFile = erroredLogos.contains(modId) ? Optional.empty() : ModList.get().getModContainerById(modId).flatMap(c -> c.getModInfo().getLogoFile());
+        // 26.2 双平台：mod logo 需要平台 API（NeoForge ModList / Fabric ModContainer），
+        // 工厂整合的收益很低。直接跳过，render() 会回退到原版 unknown_pack 图标。
         Identifier texture = null;
-        if(logoFile.isPresent()) {
-            final Pack.ResourcesSupplier supplier = ResourcePackLoader.getPackFor(modId).orElse(ResourcePackLoader.getPackFor("neoforge").orElseThrow(()->new RuntimeException("Can't find neoforge, WHAT!")));
-            try(PackResources pack = supplier.openPrimary(new PackLocationInfo("mod:" + modId, Component.empty(), PackSource.BUILT_IN, Optional.empty()))) {
-                IoSupplier<InputStream> logoResource = pack.getRootResource(logoFile.get());
-                if (logoResource != null) {
-                    NativeImage logo = NativeImage.read(logoResource.get());
-                    if(logo.getWidth() != logo.getHeight()) {
-                        logo.close();
-                        throw new IOException("Logo " + logoFile.get() + " for " + modId + " is not square");
-                    }
-                    texture = Identifier.fromNamespaceAndPath(Embeddium.MODID, "logo/" + modId);
-                    Minecraft.getInstance().getTextureManager().register(texture, new DynamicTexture(() -> "ribbon-dynamic", logo));
-                }
-            } catch(IOException e) {
-                erroredLogos.add(modId);
-                Embeddium.logger().error("Exception reading logo for " + modId, e);
-            }
-        }
         this.logoTexture = texture;
     }
 

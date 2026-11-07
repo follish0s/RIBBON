@@ -34,7 +34,22 @@ public final class RibbonFabricClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        LOGGER.info("[Ribbon] Fabric 平台初始化（26.2 双平台通用 jar，Stage 1：加载链路）");
+        LOGGER.info("[Ribbon] Fabric 平台初始化（26.2 双平台通用 jar）");
+
+        // 配置：properties 后端 → 刷新热路径快照 → 注册设置页 → 自检
+        // （对应 NeoForge 侧 ModConfigEvent 的加载链）
+        try {
+            ConfigFabric.init();
+            com.example.ribbon.optimization.RuntimeConfig.refresh();
+            com.example.ribbon.RibbonOptions.init();
+        } catch (Throwable t) {
+            LOGGER.warn("[Ribbon] Fabric 配置初始化失败，将使用默认值", t);
+        }
+        try {
+            com.example.ribbon.RibbonOptions.selfCheck();
+        } catch (Throwable t) {
+            LOGGER.warn("[Ribbon] Fabric 设置页自检异常", t);
+        }
 
         // 主菜单右下角入口。Fabric 没有 NeoForge 的 ScreenEvent.Init.Post.addListener，
         // 用 fabric-screen-api-v1 的 AFTER_INIT 等价实现。
@@ -54,7 +69,7 @@ public final class RibbonFabricClient implements ClientModInitializer {
     private static void openSettings(Screen from) {
         try {
             Minecraft.getInstance().gui.setScreen(
-                    new EmbeddiumVideoOptionsScreen(from, List.of()));
+                    new EmbeddiumVideoOptionsScreen(from, EmbeddiumVideoOptionsScreen.makePages()));
         } catch (Throwable t) {
             LOGGER.warn("[Ribbon] Fabric: 打开设置界面失败", t);
         }
