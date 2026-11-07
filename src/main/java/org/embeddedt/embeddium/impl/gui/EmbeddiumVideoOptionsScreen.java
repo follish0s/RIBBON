@@ -282,7 +282,12 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
                     // IllegalStateException 终止整帧渲染）。改用提高模糊等级补偿，
                     // 不再像 1.21.1 那样双重叠加。
                     blurOption.set(Math.max(previous, Math.min(strength, 10)));
-                    this.extractBlurredBackground(gfx.unwrap());
+                    try {
+                        this.extractBlurredBackground(gfx.unwrap());
+                    } catch (IllegalStateException blurBusy) {
+                        // 同帧已有其它来源触发过 blur（界面切换首帧等）：
+                        // 跳过模糊继续绘制玻璃层，绝不回退到会再次 blur 的原版路径
+                    }
                 } finally {
                     blurOption.set(previous);
                 }
