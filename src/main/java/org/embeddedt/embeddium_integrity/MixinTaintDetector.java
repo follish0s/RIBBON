@@ -54,7 +54,7 @@ public class MixinTaintDetector implements IExtension {
      * Mods which are not subject to the new taint requirements.
      */
     private static final Collection<String> MOD_ID_WHITELIST = Set.of(
-            "embeddium", // obviously
+            "sodium", // obviously
             "flywheel" // mixin removed in next release, and only targets a class we are currently forced to protect anyway
     );
 
@@ -214,7 +214,7 @@ public class MixinTaintDetector implements IExtension {
                 continue;
             }
             var deps = file.getMods().get(0).getDependencies();
-            var embeddiumDeps = deps.stream().filter(dep -> dep.getModId().equals("embeddium")).toList();
+            var embeddiumDeps = deps.stream().filter(dep -> dep.getModId().equals("sodium")).toList();
             // No dep or no single-version dep are both not allowed
             if(embeddiumDeps.isEmpty() || embeddiumDeps.stream().anyMatch(d -> !isDepSingleVersion(d))) {
                 map.computeIfAbsent(modId, k -> new ArrayList<>()).add(mixin);

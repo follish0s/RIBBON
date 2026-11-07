@@ -51,8 +51,16 @@ public class ScrollBarComponent extends AbstractWidget {
 
     @Override
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
-        this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
-        this.drawRect(drawContext, this.scrollThumb.x(), this.scrollThumb.y(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0xFFAAAAAA);
+        if (com.example.ribbon.optimization.RuntimeConfig.liquidGlassEnabled
+                && com.example.ribbon.glass.LiquidGlassTheme.drawPanel(drawContext,
+                        this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0.7F)) {
+            // 玻璃轨道 + 半透明白滑块
+            this.drawRect(drawContext, this.scrollThumb.x(), this.scrollThumb.y(),
+                    this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0x50FFFFFF);
+        } else {
+            this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
+            this.drawRect(drawContext, this.scrollThumb.x(), this.scrollThumb.y(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0xFFAAAAAA);
+        }
         if (this.isFocused()) {
             this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), -1);
         }

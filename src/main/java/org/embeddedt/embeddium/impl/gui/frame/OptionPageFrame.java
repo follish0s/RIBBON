@@ -58,7 +58,7 @@ public class OptionPageFrame extends AbstractFrame {
                 int visibleOptionCount = (int)group.getOptions().stream().filter(optionFilter::test).count();
                 y += visibleOptionCount * 18;
                 if (visibleOptionCount > 0 && group != lastGroup) {
-                    y += 4;
+                    y += 8; // 组间呼吸空间（需与 buildFrame 保持一致）
                 }
             }
         }
@@ -93,8 +93,8 @@ public class OptionPageFrame extends AbstractFrame {
             }
 
             if(needPadding) {
-                // Add padding beneath each option group
-                y += 4;
+                // Add padding beneath each option group（需与 setupFrame 保持一致）
+                y += 8;
             }
         }
 
@@ -129,7 +129,7 @@ public class OptionPageFrame extends AbstractFrame {
             return null;
         } else {
             return switch(mod) {
-                case "minecraft" -> "embeddium";
+                case "minecraft" -> "sodium";
                 default -> mod;
             };
         }
@@ -179,7 +179,13 @@ public class OptionPageFrame extends AbstractFrame {
 
         drawContext.pose().pushPose();
         drawContext.pose().translate(0, 0, 90);
-        this.drawRect(drawContext, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
+        if (com.example.ribbon.optimization.RuntimeConfig.liquidGlassEnabled
+                && com.example.ribbon.glass.LiquidGlassTheme.drawPanel(drawContext,
+                        boxX, boxY, boxX + boxWidth, boxY + boxHeight, 1.6F)) {
+            // 玻璃提示框（1.6x 提高不透明度保证可读性）
+        } else {
+            this.drawRect(drawContext, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
+        }
         this.drawBorder(drawContext, boxX, boxY, boxX + boxWidth, boxY + boxHeight, DefaultColors.ELEMENT_ACTIVATED);
 
         for (int i = 0; i < tooltip.size(); i++) {

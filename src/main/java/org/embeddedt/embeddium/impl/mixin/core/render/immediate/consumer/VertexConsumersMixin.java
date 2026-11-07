@@ -2,6 +2,7 @@ package org.embeddedt.embeddium.impl.mixin.core.render.immediate.consumer;
 
 
 import org.embeddedt.embeddium.api.vertex.format.VertexFormatDescription;
+import org.embeddedt.embeddium.api.vertex.format.VertexFormatRegistry;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.embeddedt.embeddium.api.vertex.buffer.VertexBufferWriter;
 import org.lwjgl.system.MemoryStack;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 public class VertexConsumersMixin {
     @Mixin(targets = "com/mojang/blaze3d/vertex/VertexMultiConsumer$Double")
-    public static class DualMixin implements VertexBufferWriter {
+    public static class DualMixin implements VertexBufferWriter, net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter {
         @Shadow
         @Final
         private VertexConsumer first;
@@ -40,10 +41,15 @@ public class VertexConsumersMixin {
             VertexBufferWriter.copyInto(VertexBufferWriter.of(this.first), stack, ptr, count, format);
             VertexBufferWriter.copyInto(VertexBufferWriter.of(this.second), stack, ptr, count, format);
         }
+
+        @Override
+        public void push(MemoryStack stack, long ptr, int count, com.mojang.blaze3d.vertex.VertexFormat format) {
+            this.push(stack, ptr, count, VertexFormatRegistry.instance().get(format));
+        }
     }
 
     @Mixin(targets = "com/mojang/blaze3d/vertex/VertexMultiConsumer$Multiple")
-    public static class UnionMixin implements VertexBufferWriter {
+    public static class UnionMixin implements VertexBufferWriter, net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter {
         @Shadow
         @Final
         private VertexConsumer[] delegates;
@@ -72,6 +78,11 @@ public class VertexConsumersMixin {
             for (var delegate : this.delegates) {
                 VertexBufferWriter.copyInto(VertexBufferWriter.of(delegate), stack, ptr, count, format);
             }
+        }
+
+        @Override
+        public void push(MemoryStack stack, long ptr, int count, com.mojang.blaze3d.vertex.VertexFormat format) {
+            this.push(stack, ptr, count, VertexFormatRegistry.instance().get(format));
         }
     }
 }

@@ -18,7 +18,7 @@ public class ConfigMigrator {
         Path mainPath = FMLPaths.CONFIGDIR.get().resolve(fileName);
         try {
             if(Files.notExists(mainPath)) {
-                String legacyName = fileName.replace("embeddium", "rubidium");
+                String legacyName = fileName.replace("sodium", "rubidium");
                 Path legacyPath = FMLPaths.CONFIGDIR.get().resolve(legacyName);
                 if(Files.exists(legacyPath)) {
                     Files.move(legacyPath, mainPath);

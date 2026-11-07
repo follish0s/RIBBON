@@ -1,5 +1,6 @@
 package com.example.ribbon;
 
+import com.example.ribbon.optimization.RuntimeConfig;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -26,6 +27,10 @@ public class Config {
 
     public static final ModConfigSpec.BooleanValue BIOME_TITLE;
     public static final ModConfigSpec.IntValue BIOME_TITLE_DURATION;
+
+    // ===== 液态玻璃 GUI 主题 =====
+    public static final ModConfigSpec.BooleanValue LIQUID_GLASS;
+    public static final ModConfigSpec.IntValue LIQUID_GLASS_BLUR;
 
     public static final ModConfigSpec.EnumValue<ClickEffectType> CLICK_EFFECT_TYPE;
 
@@ -93,6 +98,15 @@ public class Config {
     public static final ModConfigSpec.EnumValue<OverlayCorner> LIGHT_LEVEL_HUD_CORNER;
     public static final ModConfigSpec.DoubleValue LIGHT_LEVEL_HUD_SCALE;
 
+    // ===== 悬浮层增强 / 药水计时 / 夜视 / 窗口标题 FPS =====
+    public static final ModConfigSpec.BooleanValue OVERLAY_ENHANCED;
+    public static final ModConfigSpec.BooleanValue POTION_HUD_ENABLED;
+    public static final ModConfigSpec.EnumValue<OverlayCorner> POTION_HUD_CORNER;
+    public static final ModConfigSpec.DoubleValue POTION_HUD_SCALE;
+    public static final ModConfigSpec.BooleanValue NIGHT_VISION_ENABLED;
+    public static final ModConfigSpec.IntValue NIGHT_VISION_STRENGTH;
+    public static final ModConfigSpec.BooleanValue SHOW_FPS_IN_TITLE;
+
     public static final ModConfigSpec.BooleanValue DYNAMIC_LIGHT_ENABLED;
     public static final ModConfigSpec.BooleanValue DYNAMIC_LIGHT_AUTO_DISABLE_WITH_SHADERS;
     public static final ModConfigSpec.IntValue DYNAMIC_LIGHT_RADIUS;
@@ -134,7 +148,23 @@ public class Config {
     public static final ModConfigSpec.DoubleValue FSR_SHARPNESS;
     public static final ModConfigSpec.DoubleValue FSR_HISTORY_WEIGHT;
 
-    // ===== 远景 LOD =====
+    // ===== 实验性功能总闸 =====
+    // 远景 LOD 已降级为实验性功能：默认关闭，且必须显式打开本总闸才会生效。
+    public static final ModConfigSpec.BooleanValue EXPERIMENTAL_FEATURES_ENABLED;
+
+    // ===== 自适应性能 / 剔除精简开销 =====
+    public static final ModConfigSpec.BooleanValue ADAPTIVE_PERFORMANCE_ENABLED;
+    public static final ModConfigSpec.IntValue ADAPTIVE_TARGET_FPS;
+    public static final ModConfigSpec.BooleanValue SMART_CULLING_ENABLED;
+    public static final ModConfigSpec.IntValue CULLING_CACHE_MAX_ENTRIES;
+    public static final ModConfigSpec.BooleanValue ENTITY_DISTANCE_CULLING_ENABLED;
+    public static final ModConfigSpec.IntValue ENTITY_DISTANCE_CULLING_RANGE;
+    public static final ModConfigSpec.BooleanValue ENTITY_CULLING_WHITELIST;
+    public static final ModConfigSpec.BooleanValue PARTICLE_SPAWN_BUDGET_ENABLED;
+    public static final ModConfigSpec.IntValue PARTICLE_SPAWN_BUDGET_PER_FRAME;
+    public static final ModConfigSpec.BooleanValue ADAPTIVE_CULLING_DISTANCE;
+
+    // ===== 远景 LOD（实验性，默认关闭） =====
     public static final ModConfigSpec.BooleanValue LOD_ENABLED;
     public static final ModConfigSpec.IntValue LOD_RADIUS_CHUNKS;
     public static final ModConfigSpec.IntValue LOD_WORKER_THREADS;
@@ -152,6 +182,24 @@ public class Config {
         SHOW_OVERLAY = BUILDER.comment("Show the FPS/TPS overlay on screen").define("showOverlay", true);
         OVERLAY_CORNER = BUILDER.comment("Which corner to draw the overlay in").defineEnum("overlayCorner", OverlayCorner.TOP_LEFT);
         OVERLAY_SCALE = BUILDER.comment("Text size multiplier").defineInRange("overlayScale", 1.0, 0.5, 3.0);
+        OVERLAY_ENHANCED = BUILDER.comment("增强悬浮层：在 FPS/TPS 下方追加帧时间曲线、内存占用、实体/粒子数量",
+                        "帧时间条：绿色 ≤17ms、橙色 ≤33ms、红色 >33ms（对应 60/30 FPS）")
+                .define("overlayEnhanced", true);
+        BUILDER.pop();
+
+        BUILDER.push("potion_hud");
+        POTION_HUD_ENABLED = BUILDER.comment("药水效果计时 HUD：屏幕角落显示当前效果与剩余时间",
+                        "有益效果绿色、有害红色、中性黄色；F3 打开时自动隐藏")
+                .define("enabled", true);
+        POTION_HUD_CORNER = BUILDER.comment("药水 HUD 显示位置").defineEnum("corner", OverlayCorner.TOP_RIGHT);
+        POTION_HUD_SCALE = BUILDER.comment("药水 HUD 缩放").defineInRange("scale", 1.0, 0.5, 3.0);
+        BUILDER.pop();
+
+        BUILDER.push("night_vision");
+        NIGHT_VISION_ENABLED = BUILDER.comment("夜视增强（Fullbright）：提升光图亮度，黑暗环境不再伸手不见五指",
+                        "非药水夜视：不改变游戏逻辑，只调亮画面；开启光影时由光影接管，本项可能无效果")
+                .define("enabled", false);
+        NIGHT_VISION_STRENGTH = BUILDER.comment("夜视强度（%）：100 = 完全夜视，80 = 推荐值").defineInRange("strength", 80, 10, 100);
         BUILDER.pop();
 
         BUILDER.push("music_player");
@@ -174,6 +222,12 @@ public class Config {
         DAMAGE_NUMBER_MERGE_WINDOW = BUILDER.comment("Merge hits within this time window (ms)").defineInRange("damageNumberMergeWindow", 1000, 100, 3000);
         BIOME_TITLE = BUILDER.comment("Show an RPG-style title when entering a new biome").define("biomeTitle", true);
         BIOME_TITLE_DURATION = BUILDER.comment("How long the biome title stays on screen (ms)").defineInRange("biomeTitleDuration", 3000, 1000, 10000);
+        LIQUID_GLASS = BUILDER.comment("液态玻璃风格的视频设置界面",
+                        "背景增强模糊 + 中性暗化 + 半透明圆角玻璃底板 + 漂移镜面高光",
+                        "关闭后恢复 Embeddium 原版外观")
+                .define("liquidGlass", true);
+        LIQUID_GLASS_BLUR = BUILDER.comment("玻璃背景模糊强度（0=不模糊；≥6 时双重模糊增强毛玻璃感，上限 10）")
+                .defineInRange("liquidGlassBlur", 8, 0, 10);
         CLICK_EFFECT_TYPE = BUILDER.comment("Which click effect to show").defineEnum("clickEffectType", ClickEffectType.RIPPLE);
         BUILDER.pop();
 
@@ -193,7 +247,8 @@ public class Config {
         BUILDER.pop();
 
         BUILDER.push("misc");
-        LANGUAGE = BUILDER.comment("Language used by the Ribbon GUI").defineEnum("language", Language.ENGLISH);
+        LANGUAGE = BUILDER.comment("Language used by the Ribbon GUI (AUTO follows the game language)").defineEnum("language", Language.AUTO);
+        SHOW_FPS_IN_TITLE = BUILDER.comment("在窗口标题栏显示当前 FPS（离开世界时自动恢复原标题）").define("showFpsInTitle", true);
         SHADER_COMPATIBILITY_WARNING = BUILDER.comment("检测到不兼容光影时是否拦截并提示", "支持检测 Canvas 和 Vulkan 格式的光影包").define("shaderCompatibilityWarning", true);
         SHOW_ADVANCED_DEBUG = BUILDER.comment("Show advanced system and mod info in the F3 debug screen").define("showAdvancedDebug", true);
         BUILDER.pop();
@@ -294,8 +349,64 @@ public class Config {
         FSR_HISTORY_WEIGHT = BUILDER.comment("FSR 2.2 历史帧累积权重", "越高越平滑稳定（推荐 0.9），过低会闪烁、过高会拖影").defineInRange("historyWeight", 0.9, 0.0, 1.0);
         BUILDER.pop();
 
+        BUILDER.push("optimization");
+
+        // ===== 自适应性能调度（默认开启，纯削峰不改画质） =====
+        ADAPTIVE_PERFORMANCE_ENABLED = BUILDER.comment("帧时间驱动的自适应负载调度：掉帧时临时收紧区块重建/剔除批处理预算，帧率恢复后自动放开",
+                        "不改变渲染质量，只削掉区块大面积更新时的帧时间尖峰")
+                .define("adaptivePerformance", true);
+        ADAPTIVE_TARGET_FPS = BUILDER.comment("自适应调度的目标帧率，实际帧时间超过该值对应的预算时开始收紧",
+                        "建议设为显示器刷新率或略低")
+                .defineInRange("adaptiveTargetFps", 60, 30, 240);
+
+        // ===== 剔除精简开销（默认开启） =====
+        SMART_CULLING_ENABLED = BUILDER.comment("相机静止时降低遮挡检测扫描频率，并定期清理剔除缓存",
+                        "减少主线程 raycast 与 ConcurrentHashMap 长期增长带来的内存占用")
+                .define("smartCulling", true);
+        CULLING_CACHE_MAX_ENTRIES = BUILDER.comment("实体/方块实体剔除缓存的条目硬上限，超出时清空重建")
+                .defineInRange("cullingCacheMaxEntries", 4096, 256, 65536);
+        // 粒子剔除复用已有的 particleCullingEnabled / particleCullingRange 开关，
+        // 只是生效点从「渲染期」前移到「生成期」，无需新增重复配置项。
+
+        // ===== 实体渲染距离分级剔除 =====
+        ENTITY_DISTANCE_CULLING_ENABLED = BUILDER.comment("按实体到相机的距离剔除远处实体渲染",
+                        "与遮挡剔除互补：遮挡剔除处理被方块挡住的，距离剔除处理视野内但太远的")
+                .define("entityDistanceCulling", true);
+        ENTITY_DISTANCE_CULLING_RANGE = BUILDER.comment("实体最大渲染距离（格）",
+                        "超过该距离的普通实体直接跳过渲染；重要实体（Boss/命名/载具/玩家）永不剔除")
+                .defineInRange("entityDistanceCullingRange", 96, 32, 256);
+        ENTITY_CULLING_WHITELIST = BUILDER.comment("重要实体白名单：Boss、命名实体、载具/坐骑、玩家一律不剔除",
+                        "避免把末影龙、拴绳动物、坐船玩家等关键对象误剔除")
+                .define("entityCullingWhitelist", true);
+
+        // ===== 粒子生成预算 =====
+        PARTICLE_SPAWN_BUDGET_ENABLED = BUILDER.comment("限制每帧可生成的粒子数",
+                        "防止爆炸/大量方块破坏等粒子风暴打穿帧率；超出预算的粒子在生成阶段直接丢弃")
+                .define("particleSpawnBudget", true);
+        PARTICLE_SPAWN_BUDGET_PER_FRAME = BUILDER.comment("每帧粒子生成上限",
+                        "原版上限是 ParticleEngine 的全局限制，这里做更保守的前置限流")
+                .defineInRange("particleSpawnBudgetPerFrame", 512, 64, 4096);
+
+        // ===== 高压时剔除距离自适应 =====
+        ADAPTIVE_CULLING_DISTANCE = BUILDER.comment("帧时间高压时自动收紧实体/粒子剔除距离",
+                        "帧率恢复后自动放开，只在卡顿时临时降低远处对象数量")
+                .define("adaptiveCullingDistance", true);
+
+        BUILDER.pop();
+
+        BUILDER.push("experimental");
+        EXPERIMENTAL_FEATURES_ENABLED = BUILDER.comment("实验性功能总闸（默认关闭）",
+                        "远景 LOD 等尚未稳定的功能必须先打开本开关才会生效",
+                        "关闭时实验性功能完全不启动：不注册 shader、不起后台线程、不读 .mca")
+                .define("enabled", false);
+        BUILDER.pop();
+
         BUILDER.push("lod");
-        LOD_ENABLED = BUILDER.comment("启用远景 LOD", "直接读取存档 .mca 的高度图生成远景地形，不 new LevelChunk、不碰 OpenGL，非侵入式").define("enabled", true);
+        LOD_ENABLED = BUILDER.comment("【实验性·默认关闭】启用远景 LOD",
+                        "需同时开启 实验性功能总闸（experimental.enabled）才会生效",
+                        "已知限制：不接入 Iris/Neoculus 的 G-Buffer，光影下远景不接受延迟光照；与近景衔接仍可能有偏差",
+                        "直接读取存档 .mca 的高度图生成远景地形，不 new LevelChunk、不碰原版区块管线")
+                .define("enabled", false);
         LOD_RADIUS_CHUNKS = BUILDER.comment("LOD 覆盖半径（区块）", "玩家周围该半径范围内、且超出原版区块渲染范围的远景区域会被 LOD 接管").defineInRange("radiusChunks", 8, 2, 1024);
         LOD_WORKER_THREADS = BUILDER.comment("LOD 构建线程数", "0 = 自动（CPU 核心数 - 2，至少 1）").defineInRange("workerThreads", 0, 0, 16);
         LOD_REQUEST_INTERVAL_TICKS = BUILDER.comment("LOD 请求节流间隔（tick）", "每 N tick 重新计算一次玩家周围需要构建的 LOD 区块集合").defineInRange("requestIntervalTicks", 5, 1, 100);
@@ -314,7 +425,14 @@ public class Config {
     }
 
     @SubscribeEvent
-    static void onLoad(final ModConfigEvent event) {}
+    static void onLoad(final ModConfigEvent event) {
+        // 配置就绪/重载后刷新热路径快照（SPEC.save() 不会触发本事件，GUI 保存由 RibbonOptions 显式刷新）
+        RuntimeConfig.refresh();
+        // 配置值已可用后才做设置页自检：更早调用会因 ConfigValue.get() 未就绪而误报
+        if (event instanceof ModConfigEvent.Loading || event instanceof ModConfigEvent.Reloading) {
+            RibbonOptions.selfCheck();
+        }
+    }
 
     // ================= 各种 get 方法 =================
     public static boolean isShaderCompatibilityWarningEnabled() { try { return SHADER_COMPATIBILITY_WARNING.get(); } catch (IllegalStateException e) { return true; } }
@@ -323,6 +441,17 @@ public class Config {
     public static boolean isClickEffectCoverUi() { try { return CLICK_EFFECT_COVER_UI.get(); } catch (IllegalStateException e) { return true; } }
     public static boolean isClickEffectUiOnlyOnWidgets() { try { return CLICK_EFFECT_UI_ONLY_ON_WIDGETS.get(); } catch (IllegalStateException e) { return false; } }
     public static boolean isClickEffectMuteVanilla() { try { return CLICK_EFFECT_MUTE_VANILLA.get(); } catch (IllegalStateException e) { return false; } }
+
+    public static boolean isLiquidGlassEnabled() { try { return LIQUID_GLASS.get(); } catch (IllegalStateException e) { return true; } }
+    public static int getLiquidGlassBlur() { try { return LIQUID_GLASS_BLUR.get(); } catch (IllegalStateException e) { return 8; } }
+
+    public static boolean isOverlayEnhanced() { try { return OVERLAY_ENHANCED.get(); } catch (IllegalStateException e) { return true; } }
+    public static boolean isPotionHudEnabled() { try { return POTION_HUD_ENABLED.get(); } catch (IllegalStateException e) { return true; } }
+    public static OverlayCorner getPotionHudCorner() { try { return POTION_HUD_CORNER.get(); } catch (IllegalStateException e) { return OverlayCorner.TOP_RIGHT; } }
+    public static double getPotionHudScale() { try { return POTION_HUD_SCALE.get(); } catch (IllegalStateException e) { return 1.0; } }
+    public static boolean isNightVisionEnabled() { try { return NIGHT_VISION_ENABLED.get(); } catch (IllegalStateException e) { return false; } }
+    public static int getNightVisionStrength() { try { return NIGHT_VISION_STRENGTH.get(); } catch (IllegalStateException e) { return 80; } }
+    public static boolean isShowFpsInTitle() { try { return SHOW_FPS_IN_TITLE.get(); } catch (IllegalStateException e) { return true; } }
 
     public static ClickEffectType getClickEffectType() {
         try { return CLICK_EFFECT_TYPE.get(); }
@@ -412,8 +541,27 @@ public class Config {
     public static double getFsrSharpness() { try { return FSR_SHARPNESS.get(); } catch (IllegalStateException e) { return 0.2; } }
     public static double getFsrHistoryWeight() { try { return FSR_HISTORY_WEIGHT.get(); } catch (IllegalStateException e) { return 0.9; } }
 
-    // ===== 远景 LOD Getter =====
-    public static boolean isLodEnabled() { try { return LOD_ENABLED.get(); } catch (IllegalStateException e) { return true; } }
+    // ===== 实验性功能 / 通用优化 Getter =====
+    public static boolean isExperimentalFeaturesEnabled() { try { return EXPERIMENTAL_FEATURES_ENABLED.get(); } catch (IllegalStateException e) { return false; } }
+    public static boolean isAdaptivePerformanceEnabled() { try { return ADAPTIVE_PERFORMANCE_ENABLED.get(); } catch (IllegalStateException e) { return true; } }
+    public static int getAdaptiveTargetFps() { try { return ADAPTIVE_TARGET_FPS.get(); } catch (IllegalStateException e) { return 60; } }
+    public static boolean isSmartCullingEnabled() { try { return SMART_CULLING_ENABLED.get(); } catch (IllegalStateException e) { return true; } }
+    public static int getCullingCacheMaxEntries() { try { return CULLING_CACHE_MAX_ENTRIES.get(); } catch (IllegalStateException e) { return 4096; } }
+    public static boolean isEntityDistanceCullingEnabled() { try { return ENTITY_DISTANCE_CULLING_ENABLED.get(); } catch (IllegalStateException e) { return true; } }
+    public static int getEntityDistanceCullingRange() { try { return ENTITY_DISTANCE_CULLING_RANGE.get(); } catch (IllegalStateException e) { return 96; } }
+    public static boolean isEntityCullingWhitelistEnabled() { try { return ENTITY_CULLING_WHITELIST.get(); } catch (IllegalStateException e) { return true; } }
+    public static boolean isParticleSpawnBudgetEnabled() { try { return PARTICLE_SPAWN_BUDGET_ENABLED.get(); } catch (IllegalStateException e) { return true; } }
+    public static int getParticleSpawnBudgetPerFrame() { try { return PARTICLE_SPAWN_BUDGET_PER_FRAME.get(); } catch (IllegalStateException e) { return 512; } }
+    public static boolean isAdaptiveCullingDistanceEnabled() { try { return ADAPTIVE_CULLING_DISTANCE.get(); } catch (IllegalStateException e) { return true; } }
+
+    // ===== 远景 LOD Getter（实验性：总闸 + 自身开关双重判定，兜底一律 false） =====
+    public static boolean isLodEnabled() {
+        try {
+            return EXPERIMENTAL_FEATURES_ENABLED.get() && LOD_ENABLED.get();
+        } catch (IllegalStateException e) {
+            return false;
+        }
+    }
     public static int getLodRadiusChunks() { try { return LOD_RADIUS_CHUNKS.get(); } catch (IllegalStateException e) { return 8; } }
     public static int getLodWorkerThreads() { try { return LOD_WORKER_THREADS.get(); } catch (IllegalStateException e) { return 0; } }
     public static int getLodRequestIntervalTicks() { try { return LOD_REQUEST_INTERVAL_TICKS.get(); } catch (IllegalStateException e) { return 5; } }
@@ -427,7 +575,7 @@ public class Config {
     public enum OutlineColorMode { RAINBOW, BLUE_PURPLE, GREEN_PURPLE, BLUE_GREEN, PURPLE_YELLOW, PURPLE_GREEN_YELLOW }
     public enum ClickEffectType { NONE, RIPPLE, RAIN, SAKURA, CARD, RAT, OX, TIGER, RABBIT, DRAGON, SNAKE, HORSE, GOAT, MONKEY, ROOSTER, DOG, PIG, SPRING, SUMMER, AUTUMN, WINTER }
     public enum HealthColorMode { RAINBOW, CUSTOM }
-    public enum Language { ENGLISH, CHINESE }
+    public enum Language { AUTO, ENGLISH, CHINESE }
     public enum HolidayScope { CHINA_ONLY, INTERNATIONAL, ALL }
     public enum FsrMode { OFF, FSR1, FSR2 }
     public enum LodQuality { LOW, MEDIUM, HIGH }

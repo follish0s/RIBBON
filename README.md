@@ -610,7 +610,7 @@
 
 &#x20;   <span class="dot"></span>
 
-&#x20;   当前版本 0.10.5 Beta · 1.21.1 NeoForge
+&#x20;   当前版本 0.20.7 · 1.21.1 NeoForge
 
 &#x20; </div>
 
@@ -624,7 +624,7 @@
 
 &#x20;   <a class="btn btn-primary" href="https://github.com/follish0s/ribbon-21.1-neoforge/releases" target="\_blank" rel="noopener">
 
-&#x20;     ↓ 下载 0.10.5 Beta
+&#x20;     ↓ 下载 0.20.7
 
 &#x20;   </a>
 

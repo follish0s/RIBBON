@@ -51,29 +51,30 @@ void main() {
 
     vec3 n = normalize(vertexNormal + 1e-5);
 
-    vec3 albedo;
-    if (QualityMode >= 2) {
-        // HIGH：采样原版 atlas。texCoord 是世界坐标，fract 成 0~1 平铺。
-        // 顶面用草顶 sprite，其余（侧/底）用草侧 sprite，颜色由 vertexColor 调制。
-        vec2 tile = fract(texCoord / 16.0);
-        if (n.y > 0.5) {
-            vec2 uv = mix(vec2(TopU0, TopV0), vec2(TopU1, TopV1), tile);
-            albedo = texture(Sampler0, uv).rgb * vertexColor.rgb;
-        } else {
-            vec2 uv = mix(vec2(SideU0, SideV0), vec2(SideU1, SideV1), tile);
-            albedo = texture(Sampler0, uv).rgb * vertexColor.rgb;
-        }
-    } else {
-        albedo = vertexColor.rgb;
-    }
+    // —— albedo 取色 ——
+    // 关键修复：HIGH 档此前用「固定草方块纹理 × vertexColor(MapColor)」二次调制，
+    // 导致水体(蓝)×草纹理→青色斑块、沙地(黄)×草纹理→黄绿怪色，且整体过饱和。
+    // LOD 顶点色本身就是 MapColor（已含正确的地形固有色：草绿/沙黄/水蓝/雪白），
+    // 因此所有档位统一直接用 vertexColor 作为 albedo，不再采样固定草纹理。
+    // HIGH 档保留「方向光照」以增加立体感，颜色不再被错误纹理污染。
+    vec3 albedo = vertexColor.rgb;
 
-    // 光影下（ShaderMode==1）：deferred 已结束，光影已处理光照、大气与色调映射，
-    // LOD 画在最终 sRGB framebuffer 上。此时若再叠方向光照/固定雾色，颜色会被
-    // 双重处理 → 偏暗/偏色/灰黑。正确做法是<b>直接输出纯顶点色</b>（顶点色本身
-    // 就是 sRGB MapColor，与最终 framebuffer 的颜色空间一致），不混雾、不调光照，
-    // 把亮度/雾/色调全部交给光影的 final pass 已经做过的结果。
+    // —— 去饱和（大气透视）——
+    // MapColor 是满饱和度纯色，直接上屏会显得「荧光绿/刺眼」，与近景经过光影
+    // 色调映射 + 大气散射后的偏灰自然色脱节。这里按距离做一次向灰度(Rec.709 luma)
+    // 的轻微拉近，模拟远景大气透视的灰化，让 LOD 视觉上融入近景。
+    float luma = dot(albedo, vec3(0.2126, 0.7152, 0.0722));
+    // 饱和度混合：近处 0.75 保留较多色彩，远处随 fog 增强灰化，最终 0.45。
+    float sat = mix(0.75, 0.45, fog);
+    albedo = mix(vec3(luma), albedo, sat);
+
+    // 光影下（ShaderMode==1）：deferred 已结束，光影已处理光照、大气与色调映射。
+    // LOD 画在最终 sRGB framebuffer 上，不重复叠方向光照，但<b>仍需做雾效</b>把
+    // 远景拉向天空色——否则满饱和 MapColor 直出会与光影色调严重脱节（荧光绿/刺眼）。
+    // 雾按距离淡出到 FOG_COLOR，让 LOD 与地平线自然融合。
     if (ShaderMode == 1) {
-        fragColor = vec4(albedo, 1.0);
+        vec3 fogged = mix(albedo, FOG_COLOR, fog * 0.85);
+        fragColor = vec4(fogged, 1.0);
         return;
     }
 

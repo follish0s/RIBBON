@@ -1,6 +1,7 @@
 package com.example.ribbon.entityculling;
 
-import com.example.ribbon.Config;
+import com.example.ribbon.optimization.CullingOptimizer;
+import com.example.ribbon.optimization.RuntimeConfig;
 import com.example.ribbon.ShadowRendererDetector;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
@@ -19,7 +20,7 @@ public final class EntityCullingTickHandler {
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
-        if (!Config.isEntityCullingEnabled()) return;
+        if (!RuntimeConfig.entityCullingEnabled) return;
 
         // 影子渲染阶段不提交任务
         if (ShadowRendererDetector.isShadowPassActive()) return;
@@ -33,6 +34,9 @@ public final class EntityCullingTickHandler {
         }
 
         Vec3 cameraPos = mc.gameRenderer.getMainCamera().getPosition();
+        // 相机静止时降频扫描，减少主线程 raycast；移动时立即恢复每 tick
+        if (!CullingOptimizer.shouldScan(cameraPos, mc.level.getGameTime())) return;
+
         EntityCullingManager.submitBatch(mc.level.entitiesForRendering(), cameraPos, mc.level);
     }
 }

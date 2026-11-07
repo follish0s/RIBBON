@@ -27,10 +27,30 @@ public class FlatButtonWidget extends AbstractWidget implements Renderable {
 
     private Component label;
 
+    /** 悬停发光平滑值（0=静止，1=完全高亮），指数缓动产生呼吸感。 */
+    private float hoverGlow;
+    private long lastFrameMs;
+
     public FlatButtonWidget(Dim2i dim, Component label, Runnable action) {
         this.dim = dim;
         this.label = label;
         this.action = action;
+    }
+
+    /** 每帧推进悬停动画，返回 0..1 的平滑发光值。 */
+    protected float advanceHoverGlow() {
+        long now = net.minecraft.Util.getMillis();
+        if (this.lastFrameMs == 0L) {
+            this.lastFrameMs = now;
+        }
+        float dt = Math.min(0.1f, (now - this.lastFrameMs) / 1000.0f);
+        this.lastFrameMs = now;
+        float target = this.hovered ? 1.0f : 0.0f;
+        this.hoverGlow += (target - this.hoverGlow) * Math.min(1.0f, dt * 12.0f);
+        if (Math.abs(this.hoverGlow - target) < 0.01f) {
+            this.hoverGlow = target;
+        }
+        return this.hoverGlow;
     }
 
     protected int getLeftAlignedTextOffset() {
@@ -48,13 +68,21 @@ public class FlatButtonWidget extends AbstractWidget implements Renderable {
         }
 
         this.hovered = this.isHovered(mouseX, mouseY);
+        float glow = this.advanceHoverGlow();
 
         int backgroundColor = this.enabled ? (this.hovered ? this.style.bgHovered : this.style.bgDefault) : this.style.bgDisabled;
         int textColor = this.enabled ? this.style.textDefault : this.style.textDisabled;
 
         int strWidth = this.font.width(this.label);
 
-        this.drawRect(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), backgroundColor);
+        if (com.example.ribbon.optimization.RuntimeConfig.liquidGlassEnabled
+                && com.example.ribbon.glass.LiquidGlassTheme.drawPanel(drawContext,
+                        this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(),
+                        this.enabled ? (1.0f + glow + (this.selected ? 0.35f : 0.0f)) : 0.55f)) {
+            // 液态玻璃胶囊：悬停平滑增亮、选中态常亮、禁用减淡
+        } else {
+            this.drawRect(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), backgroundColor);
+        }
         int textX;
         if (this.leftAligned) {
             textX = this.dim.x() + this.getLeftAlignedTextOffset();
@@ -64,7 +92,10 @@ public class FlatButtonWidget extends AbstractWidget implements Renderable {
         this.drawString(drawContext, this.label, textX, this.dim.getCenterY() - 4, textColor);
 
         if (this.enabled && this.selected) {
-            this.drawRect(drawContext, this.dim.x(), this.leftAligned ? this.dim.y() : (this.dim.getLimitY() - 1), this.leftAligned ? (this.dim.x() + 1) : this.dim.getLimitX(), this.dim.getLimitY(), DefaultColors.ELEMENT_ACTIVATED);
+            // 选中强调条：玻璃圆角下上下各内缩 2px，避免压住圆角
+            this.drawRect(drawContext, this.dim.x(), this.leftAligned ? this.dim.y() + 2 : (this.dim.getLimitY() - 1),
+                    this.leftAligned ? (this.dim.x() + 1) : this.dim.getLimitX(),
+                    this.leftAligned ? this.dim.getLimitY() - 2 : this.dim.getLimitY(), DefaultColors.ELEMENT_ACTIVATED);
         }
         if (this.enabled && this.isFocused()) {
             this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), -1);

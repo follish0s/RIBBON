@@ -46,7 +46,16 @@ public class SearchTextFieldComponent extends AbstractWidget {
             this.drawString(context, Component.translatable("embeddium.search_bar_empty"), this.dim.x() + 6, this.dim.y() + 6, 0xFFAAAAAA);
         }
 
-        this.drawRect(context, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), this.isFocused() ? 0xE0000000 : 0x90000000);
+        if (com.example.ribbon.optimization.RuntimeConfig.liquidGlassEnabled
+                && com.example.ribbon.glass.LiquidGlassTheme.drawPanel(context,
+                        this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(),
+                        this.isFocused() ? 1.8F : 1.0F)) {
+            if (this.isFocused()) {
+                this.drawBorder(context, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0x90FFFFFF);
+            }
+        } else {
+            this.drawRect(context, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), this.isFocused() ? 0xE0000000 : 0x90000000);
+        }
         int j = this.model.selectionStart - this.model.firstCharacterIndex;
         int k = this.model.selectionEnd - this.model.firstCharacterIndex;
         String string = this.textRenderer.plainSubstrByWidth(this.model.text.substring(this.model.firstCharacterIndex), this.getInnerWidth());

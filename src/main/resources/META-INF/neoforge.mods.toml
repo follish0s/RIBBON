@@ -9,17 +9,19 @@ config="embeddium.mixins.json"
 config="ribbon.mixins.json"
 
 [[mods]]
-modId="embeddium"
-version="1.0.15"
-displayName="Ribbon (Embeddium fork)"
+modId="sodium"
+# 伪装成 Sodium，供 Iris / sodium-extra / moreculling 等下游按 modId 识别。
+# sodium-extra 0.9.5 要求精确版本 [0.8.13+mc1.21.1]，不可跟随 ribbon 自身版本。
+version="0.8.13+mc1.21.1"
+displayName="Ribbon (Sodium-compatible fork)"
 logoFile="icon.png"
 description='''
-Embeddium fork bundled with Ribbon HUD enhancements.
+Embeddium fork bundled with Ribbon HUD enhancements, identifying as Sodium for Iris compatibility.
 '''
 credits="embeddedt, NanoLive, CaffeineMC"
 authors="embeddedt"
 
-[[dependencies.embeddium]]
+[[dependencies.sodium]]
 modId = "neoforge"
 type = "required"
 mandatory = true
@@ -29,7 +31,7 @@ side = "CLIENT"
 
 [[mods]]
 modId="ribbon"
-version="0.10.8"
+version="${version}"
 displayName="Ribbon"
 logoFile="icon.png"
 description='''
@@ -47,9 +49,31 @@ ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.ribbon]]
-modId = "embeddium"
+modId = "sodium"
 type = "required"
 mandatory = true
-versionRange = "[1.0.0,)"
+versionRange = "[0.8,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[mods]]
+modId="embeddium"
+# 伪装成 Embeddium，供 Oculus / monocle / embeddium-extra 等下游按 modId 识别。
+# monocle 0.2.4 要求 [1.0.7,)，embeddium-extra 要求 [1.0.4+mc1.21,)，
+# 故固定为 1.0.7，不可跟随 ribbon 自身版本。
+version="1.0.7"
+displayName="Ribbon (Embeddium-compatible fork)"
+logoFile="icon.png"
+description='''
+Embeddium fork bundled with Ribbon HUD enhancements, identifying as Embeddium for Oculus compatibility.
+'''
+credits="embeddedt, NanoLive, CaffeineMC"
+authors="embeddedt"
+
+[[dependencies.embeddium]]
+modId = "neoforge"
+type = "required"
+mandatory = true
+versionRange = "[21.1.15,)"
 ordering = "NONE"
 side = "CLIENT"

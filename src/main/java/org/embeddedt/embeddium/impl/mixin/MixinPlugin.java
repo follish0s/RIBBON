@@ -143,11 +143,11 @@ public class MixinPlugin implements IMixinConfigPlugin {
             return null;
         }
 
-        ModFileInfo modFileInfo = FMLLoader.getLoadingModList().getModFileById("embeddium");
+        ModFileInfo modFileInfo = FMLLoader.getLoadingModList().getModFileById("sodium");
 
         if (modFileInfo == null) {
             // Probably a load error
-            logger.error("Could not find embeddium mod, there is likely a dependency error. Skipping mixin application.");
+            logger.error("Could not find sodium mod, there is likely a dependency error. Skipping mixin application.");
             return null;
         }
 

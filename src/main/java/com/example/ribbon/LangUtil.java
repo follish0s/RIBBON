@@ -1,6 +1,9 @@
 package com.example.ribbon;
 
+import net.minecraft.client.Minecraft;
+
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class LangUtil {
@@ -17,20 +20,45 @@ public class LangUtil {
         EN.put("option.overlay_corner.tooltip", "Which screen corner the overlay is drawn in");
         EN.put("option.overlay_scale", "Overlay scale");
         EN.put("option.overlay_scale.tooltip", "Text size multiplier for the overlay text");
+        EN.put("option.overlay_enhanced", "Extended overlay info");
+        EN.put("option.overlay_enhanced.tooltip", "Append a frame-time graph (green <=17ms, orange <=33ms, red >33ms), memory usage and entity/particle counts below the FPS/TPS line.");
+        EN.put("option.potion_hud_enabled", "Potion timer HUD");
+        EN.put("option.potion_hud_enabled.tooltip", "Show active potion effects with their remaining time in a screen corner. Beneficial = green, harmful = red, neutral = yellow. Hidden while the F3 debug screen is open.");
+        EN.put("option.potion_hud_corner", "Potion HUD position");
+        EN.put("option.potion_hud_corner.tooltip", "Which corner of the screen the potion timer HUD is drawn in");
+        EN.put("option.potion_hud_scale", "Potion HUD scale");
+        EN.put("option.potion_hud_scale.tooltip", "Text size multiplier for the potion timer HUD");
+        EN.put("option.night_vision_enabled", "Night vision boost (Fullbright)");
+        EN.put("option.night_vision_enabled.tooltip", "Brighten the lightmap so dark areas stay visible. Client-side visual only; does not grant real night vision. With shaderpacks the shader controls the lightmap and this may have no effect.");
+        EN.put("option.night_vision_strength", "Night vision strength");
+        EN.put("option.night_vision_strength.tooltip", "100% = fully lit everywhere, 80% = recommended. Applies instantly, no reload needed.");
+        EN.put("option.show_fps_in_title", "FPS in window title");
+        EN.put("option.show_fps_in_title.tooltip", "Show the current FPS in the window title bar. The original title is restored automatically when you leave a world.");
         EN.put("option.rainbow_crosshair", "Rainbow crosshair");
         EN.put("option.rainbow_crosshair.tooltip", "Replace the vanilla crosshair with a rainbow gradient crosshair");
+        EN.put("option.liquid_glass", "Liquid Glass UI");
+        EN.put("option.liquid_glass.tooltip", "Frosted-glass styling for the video settings screen: boosted backdrop blur, translucent rounded glass slab, drifting specular sheen. Turn off to restore the vanilla look.");
+        EN.put("option.liquid_glass_blur", "Glass Blur Strength");
+        EN.put("option.liquid_glass_blur.tooltip", "Backdrop blur radius for the liquid glass UI (0 = no blur). Values of 6 or higher apply a double blur pass for a stronger frosted look.");
         EN.put("option.rainbow_block_outline", "Rainbow block outline");
         EN.put("option.rainbow_block_outline.tooltip", "Draw a rainbow outline around the block you are looking at");
         EN.put("option.outline_color_mode", "Outline color mode");
         EN.put("option.outline_color_mode.tooltip", "Which color gradient to use for the block outline");
         EN.put("option.hotbar_highlight", "Hotbar highlight");
         EN.put("option.hotbar_highlight.tooltip", "Draw a rainbow border around the currently selected hotbar slot");
+        EN.put("option.light_level_hud", "Light level HUD");
+        EN.put("option.light_level_hud.tooltip", "Show a light level indicator for the block you are standing on");
+        EN.put("option.light_level_hud_corner", "Light HUD corner");
+        EN.put("option.light_level_hud_corner.tooltip", "Which corner of the screen the light level HUD is drawn in");
+        EN.put("option.light_level_hud_scale", "Light HUD scale");
+        EN.put("option.light_level_hud_scale.tooltip", "Text size multiplier for the light level HUD");
         EN.put("option.damage_numbers", "Damage numbers");
         EN.put("option.damage_numbers.tooltip", "Show floating damage numbers when you hit an entity. Fire = red, Freeze = cyan, Lightning = yellow, Magic = purple, Special mods = rainbow, Normal = white.");
         EN.put("option.damage_number_scale", "Damage number scale");
         EN.put("option.damage_number_scale.tooltip", "Size multiplier for the damage numbers");
         EN.put("option.language", "Language");
         EN.put("option.language.tooltip", "Language used by the Ribbon GUI. Restart the video settings screen after switching.");
+        EN.put("damage.crit", "Critical!");
         EN.put("option.biome_title", "Biome title");
         EN.put("option.biome_title.tooltip", "Show an RPG-style title when entering a new biome");
         EN.put("option.biome_title_duration", "Biome title duration");
@@ -311,10 +339,38 @@ public class LangUtil {
         EN.put("option.async_pathfinding_max_in_flight.tooltip", "Maximum number of asynchronous pathfinding tasks running simultaneously.");
         EN.put("option.async_pathfinding_snapshot_range", "Snapshot Radius");
         EN.put("option.async_pathfinding_snapshot_range.tooltip", "Radius (in chunks) of the world snapshot used for background pathfinding.");
-        // ===== 远景 LOD (英文) =====
-        EN.put("ribbon.page.lod", "Ribbon · LOD");
-        EN.put("option.lod_enabled", "Distant LOD");
-        EN.put("option.lod_enabled.tooltip", "Generate distant terrain from the save's .mca heightmaps. Non-invasive: never allocates LevelChunk or touches the GL state machine.");
+        // ===== 自适应性能 / 剔除精简开销 (英文) =====
+        EN.put("option.adaptive_performance", "Adaptive Load Scheduling");
+        EN.put("option.adaptive_performance.tooltip", "Samples real frame time and temporarily tightens chunk rebuild / culling batch budgets during frame spikes. Restores automatically; never changes render quality.");
+        EN.put("option.adaptive_target_fps", "Adaptive Target FPS");
+        EN.put("option.adaptive_target_fps.tooltip", "Frame time budget used by adaptive scheduling. Set to your monitor refresh rate or slightly below.");
+        EN.put("option.smart_culling", "Smart Culling Scans");
+        EN.put("option.smart_culling.tooltip", "Lower occlusion scan frequency while the camera is stationary and periodically sweep stale culling cache entries. Cuts main-thread raycasts and memory growth.");
+        EN.put("option.culling_cache_max_entries", "Culling Cache Limit");
+        EN.put("option.culling_cache_max_entries.tooltip", "Hard cap on entity / block-entity culling cache entries. The cache is cleared and rebuilt when exceeded.");
+        EN.put("option.particle_distance_culling", "Particle Spawn Culling");
+        EN.put("option.particle_distance_culling.tooltip", "Drop distant particles at spawn time instead of during render. Culled particles never enter the tick/render queues.");
+        EN.put("option.particle_culling_range", "Particle Culling Distance");
+        EN.put("option.particle_culling_range.tooltip", "Particles farther than this distance from the camera are dropped at spawn time.");
+        EN.put("option.entity_distance_culling", "Entity Distance Culling");
+        EN.put("option.entity_distance_culling.tooltip", "Skip rendering distant entities. Complements occlusion culling (which handles entities hidden behind blocks). Uses squared distance with a volatile config cache.");
+        EN.put("option.entity_distance_culling_range", "Entity Render Distance");
+        EN.put("option.entity_distance_culling_range.tooltip", "Ordinary entities beyond this range are not rendered. Important entities (bosses, name-tagged, mounted/ridden, players) are never culled.");
+        EN.put("option.entity_culling_whitelist", "Protect Important Entities");
+        EN.put("option.entity_culling_whitelist.tooltip", "Bosses, name-tagged entities, vehicles/mounts and players are never culled, avoiding disappearing dragons, leashed animals or boats.");
+        EN.put("option.particle_spawn_budget", "Particle Spawn Budget");
+        EN.put("option.particle_spawn_budget.tooltip", "Cap the number of particles created per frame. Prevents explosions or mass block breaking from tanking FPS; excess particles are dropped before entering the tick/render queues.");
+        EN.put("option.particle_spawn_budget_per_frame", "Particles Per Frame");
+        EN.put("option.particle_spawn_budget_per_frame.tooltip", "Maximum particles allowed per frame window before additional spawns are dropped.");
+        EN.put("option.adaptive_culling_distance", "Adaptive Culling Distance");
+        EN.put("option.adaptive_culling_distance.tooltip", "Temporarily tighten entity/particle culling distances while frame time is under pressure; automatically relaxes when FPS recovers.");
+        // ===== 实验性功能 (英文) =====
+        EN.put("option.experimental_enabled", "Experimental Features");
+        EN.put("option.experimental_enabled.tooltip", "Master switch for unfinished features. OFF by default. Distant LOD requires BOTH this switch and its own toggle to be ON. After enabling, press F3+T (or restart) to register the LOD shaders, then re-enter the world.");
+        // ===== 远景 LOD (英文, 实验性) =====
+        EN.put("ribbon.page.lod", "Ribbon · Experimental");
+        EN.put("option.lod_enabled", "Distant LOD (Experimental)");
+        EN.put("option.lod_enabled.tooltip", "EXPERIMENTAL / OFF BY DEFAULT. Requires the Experimental Features master switch. Known limits: no Iris/Neoculus G-Buffer integration (no deferred lighting on distant terrain) and imperfect near/far terrain seams.");
         EN.put("option.lod_radius_chunks", "LOD Radius");
         EN.put("option.lod_radius_chunks.tooltip", "Chunk radius around the player covered by distant LOD terrain.");
         EN.put("option.lod_worker_threads", "LOD Worker Threads");
@@ -350,14 +406,38 @@ public class LangUtil {
         ZH.put("option.overlay_corner.tooltip", "悬浮窗显示在屏幕的哪个角落");
         ZH.put("option.overlay_scale", "悬浮窗缩放");
         ZH.put("option.overlay_scale.tooltip", "悬浮窗文字大小的倍数");
+        ZH.put("option.overlay_enhanced", "增强悬浮层");
+        ZH.put("option.overlay_enhanced.tooltip", "在 FPS/TPS 下方追加：帧时间曲线（绿 ≤17ms、橙 ≤33ms、红 >33ms，对应 60/30 FPS）、内存占用、实体/粒子数量。");
+        ZH.put("option.potion_hud_enabled", "药水计时 HUD");
+        ZH.put("option.potion_hud_enabled.tooltip", "在屏幕角落显示当前药水效果与剩余时间。有益绿色、有害红色、中性黄色；F3 打开时自动隐藏。");
+        ZH.put("option.potion_hud_corner", "药水 HUD 位置");
+        ZH.put("option.potion_hud_corner.tooltip", "药水计时 HUD 显示在屏幕的哪个角落");
+        ZH.put("option.potion_hud_scale", "药水 HUD 缩放");
+        ZH.put("option.potion_hud_scale.tooltip", "药水计时 HUD 的文字大小倍率");
+        ZH.put("option.night_vision_enabled", "夜视增强（Fullbright）");
+        ZH.put("option.night_vision_enabled.tooltip", "调亮光图让黑暗处保持可见。仅客户端视觉效果，不授予真实夜视；开启光影时光影接管光图，本项可能无效。");
+        ZH.put("option.night_vision_strength", "夜视强度");
+        ZH.put("option.night_vision_strength.tooltip", "100% = 全图明亮，推荐 80%。改动即时生效，无需重载。");
+        ZH.put("option.show_fps_in_title", "窗口标题显示 FPS");
+        ZH.put("option.show_fps_in_title.tooltip", "在窗口标题栏显示当前 FPS。离开世界时自动恢复原标题。");
         ZH.put("option.rainbow_crosshair", "彩虹准星");
         ZH.put("option.rainbow_crosshair.tooltip", "用彩虹渐变准星替换原版准星");
+        ZH.put("option.liquid_glass", "液态玻璃界面");
+        ZH.put("option.liquid_glass.tooltip", "视频设置界面液态玻璃化：背景增强模糊 + 半透明圆角玻璃底板 + 漂移镜面高光。关闭后恢复原版外观。");
+        ZH.put("option.liquid_glass_blur", "玻璃模糊强度");
+        ZH.put("option.liquid_glass_blur.tooltip", "液态玻璃的背景模糊半径（0 = 不模糊）。≥6 时双重模糊叠加，毛玻璃感更强。");
         ZH.put("option.rainbow_block_outline", "彩虹方块描边");
         ZH.put("option.rainbow_block_outline.tooltip", "准星指向的方块绘制彩虹描边");
         ZH.put("option.outline_color_mode", "描边颜色模式");
         ZH.put("option.outline_color_mode.tooltip", "方块描边使用的颜色渐变模式");
         ZH.put("option.hotbar_highlight", "物品栏高亮");
         ZH.put("option.hotbar_highlight.tooltip", "在当前选中的物品栏槽位周围绘制彩虹边框");
+        ZH.put("option.light_level_hud", "光照等级 HUD");
+        ZH.put("option.light_level_hud.tooltip", "在屏幕上显示脚下方块的光照等级");
+        ZH.put("option.light_level_hud_corner", "光照 HUD 位置");
+        ZH.put("option.light_level_hud_corner.tooltip", "光照等级 HUD 显示在屏幕的哪个角落");
+        ZH.put("option.light_level_hud_scale", "光照 HUD 缩放");
+        ZH.put("option.light_level_hud_scale.tooltip", "光照等级 HUD 的文字大小倍率");
         ZH.put("option.damage_numbers", "伤害数字");
         ZH.put("option.damage_numbers.tooltip", "攻击实体时显示漂浮的伤害数字。火焰=红色，冰冻=青色，闪电=黄色，魔法=紫色，特殊模组=彩虹色，普通=白色。");
         ZH.put("option.damage_number_scale", "伤害数字大小");
@@ -635,10 +715,38 @@ public class LangUtil {
         ZH.put("option.async_pathfinding_max_in_flight.tooltip", "同时进行的后台寻路任务上限，防止线程池积压。");
         ZH.put("option.async_pathfinding_snapshot_range", "快照区域半径");
         ZH.put("option.async_pathfinding_snapshot_range.tooltip", "后台寻路时读取的世界快照半径（区块）。");
-        // ===== 远景 LOD (中文) =====
-        ZH.put("ribbon.page.lod", "Ribbon · 远景");
-        ZH.put("option.lod_enabled", "远景 LOD");
-        ZH.put("option.lod_enabled.tooltip", "从存档 .mca 高度图生成远景地形。非侵入式：不 new LevelChunk、不碰 OpenGL 状态机。");
+        // ===== 自适应性能 / 剔除精简开销 (中文) =====
+        ZH.put("option.adaptive_performance", "自适应负载调度");
+        ZH.put("option.adaptive_performance.tooltip", "采样真实帧耗时，掉帧尖峰时临时收紧区块重建与剔除批处理预算，帧率恢复后自动放开；不改变画质。");
+        ZH.put("option.adaptive_target_fps", "自适应目标帧率");
+        ZH.put("option.adaptive_target_fps.tooltip", "自适应调度参考的帧时间预算，建议设为显示器刷新率或略低。");
+        ZH.put("option.smart_culling", "智能剔除扫描");
+        ZH.put("option.smart_culling.tooltip", "相机静止时降低遮挡检测频率，并定期清理过期剔除缓存；减少主线程 raycast 与内存增长。");
+        ZH.put("option.culling_cache_max_entries", "剔除缓存上限");
+        ZH.put("option.culling_cache_max_entries.tooltip", "实体/方块实体剔除缓存的条目硬上限，超出后清空重建。");
+        ZH.put("option.particle_distance_culling", "粒子生成期剔除");
+        ZH.put("option.particle_distance_culling.tooltip", "在粒子生成阶段剔除远处粒子，比渲染期剔除更省：被剔除的粒子不会进入 tick/render 队列。");
+        ZH.put("option.particle_culling_range", "粒子剔除距离");
+        ZH.put("option.particle_culling_range.tooltip", "距离相机超过该值的粒子在生成时直接丢弃。");
+        ZH.put("option.entity_distance_culling", "实体距离剔除");
+        ZH.put("option.entity_distance_culling.tooltip", "跳过远处实体的渲染，与遮挡剔除互补（后者处理被方块挡住的实体）。用平方距离 + volatile 配置快照，热路径零分配。");
+        ZH.put("option.entity_distance_culling_range", "实体最大渲染距离");
+        ZH.put("option.entity_distance_culling_range.tooltip", "超过该距离的普通实体不渲染；重要实体（Boss、命名、载具/坐骑、玩家）永不剔除。");
+        ZH.put("option.entity_culling_whitelist", "保护重要实体");
+        ZH.put("option.entity_culling_whitelist.tooltip", "Boss、命名实体、载具/坐骑、玩家一律不剔除，避免末影龙、拴绳动物、船等凭空消失。");
+        ZH.put("option.particle_spawn_budget", "粒子生成预算");
+        ZH.put("option.particle_spawn_budget.tooltip", "限制每帧生成的粒子数，防止爆炸或大范围方块破坏时的粒子风暴打穿帧率；超出预算的粒子在进入 tick/render 队列前就被丢弃。");
+        ZH.put("option.particle_spawn_budget_per_frame", "每帧粒子上限");
+        ZH.put("option.particle_spawn_budget_per_frame.tooltip", "每个帧窗口允许生成的粒子数上限，超出后丢弃新增粒子。");
+        ZH.put("option.adaptive_culling_distance", "自适应剔除距离");
+        ZH.put("option.adaptive_culling_distance.tooltip", "帧时间高压时临时收紧实体/粒子剔除距离，帧率恢复后自动放开。");
+        // ===== 实验性功能 (中文) =====
+        ZH.put("option.experimental_enabled", "实验性功能总闸");
+        ZH.put("option.experimental_enabled.tooltip", "未稳定功能的总开关，默认关闭。远景 LOD 必须同时打开本开关和它自己的开关；开启后按 F3+T（或重启）注册 LOD shader，再重新进入世界生效。");
+        // ===== 远景 LOD (中文, 实验性) =====
+        ZH.put("ribbon.page.lod", "Ribbon · 实验性");
+        ZH.put("option.lod_enabled", "远景 LOD（实验性）");
+        ZH.put("option.lod_enabled.tooltip", "实验性功能，默认关闭；需先打开「实验性功能总闸」。已知限制：未接入 Iris/Neoculus 的 G-Buffer，光影下远景不接受延迟光照；远景与近景衔接仍可能有偏差。");
         ZH.put("option.lod_radius_chunks", "LOD 覆盖半径");
         ZH.put("option.lod_radius_chunks.tooltip", "玩家周围由远景 LOD 地形覆盖的区块半径。");
         ZH.put("option.lod_worker_threads", "LOD 构建线程数");
@@ -659,14 +767,31 @@ public class LangUtil {
     }
 
     public static String tr(String key) {
-        boolean chinese;
+        Config.Language mode;
         try {
-            chinese = Config.LANGUAGE.get() == Config.Language.CHINESE;
+            mode = Config.LANGUAGE.get();
         } catch (IllegalStateException e) {
+            mode = Config.Language.AUTO;
+        }
+        boolean chinese;
+        if (mode == Config.Language.CHINESE) {
+            chinese = true;
+        } else if (mode == Config.Language.ENGLISH) {
             chinese = false;
+        } else {
+            // AUTO：跟随游戏客户端语言（zh_cn / zh_tw 等一律视为中文）
+            String code = null;
+            try {
+                Minecraft mc = Minecraft.getInstance();
+                code = mc == null ? null : mc.getLanguageManager().getSelected();
+            } catch (Throwable ignored) {
+                // 极早期调用（无客户端实例）时按英文兜底
+            }
+            chinese = code != null && code.toLowerCase(Locale.ROOT).startsWith("zh");
         }
         Map<String, String> map = chinese ? ZH : EN;
-        return map.getOrDefault(key, key);
+        // 缺失键先回落到另一语言，最后才露出键名，避免界面出现裸 key
+        return map.getOrDefault(key, (chinese ? EN : ZH).getOrDefault(key, key));
     }
 
     public static String tr(String key, Object arg) {

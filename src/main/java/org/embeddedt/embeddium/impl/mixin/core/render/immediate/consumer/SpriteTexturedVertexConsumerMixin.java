@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.embeddedt.embeddium.api.vertex.attributes.CommonVertexAttribute;
 import org.embeddedt.embeddium.api.vertex.attributes.common.TextureAttribute;
 import org.embeddedt.embeddium.api.vertex.format.VertexFormatDescription;
+import org.embeddedt.embeddium.api.vertex.format.VertexFormatRegistry;
 import net.minecraft.client.renderer.SpriteCoordinateExpander;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.embeddedt.embeddium.api.vertex.buffer.VertexBufferWriter;
@@ -17,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SpriteCoordinateExpander.class)
-public class SpriteTexturedVertexConsumerMixin implements VertexBufferWriter {
+public class SpriteTexturedVertexConsumerMixin implements VertexBufferWriter, net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter {
     @Shadow
     @Final
     private VertexConsumer delegate;
@@ -54,6 +55,11 @@ public class SpriteTexturedVertexConsumerMixin implements VertexBufferWriter {
 
         VertexBufferWriter.of(this.delegate)
                 .push(stack, ptr, count, format);
+    }
+
+    @Override
+    public void push(MemoryStack stack, long ptr, int count, com.mojang.blaze3d.vertex.VertexFormat format) {
+        this.push(stack, ptr, count, VertexFormatRegistry.instance().get(format));
     }
 
     /**

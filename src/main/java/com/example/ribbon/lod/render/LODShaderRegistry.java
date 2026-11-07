@@ -63,6 +63,14 @@ public final class LODShaderRegistry {
 
     @SubscribeEvent
     public static void onRegisterShaders(RegisterShadersEvent event) {
+        // 实验性功能总闸：默认关闭时完全不编译 LOD shader，零启动开销、零 GL 副作用。
+        // 直接读 Config（而非 RuntimeConfig 快照）：RegisterShadersEvent 可能早于配置加载
+        // 事件，用实时值可避免时序导致的误判。
+        // 用户打开总闸后需要重载资源包（F3+T）或重启才会注册 shader。
+        if (!com.example.ribbon.Config.isLodEnabled()) {
+            LOGGER.info("[Ribbon/LOD] 实验性功能未启用，跳过 LOD shader 注册");
+            return;
+        }
         try {
             // 【关键重构】格式升级为 DefaultVertexFormat.BLOCK —— 与 VBO 上传、以及
             // Iris 的 GBuffer/Shadow Pass 完全对齐。此前用 POSITION_COLOR 丢掉了

@@ -1,41 +1,111 @@
 package com.example.ribbon;
 
+import com.example.ribbon.optimization.RuntimeConfig;
 import com.google.common.collect.ImmutableList;
+import com.mojang.logging.LogUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.embeddedt.embeddium.api.OptionGUIConstructionEvent;
 import org.embeddedt.embeddium.api.options.OptionIdentifier;
+import org.embeddedt.embeddium.api.options.control.ControlValueFormatter;
 import org.embeddedt.embeddium.api.options.control.CyclingControl;
 import org.embeddedt.embeddium.api.options.control.SliderControl;
 import org.embeddedt.embeddium.api.options.control.TickBoxControl;
+import org.embeddedt.embeddium.api.options.structure.Option;
 import org.embeddedt.embeddium.api.options.structure.OptionGroup;
 import org.embeddedt.embeddium.api.options.structure.OptionImpact;
 import org.embeddedt.embeddium.api.options.structure.OptionImpl;
 import org.embeddedt.embeddium.api.options.structure.OptionPage;
 import org.embeddedt.embeddium.api.options.structure.OptionStorage;
+import org.slf4j.Logger;
+
+import java.util.function.Supplier;
 
 public class RibbonOptions {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final OptionStorage<Object> STORAGE = new OptionStorage<Object>() {
         private final Object data = new Object();
         @Override public Object getData() { return data; }
-        @Override public void save() { Config.SPEC.save(); }
+        @Override public void save() { Config.SPEC.save(); RuntimeConfig.refresh(); }
     };
 
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath("ribbon", path);
     }
 
+    /**
+     * 创建滑杆时自动把上限向下对齐到区间步长的整数倍。
+     *
+     * <p>Embeddium 的 {@link SliderControl} 构造器有硬断言
+     * {@code (max - min) % interval == 0}，参数不整除时直接抛
+     * {@code IllegalArgumentException}，且该异常发生在打开视频设置界面的
+     * mouseClicked 回调里 → 整个游戏崩溃。这里统一收口，杜绝此类崩溃。</p>
+     */
+    private static SliderControl slider(Option<Integer> option, int min, int max, int interval,
+                                        ControlValueFormatter formatter) {
+        int safeInterval = Math.max(1, interval);
+        int safeMax = Math.max(min + safeInterval, max);
+        int alignedMax = min + Math.max(1, (safeMax - min) / safeInterval) * safeInterval;
+        ControlValueFormatter safeFormatter = formatter != null
+                ? formatter : v -> Component.literal(String.valueOf(v));
+        return new SliderControl(option, min, alignedMax, safeInterval, safeFormatter);
+    }
+
+    /**
+     * 单个页面构建失败只跳过该页，绝不让整个视频设置界面（以及游戏）崩掉。
+     * 页面构建发生在 mouseClicked 回调中，任何未捕获异常都会变成 crash report。
+     */
+    private static void addPage(OptionGUIConstructionEvent event, String name, Supplier<OptionPage> factory) {
+        try {
+            event.addPage(factory.get());
+        } catch (Throwable t) {
+            LOGGER.error("[Ribbon] 构建设置页面 {} 失败，已跳过该页", name, t);
+        }
+    }
+
     public static void init() {
         OptionGUIConstructionEvent.BUS.addListener(event -> {
-            event.addPage(buildHudPage());
-            event.addPage(buildVisualsPage());
-            event.addPage(buildEffectsPage());
-            event.addPage(buildPerformancePage());
-            event.addPage(buildLunarPage());
-            event.addPage(buildMiscPage());
-            event.addPage(buildLodPage());
+            addPage(event, "HUD", RibbonOptions::buildHudPage);
+            addPage(event, "Visuals", RibbonOptions::buildVisualsPage);
+            addPage(event, "Effects", RibbonOptions::buildEffectsPage);
+            addPage(event, "Performance", RibbonOptions::buildPerformancePage);
+            addPage(event, "Lunar", RibbonOptions::buildLunarPage);
+            addPage(event, "Misc", RibbonOptions::buildMiscPage);
+            addPage(event, "LOD", RibbonOptions::buildLodPage);
         });
+    }
+
+    private static volatile boolean selfChecked = false;
+
+    /**
+     * 配置加载完成后预构建所有设置页一次。
+     *
+     * <p>{@link OptionImpl} 在构造时就会执行 control 工厂（含 {@link SliderControl}
+     * 的硬断言）以及 binding 的 getValue，因此这里能提前捕获「参数不整除」之类的
+     * GUI 崩溃，写入启动日志，而不是等玩家点开视频设置才在 mouseClicked 回调里崩掉。
+     * 必须在 {@code ModConfigEvent.Loading} 之后调用：更早时配置值尚未就绪，
+     * {@code ConfigValue.get()} 会抛 IllegalStateException。</p>
+     */
+    public static void selfCheck() {
+        if (selfChecked) return;
+        selfChecked = true;
+        java.util.List<Supplier<OptionPage>> pages = java.util.List.of(
+                RibbonOptions::buildHudPage, RibbonOptions::buildVisualsPage,
+                RibbonOptions::buildEffectsPage, RibbonOptions::buildPerformancePage,
+                RibbonOptions::buildLunarPage, RibbonOptions::buildMiscPage,
+                RibbonOptions::buildLodPage);
+        int ok = 0;
+        for (int i = 0; i < pages.size(); i++) {
+            try {
+                pages.get(i).get();
+                ok++;
+            } catch (Throwable t) {
+                LOGGER.error("[Ribbon] 设置页自检失败 index={}", i, t);
+            }
+        }
+        LOGGER.info("[Ribbon] 设置页自检完成 {}/{} 通过", ok, pages.size());
     }
 
     // ============ 页面 1：HUD ============
@@ -63,7 +133,40 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.overlay_scale.tooltip")))
                 .setBinding((d, v) -> Config.OVERLAY_SCALE.set(v / 10.0),
                         d -> (int) Math.round(Config.OVERLAY_SCALE.get() * 10.0))
-                .setControl(o -> new SliderControl(o, 5, 30, 1,
+                .setControl(o -> slider(o, 5, 30, 1,
+                        v -> Component.literal(String.format("%.1fx", v / 10.0))))
+                .setImpact(OptionImpact.LOW).build());
+
+        group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("overlay_enhanced"))
+                .setName(Component.literal(LangUtil.tr("option.overlay_enhanced")))
+                .setTooltip(Component.literal(LangUtil.tr("option.overlay_enhanced.tooltip")))
+                .setBinding((d, v) -> Config.OVERLAY_ENHANCED.set(v), d -> Config.isOverlayEnhanced())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.LOW).build());
+
+        // ===== 药水效果计时 HUD =====
+        group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("potion_hud_enabled"))
+                .setName(Component.literal(LangUtil.tr("option.potion_hud_enabled")))
+                .setTooltip(Component.literal(LangUtil.tr("option.potion_hud_enabled.tooltip")))
+                .setBinding((d, v) -> Config.POTION_HUD_ENABLED.set(v), d -> Config.isPotionHudEnabled())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.LOW).build());
+
+        group.add(OptionImpl.createBuilder(Config.OverlayCorner.class, STORAGE)
+                .setId(id("potion_hud_corner"))
+                .setName(Component.literal(LangUtil.tr("option.potion_hud_corner")))
+                .setTooltip(Component.literal(LangUtil.tr("option.potion_hud_corner.tooltip")))
+                .setBinding((d, v) -> Config.POTION_HUD_CORNER.set(v), d -> Config.getPotionHudCorner())
+                .setControl(o -> new CyclingControl<>(o, Config.OverlayCorner.class))
+                .setImpact(OptionImpact.LOW).build());
+
+        group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
+                .setId(id("potion_hud_scale"))
+                .setName(Component.literal(LangUtil.tr("option.potion_hud_scale")))
+                .setTooltip(Component.literal(LangUtil.tr("option.potion_hud_scale.tooltip")))
+                .setBinding((d, v) -> Config.POTION_HUD_SCALE.set(v / 10.0),
+                        d -> (int) Math.round(Config.getPotionHudScale() * 10.0))
+                .setControl(o -> slider(o, 5, 30, 1,
                         v -> Component.literal(String.format("%.1fx", v / 10.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -94,7 +197,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.damage_number_scale.tooltip")))
                 .setBinding((d, v) -> Config.DAMAGE_NUMBER_SCALE.set(v / 10.0),
                         d -> (int) Math.round(Config.DAMAGE_NUMBER_SCALE.get() * 10.0))
-                .setControl(o -> new SliderControl(o, 5, 50, 1,
+                .setControl(o -> slider(o, 5, 50, 1,
                         v -> Component.literal(String.format("%.1fx", v / 10.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -110,7 +213,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.biome_title_duration")))
                 .setTooltip(Component.literal(LangUtil.tr("option.biome_title_duration.tooltip")))
                 .setBinding((d, v) -> Config.BIOME_TITLE_DURATION.set(v), d -> Config.BIOME_TITLE_DURATION.get())
-                .setControl(o -> new SliderControl(o, 1000, 10000, 500,
+                .setControl(o -> slider(o, 1000, 10000, 500,
                         v -> Component.literal(String.format("%.1fs", v / 1000.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -136,7 +239,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.info_hud_scale.tooltip")))
                 .setBinding((d, v) -> Config.INFO_HUD_SCALE.set(v / 10.0),
                         d -> (int) Math.round(Config.getInfoHudScale() * 10.0))
-                .setControl(o -> new SliderControl(o, 5, 30, 1,
+                .setControl(o -> slider(o, 5, 30, 1,
                         v -> Component.literal(String.format("%.1fx", v / 10.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -149,6 +252,38 @@ public class RibbonOptions {
     // ============ 页面 2：视觉 ============
     private static OptionPage buildVisualsPage() {
         OptionGroup.Builder group = OptionGroup.createBuilder().setId(id("visuals_group"));
+
+        // ===== 液态玻璃 GUI 主题 =====
+        group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("liquid_glass"))
+                .setName(Component.literal(LangUtil.tr("option.liquid_glass")))
+                .setTooltip(Component.literal(LangUtil.tr("option.liquid_glass.tooltip")))
+                .setBinding((d, v) -> Config.LIQUID_GLASS.set(v), d -> Config.isLiquidGlassEnabled())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.LOW).build());
+
+        group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
+                .setId(id("liquid_glass_blur"))
+                .setName(Component.literal(LangUtil.tr("option.liquid_glass_blur")))
+                .setTooltip(Component.literal(LangUtil.tr("option.liquid_glass_blur.tooltip")))
+                .setBinding((d, v) -> Config.LIQUID_GLASS_BLUR.set(v), d -> Config.getLiquidGlassBlur())
+                .setControl(o -> slider(o, 0, 10, 1, v -> Component.literal(String.valueOf(v))))
+                .setImpact(OptionImpact.LOW).build());
+
+        // ===== 夜视增强（Fullbright） =====
+        group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("night_vision_enabled"))
+                .setName(Component.literal(LangUtil.tr("option.night_vision_enabled")))
+                .setTooltip(Component.literal(LangUtil.tr("option.night_vision_enabled.tooltip")))
+                .setBinding((d, v) -> Config.NIGHT_VISION_ENABLED.set(v), d -> Config.isNightVisionEnabled())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.MEDIUM).build());
+
+        group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
+                .setId(id("night_vision_strength"))
+                .setName(Component.literal(LangUtil.tr("option.night_vision_strength")))
+                .setTooltip(Component.literal(LangUtil.tr("option.night_vision_strength.tooltip")))
+                .setBinding((d, v) -> Config.NIGHT_VISION_STRENGTH.set(v), d -> Config.getNightVisionStrength())
+                .setControl(o -> slider(o, 10, 100, 10, v -> Component.literal(v + "%")))
+                .setImpact(OptionImpact.LOW).build());
 
         group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
                 .setId(id("rainbow_block_outline"))
@@ -186,7 +321,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.health_rainbow_speed.tooltip")))
                 .setBinding((d, v) -> Config.HEALTH_RAINBOW_SPEED.set(v / 10.0),
                         d -> (int) Math.round(Config.HEALTH_RAINBOW_SPEED.get() * 10.0))
-                .setControl(o -> new SliderControl(o, 1, 50, 1,
+                .setControl(o -> slider(o, 1, 50, 1,
                         v -> Component.literal(String.format("%.1fx", v / 10.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -203,7 +338,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.health_low_shake_threshold.tooltip")))
                 .setBinding((d, v) -> Config.HEALTH_LOW_SHAKE_THRESHOLD.set(v),
                         d -> Config.HEALTH_LOW_SHAKE_THRESHOLD.get())
-                .setControl(o -> new SliderControl(o, 5, 90, 5, v -> Component.literal(v + "%")))
+                .setControl(o -> slider(o, 5, 90, 5, v -> Component.literal(v + "%")))
                 .setImpact(OptionImpact.LOW).build());
 
         // ===== 动态光源（并入视觉页：渲染观感的一部分） =====
@@ -230,7 +365,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.light_level_hud_scale.tooltip")))
                 .setBinding((d, v) -> Config.LIGHT_LEVEL_HUD_SCALE.set(v / 10.0),
                         d -> (int) Math.round(Config.getLightLevelHudScale() * 10.0))
-                .setControl(o -> new SliderControl(o, 5, 30, 1,
+                .setControl(o -> slider(o, 5, 30, 1,
                         v -> Component.literal(String.format("%.1fx", v / 10.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -256,7 +391,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.dynamic_light_radius.tooltip")))
                 .setBinding((d, v) -> Config.DYNAMIC_LIGHT_RADIUS.set(v),
                         d -> Config.getDynamicLightRadius())
-                .setControl(o -> new SliderControl(o, 4, 24, 1, v -> Component.literal(v + "m")))
+                .setControl(o -> slider(o, 4, 24, 1, v -> Component.literal(v + "m")))
                 .setImpact(OptionImpact.MEDIUM).build());
 
         group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
@@ -265,7 +400,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.dynamic_light_intensity.tooltip")))
                 .setBinding((d, v) -> Config.DYNAMIC_LIGHT_INTENSITY.set(v),
                         d -> Config.getDynamicLightIntensity())
-                .setControl(o -> new SliderControl(o, 1, 15, 1, v -> Component.literal(String.valueOf(v))))
+                .setControl(o -> slider(o, 1, 15, 1, v -> Component.literal(String.valueOf(v))))
                 .setImpact(OptionImpact.LOW).build());
 
         group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
@@ -274,7 +409,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.dynamic_light_offset_x.tooltip")))
                 .setBinding((d, v) -> Config.DYNAMIC_LIGHT_OFFSET_X.set(v / 10.0),
                         d -> (int) Math.round(Config.getDynamicLightOffsetX() * 10.0))
-                .setControl(o -> new SliderControl(o, -40, 40, 1,
+                .setControl(o -> slider(o, -40, 40, 1,
                         v -> Component.literal(String.format("%.1f", v / 10.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -284,7 +419,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.dynamic_light_offset_y.tooltip")))
                 .setBinding((d, v) -> Config.DYNAMIC_LIGHT_OFFSET_Y.set(v / 10.0),
                         d -> (int) Math.round(Config.getDynamicLightOffsetY() * 10.0))
-                .setControl(o -> new SliderControl(o, -40, 40, 1,
+                .setControl(o -> slider(o, -40, 40, 1,
                         v -> Component.literal(String.format("%.1f", v / 10.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -294,7 +429,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.dynamic_light_offset_z.tooltip")))
                 .setBinding((d, v) -> Config.DYNAMIC_LIGHT_OFFSET_Z.set(v / 10.0),
                         d -> (int) Math.round(Config.getDynamicLightOffsetZ() * 10.0))
-                .setControl(o -> new SliderControl(o, -40, 40, 1,
+                .setControl(o -> slider(o, -40, 40, 1,
                         v -> Component.literal(String.format("%.1f", v / 10.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -304,7 +439,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.dynamic_light_update_interval.tooltip")))
                 .setBinding((d, v) -> Config.DYNAMIC_LIGHT_UPDATE_INTERVAL.set(v),
                         d -> Config.getDynamicLightUpdateInterval())
-                .setControl(o -> new SliderControl(o, 1, 20, 1, v -> Component.literal(v + " ticks")))
+                .setControl(o -> slider(o, 1, 20, 1, v -> Component.literal(v + " ticks")))
                 .setImpact(OptionImpact.LOW).build());
 
         group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
@@ -321,7 +456,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.dynamic_light_smooth_speed.tooltip")))
                 .setBinding((d, v) -> Config.DYNAMIC_LIGHT_SMOOTH_SPEED.set(v / 100.0),
                         d -> (int) Math.round(Config.getDynamicLightSmoothSpeed() * 100.0))
-                .setControl(o -> new SliderControl(o, 5, 100, 5,
+                .setControl(o -> slider(o, 5, 100, 5,
                         v -> Component.literal(String.format("%.2f", v / 100.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -347,7 +482,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.dynamic_light_item_min.tooltip")))
                 .setBinding((d, v) -> Config.DYNAMIC_LIGHT_ITEM_MIN_LIGHT.set(v),
                         d -> Config.getDynamicLightItemMinLight())
-                .setControl(o -> new SliderControl(o, 1, 15, 1, v -> Component.literal(String.valueOf(v))))
+                .setControl(o -> slider(o, 1, 15, 1, v -> Component.literal(String.valueOf(v))))
                 .setImpact(OptionImpact.LOW).build());
 
         return new OptionPage(
@@ -405,7 +540,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.hit_particle_intensity.tooltip")))
                 .setBinding((d, v) -> Config.HIT_PARTICLE_INTENSITY.set(v),
                         d -> Config.HIT_PARTICLE_INTENSITY.get())
-                .setControl(o -> new SliderControl(o, 1, 10, 1, v -> Component.literal(v + "x")))
+                .setControl(o -> slider(o, 1, 10, 1, v -> Component.literal(v + "x")))
                 .setImpact(OptionImpact.LOW).build());
 
         return new OptionPage(
@@ -432,7 +567,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.entity_culling_range.tooltip")))
                 .setBinding((d, v) -> Config.ENTITY_CULLING_RANGE.set(v),
                         d -> Config.getEntityCullingRange())
-                .setControl(o -> new SliderControl(o, 16, 128, 8, v -> Component.literal(v + "m")))
+                .setControl(o -> slider(o, 16, 128, 8, v -> Component.literal(v + "m")))
                 .setImpact(OptionImpact.LOW).build());
 
         group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
@@ -449,7 +584,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.block_entity_culling_range.tooltip")))
                 .setBinding((d, v) -> Config.BLOCK_ENTITY_CULLING_RANGE.set(v),
                         d -> Config.getBlockEntityCullingRange())
-                .setControl(o -> new SliderControl(o, 16, 128, 8, v -> Component.literal(v + "m")))
+                .setControl(o -> slider(o, 16, 128, 8, v -> Component.literal(v + "m")))
                 .setImpact(OptionImpact.LOW).build());
         // ===== 异步寻路 =====
         group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
@@ -464,7 +599,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.async_pathfinding_threads")))
                 .setTooltip(Component.literal(LangUtil.tr("option.async_pathfinding_threads.tooltip")))
                 .setBinding((d, v) -> Config.ASYNC_PATHFINDING_THREADS.set(v), d -> Config.getAsyncPathfindingThreads())
-                .setControl(o -> new SliderControl(o, 1, 8, 1, v -> Component.literal(v + " Threads")))
+                .setControl(o -> slider(o, 1, 8, 1, v -> Component.literal(v + " Threads")))
                 .setImpact(OptionImpact.MEDIUM).build());
 
         group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
@@ -472,7 +607,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.async_pathfinding_cache_ticks")))
                 .setTooltip(Component.literal(LangUtil.tr("option.async_pathfinding_cache_ticks.tooltip")))
                 .setBinding((d, v) -> Config.ASYNC_PATHFINDING_CACHE_TICKS.set(v), d -> Config.getAsyncPathfindingCacheTicks())
-                .setControl(o -> new SliderControl(o, 10, 200, 10, v -> Component.literal(v + " ticks")))
+                .setControl(o -> slider(o, 10, 200, 10, v -> Component.literal(v + " ticks")))
                 .setImpact(OptionImpact.LOW).build());
 
         group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
@@ -480,7 +615,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.async_pathfinding_hot_threshold")))
                 .setTooltip(Component.literal(LangUtil.tr("option.async_pathfinding_hot_threshold.tooltip")))
                 .setBinding((d, v) -> Config.ASYNC_PATHFINDING_HOT_THRESHOLD.set(v), d -> Config.getAsyncPathfindingHotThreshold())
-                .setControl(o -> new SliderControl(o, 1, 20, 1, v -> Component.literal(String.valueOf(v))))
+                .setControl(o -> slider(o, 1, 20, 1, v -> Component.literal(String.valueOf(v))))
                 .setImpact(OptionImpact.LOW).build());
 
         group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
@@ -488,7 +623,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.async_pathfinding_max_in_flight")))
                 .setTooltip(Component.literal(LangUtil.tr("option.async_pathfinding_max_in_flight.tooltip")))
                 .setBinding((d, v) -> Config.ASYNC_PATHFINDING_MAX_IN_FLIGHT.set(v), d -> Config.getAsyncPathfindingMaxInFlight())
-                .setControl(o -> new SliderControl(o, 10, 500, 10, v -> Component.literal(String.valueOf(v))))
+                .setControl(o -> slider(o, 10, 500, 10, v -> Component.literal(String.valueOf(v))))
                 .setImpact(OptionImpact.LOW).build());
 
         group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
@@ -496,7 +631,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.async_pathfinding_snapshot_range")))
                 .setTooltip(Component.literal(LangUtil.tr("option.async_pathfinding_snapshot_range.tooltip")))
                 .setBinding((d, v) -> Config.ASYNC_PATHFINDING_SNAPSHOT_RANGE.set(v), d -> Config.getAsyncPathfindingSnapshotRange())
-                .setControl(o -> new SliderControl(o, 1, 8, 1, v -> Component.literal(v + " chunks")))
+                .setControl(o -> slider(o, 1, 8, 1, v -> Component.literal(v + " chunks")))
                 .setImpact(OptionImpact.LOW).build());
         // ===== 光影源码缓存 =====
         group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
@@ -520,7 +655,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.item_entity_max_distance.tooltip")))
                 .setBinding((d, v) -> Config.ITEM_ENTITY_MAX_DISTANCE.set(v),
                         d -> Config.getItemEntityMaxDistance())
-                .setControl(o -> new SliderControl(o, 16, 128, 8, v -> Component.literal(v + "m")))
+                .setControl(o -> slider(o, 16, 128, 8, v -> Component.literal(v + "m")))
                 .setImpact(OptionImpact.LOW).build());
 
         // ===== FSR 超分辨率模式（OFF / FSR1 / FSR2） =====
@@ -537,7 +672,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.fsr_render_scale")))
                 .setTooltip(Component.literal(LangUtil.tr("option.fsr_render_scale.tooltip")))
                 .setBinding((d, v) -> Config.FSR_RENDER_SCALE.set(v / 100.0), d -> (int)(Config.getFsrRenderScale() * 100))
-                .setControl(o -> new SliderControl(o, 50, 100, 5, v -> Component.literal(v + "%")))
+                .setControl(o -> slider(o, 50, 100, 5, v -> Component.literal(v + "%")))
                 .setImpact(OptionImpact.MEDIUM).build());
 
         group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
@@ -545,7 +680,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.fsr_sharpness")))
                 .setTooltip(Component.literal(LangUtil.tr("option.fsr_sharpness.tooltip")))
                 .setBinding((d, v) -> Config.FSR_SHARPNESS.set(v / 100.0), d -> (int)(Config.getFsrSharpness() * 100))
-                .setControl(o -> new SliderControl(o, 0, 100, 5, v -> Component.literal(v + "%")))
+                .setControl(o -> slider(o, 0, 100, 5, v -> Component.literal(v + "%")))
                 .setImpact(OptionImpact.LOW).build());
 
         group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
@@ -553,7 +688,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.fsr_history_weight")))
                 .setTooltip(Component.literal(LangUtil.tr("option.fsr_history_weight.tooltip")))
                 .setBinding((d, v) -> Config.FSR_HISTORY_WEIGHT.set(v / 100.0), d -> (int)(Config.getFsrHistoryWeight() * 100))
-                .setControl(o -> new SliderControl(o, 0, 100, 5, v -> Component.literal(v + "%")))
+                .setControl(o -> slider(o, 0, 100, 5, v -> Component.literal(v + "%")))
                 .setImpact(OptionImpact.MEDIUM).build());
 
         // ===== 极速材质加载配置 =====
@@ -573,7 +708,7 @@ public class RibbonOptions {
                     Config.TEXTURE_LOADING_THREADS.set(v);
                     com.example.ribbon.util.TextureThreadPool.init();
                 }, d -> Config.getTextureLoadingThreads())
-                .setControl(o -> new SliderControl(o, 1, 8, 1, v -> Component.literal(v + " Threads")))
+                .setControl(o -> slider(o, 1, 8, 1, v -> Component.literal(v + " Threads")))
                 .setImpact(OptionImpact.LOW).build());
 
         group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
@@ -634,10 +769,111 @@ public class RibbonOptions {
                 .setBinding((d, v) -> Config.MEMORY_SHOW_IN_HUD.set(v), d -> Config.isMemoryShowInHudEnabled())
                 .setControl(TickBoxControl::new).setImpact(OptionImpact.LOW).build());
 
+        // ===== 自适应性能 / 剔除精简开销 =====
+        OptionGroup.Builder adaptiveGroup = OptionGroup.createBuilder().setId(id("adaptive_group"));
+
+        adaptiveGroup.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("adaptive_performance"))
+                .setName(Component.literal(LangUtil.tr("option.adaptive_performance")))
+                .setTooltip(Component.literal(LangUtil.tr("option.adaptive_performance.tooltip")))
+                .setBinding((d, v) -> Config.ADAPTIVE_PERFORMANCE_ENABLED.set(v),
+                        d -> Config.isAdaptivePerformanceEnabled())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.MEDIUM).build());
+
+        adaptiveGroup.add(OptionImpl.createBuilder(Integer.class, STORAGE)
+                .setId(id("adaptive_target_fps"))
+                .setName(Component.literal(LangUtil.tr("option.adaptive_target_fps")))
+                .setTooltip(Component.literal(LangUtil.tr("option.adaptive_target_fps.tooltip")))
+                .setBinding((d, v) -> Config.ADAPTIVE_TARGET_FPS.set(v), d -> Config.getAdaptiveTargetFps())
+                .setControl(o -> slider(o, 30, 240, 5, v -> Component.literal(v + " FPS")))
+                .setImpact(OptionImpact.LOW).build());
+
+        adaptiveGroup.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("smart_culling"))
+                .setName(Component.literal(LangUtil.tr("option.smart_culling")))
+                .setTooltip(Component.literal(LangUtil.tr("option.smart_culling.tooltip")))
+                .setBinding((d, v) -> Config.SMART_CULLING_ENABLED.set(v), d -> Config.isSmartCullingEnabled())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.MEDIUM).build());
+
+        adaptiveGroup.add(OptionImpl.createBuilder(Integer.class, STORAGE)
+                .setId(id("culling_cache_max_entries"))
+                .setName(Component.literal(LangUtil.tr("option.culling_cache_max_entries")))
+                .setTooltip(Component.literal(LangUtil.tr("option.culling_cache_max_entries.tooltip")))
+                .setBinding((d, v) -> Config.CULLING_CACHE_MAX_ENTRIES.set(v), d -> Config.getCullingCacheMaxEntries())
+                .setControl(o -> slider(o, 256, 16384, 256, v -> Component.literal(String.valueOf(v))))
+                .setImpact(OptionImpact.LOW).build());
+
+        adaptiveGroup.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("particle_distance_culling"))
+                .setName(Component.literal(LangUtil.tr("option.particle_distance_culling")))
+                .setTooltip(Component.literal(LangUtil.tr("option.particle_distance_culling.tooltip")))
+                .setBinding((d, v) -> Config.PARTICLE_CULLING_ENABLED.set(v),
+                        d -> Config.isParticleCullingEnabled())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.MEDIUM).build());
+
+        adaptiveGroup.add(OptionImpl.createBuilder(Integer.class, STORAGE)
+                .setId(id("particle_culling_range"))
+                .setName(Component.literal(LangUtil.tr("option.particle_culling_range")))
+                .setTooltip(Component.literal(LangUtil.tr("option.particle_culling_range.tooltip")))
+                .setBinding((d, v) -> Config.PARTICLE_CULLING_RANGE.set(v),
+                        d -> Config.getParticleCullingRange())
+                .setControl(o -> slider(o, 8, 64, 4, v -> Component.literal(v + "m")))
+                .setImpact(OptionImpact.LOW).build());
+
+        adaptiveGroup.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("entity_distance_culling"))
+                .setName(Component.literal(LangUtil.tr("option.entity_distance_culling")))
+                .setTooltip(Component.literal(LangUtil.tr("option.entity_distance_culling.tooltip")))
+                .setBinding((d, v) -> Config.ENTITY_DISTANCE_CULLING_ENABLED.set(v),
+                        d -> Config.isEntityDistanceCullingEnabled())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.MEDIUM).build());
+
+        adaptiveGroup.add(OptionImpl.createBuilder(Integer.class, STORAGE)
+                .setId(id("entity_distance_culling_range"))
+                .setName(Component.literal(LangUtil.tr("option.entity_distance_culling_range")))
+                .setTooltip(Component.literal(LangUtil.tr("option.entity_distance_culling_range.tooltip")))
+                .setBinding((d, v) -> Config.ENTITY_DISTANCE_CULLING_RANGE.set(v),
+                        d -> Config.getEntityDistanceCullingRange())
+                .setControl(o -> slider(o, 32, 256, 8, v -> Component.literal(v + "m")))
+                .setImpact(OptionImpact.MEDIUM).build());
+
+        adaptiveGroup.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("entity_culling_whitelist"))
+                .setName(Component.literal(LangUtil.tr("option.entity_culling_whitelist")))
+                .setTooltip(Component.literal(LangUtil.tr("option.entity_culling_whitelist.tooltip")))
+                .setBinding((d, v) -> Config.ENTITY_CULLING_WHITELIST.set(v),
+                        d -> Config.isEntityCullingWhitelistEnabled())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.LOW).build());
+
+        adaptiveGroup.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("particle_spawn_budget"))
+                .setName(Component.literal(LangUtil.tr("option.particle_spawn_budget")))
+                .setTooltip(Component.literal(LangUtil.tr("option.particle_spawn_budget.tooltip")))
+                .setBinding((d, v) -> Config.PARTICLE_SPAWN_BUDGET_ENABLED.set(v),
+                        d -> Config.isParticleSpawnBudgetEnabled())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.MEDIUM).build());
+
+        adaptiveGroup.add(OptionImpl.createBuilder(Integer.class, STORAGE)
+                .setId(id("particle_spawn_budget_per_frame"))
+                .setName(Component.literal(LangUtil.tr("option.particle_spawn_budget_per_frame")))
+                .setTooltip(Component.literal(LangUtil.tr("option.particle_spawn_budget_per_frame.tooltip")))
+                .setBinding((d, v) -> Config.PARTICLE_SPAWN_BUDGET_PER_FRAME.set(v),
+                        d -> Config.getParticleSpawnBudgetPerFrame())
+                .setControl(o -> slider(o, 64, 4096, 64, v -> Component.literal(String.valueOf(v))))
+                .setImpact(OptionImpact.LOW).build());
+
+        adaptiveGroup.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("adaptive_culling_distance"))
+                .setName(Component.literal(LangUtil.tr("option.adaptive_culling_distance")))
+                .setTooltip(Component.literal(LangUtil.tr("option.adaptive_culling_distance.tooltip")))
+                .setBinding((d, v) -> Config.ADAPTIVE_CULLING_DISTANCE.set(v),
+                        d -> Config.isAdaptiveCullingDistanceEnabled())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.LOW).build());
+
         return new OptionPage(
                 OptionIdentifier.create(id("page_performance")),
                 Component.literal(LangUtil.tr("ribbon.page.performance")),
-                ImmutableList.of(group.build()));
+                ImmutableList.of(group.build(), adaptiveGroup.build()));
     }
 
     // ============ 页面 6：农历 ============
@@ -667,7 +903,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.lunar_hud_scale.tooltip")))
                 .setBinding((d, v) -> Config.LUNAR_HUD_SCALE.set(v / 10.0),
                         d -> (int) Math.round(Config.getLunarHudScale() * 10.0))
-                .setControl(o -> new SliderControl(o, 5, 30, 1,
+                .setControl(o -> slider(o, 5, 30, 1,
                         v -> Component.literal(String.format("%.1fx", v / 10.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -742,7 +978,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.lunar_upcoming_preview")))
                 .setTooltip(Component.literal(LangUtil.tr("option.lunar_upcoming_preview.tooltip")))
                 .setBinding((d, v) -> {}, d -> 0)
-                .setControl(o -> new SliderControl(o, 0, 4, 1, v -> {
+                .setControl(o -> slider(o, 0, 4, 1, v -> {
                     var list = com.example.ribbon.lunar.FestivalPreview.getUpcoming(5);
                     if (v >= list.size()) return Component.literal("-");
                     return Component.literal(list.get(v).format());
@@ -776,6 +1012,13 @@ public class RibbonOptions {
                 .setControl(TickBoxControl::new).setImpact(OptionImpact.LOW).build());
 
         group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("show_fps_in_title"))
+                .setName(Component.literal(LangUtil.tr("option.show_fps_in_title")))
+                .setTooltip(Component.literal(LangUtil.tr("option.show_fps_in_title.tooltip")))
+                .setBinding((d, v) -> Config.SHOW_FPS_IN_TITLE.set(v), d -> Config.isShowFpsInTitle())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.LOW).build());
+
+        group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
                 .setId(id("show_advanced_debug"))
                 .setName(Component.literal(LangUtil.tr("option.show_advanced_debug")))
                 .setTooltip(Component.literal(LangUtil.tr("option.show_advanced_debug.tooltip")))
@@ -797,7 +1040,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.zoom_fov_multiplier.tooltip")))
                 .setBinding((d, v) -> Config.ZOOM_FOV_MULTIPLIER.set(v / 100.0),
                         d -> (int) Math.round(Config.ZOOM_FOV_MULTIPLIER.get() * 100.0))
-                .setControl(o -> new SliderControl(o, 10, 90, 5,
+                .setControl(o -> slider(o, 10, 90, 5,
                         v -> Component.literal(String.format("%.2fx", v / 100.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -840,15 +1083,26 @@ public class RibbonOptions {
                 ImmutableList.of(group.build()));
     }
 
-    // ============ 页面 7：远景 LOD ============
+    // ============ 页面 7：远景 LOD（实验性） ============
     private static OptionPage buildLodPage() {
+        OptionGroup.Builder experimentalGroup = OptionGroup.createBuilder().setId(id("experimental_group"));
+
+        experimentalGroup.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
+                .setId(id("experimental_enabled"))
+                .setName(Component.literal(LangUtil.tr("option.experimental_enabled")))
+                .setTooltip(Component.literal(LangUtil.tr("option.experimental_enabled.tooltip")))
+                .setBinding((d, v) -> { Config.EXPERIMENTAL_FEATURES_ENABLED.set(v); RuntimeConfig.refresh(); },
+                        d -> Config.isExperimentalFeaturesEnabled())
+                .setControl(TickBoxControl::new).setImpact(OptionImpact.HIGH).build());
+
         OptionGroup.Builder group = OptionGroup.createBuilder().setId(id("lod_group"));
 
         group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
                 .setId(id("lod_enabled"))
                 .setName(Component.literal(LangUtil.tr("option.lod_enabled")))
                 .setTooltip(Component.literal(LangUtil.tr("option.lod_enabled.tooltip")))
-                .setBinding((d, v) -> Config.LOD_ENABLED.set(v), d -> Config.isLodEnabled())
+                .setBinding((d, v) -> { Config.LOD_ENABLED.set(v); RuntimeConfig.refresh(); },
+                        d -> Config.LOD_ENABLED.get())
                 .setControl(TickBoxControl::new).setImpact(OptionImpact.HIGH).build());
 
         group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
@@ -856,7 +1110,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.lod_radius_chunks")))
                 .setTooltip(Component.literal(LangUtil.tr("option.lod_radius_chunks.tooltip")))
                 .setBinding((d, v) -> Config.LOD_RADIUS_CHUNKS.set(v), d -> Config.getLodRadiusChunks())
-                .setControl(o -> new SliderControl(o, 2, 32, 2, v -> Component.literal(v + " chunks")))
+                .setControl(o -> slider(o, 2, 32, 2, v -> Component.literal(v + " chunks")))
                 .setImpact(OptionImpact.HIGH).build());
 
         group.add(OptionImpl.createBuilder(Integer.class, STORAGE)
@@ -864,7 +1118,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.lod_worker_threads")))
                 .setTooltip(Component.literal(LangUtil.tr("option.lod_worker_threads.tooltip")))
                 .setBinding((d, v) -> Config.LOD_WORKER_THREADS.set(v), d -> Config.getLodWorkerThreads())
-                .setControl(o -> new SliderControl(o, 0, 16, 1,
+                .setControl(o -> slider(o, 0, 16, 1,
                         v -> Component.literal(v == 0 ? "Auto" : v + " Threads")))
                 .setImpact(OptionImpact.MEDIUM).build());
 
@@ -873,7 +1127,7 @@ public class RibbonOptions {
                 .setName(Component.literal(LangUtil.tr("option.lod_request_interval_ticks")))
                 .setTooltip(Component.literal(LangUtil.tr("option.lod_request_interval_ticks.tooltip")))
                 .setBinding((d, v) -> Config.LOD_REQUEST_INTERVAL_TICKS.set(v), d -> Config.getLodRequestIntervalTicks())
-                .setControl(o -> new SliderControl(o, 5, 100, 5, v -> Component.literal(v + " ticks")))
+                .setControl(o -> slider(o, 5, 100, 5, v -> Component.literal(v + " ticks")))
                 .setImpact(OptionImpact.LOW).build());
 
         group.add(OptionImpl.createBuilder(Boolean.class, STORAGE)
@@ -896,7 +1150,7 @@ public class RibbonOptions {
                 .setTooltip(Component.literal(LangUtil.tr("option.lod_vertical_bias.tooltip")))
                 .setBinding((d, v) -> Config.LOD_VERTICAL_BIAS.set(v / 10.0),
                         d -> (int) Math.round(Config.getLodVerticalBias() * 10.0))
-                .setControl(o -> new SliderControl(o, -160, 160, 5,
+                .setControl(o -> slider(o, -160, 160, 5,
                         v -> Component.literal(String.format("%.1f", v / 10.0))))
                 .setImpact(OptionImpact.LOW).build());
 
@@ -911,6 +1165,6 @@ public class RibbonOptions {
         return new OptionPage(
                 OptionIdentifier.create(id("page_lod")),
                 Component.literal(LangUtil.tr("ribbon.page.lod")),
-                ImmutableList.of(group.build()));
+                ImmutableList.of(experimentalGroup.build(), group.build()));
     }
 }

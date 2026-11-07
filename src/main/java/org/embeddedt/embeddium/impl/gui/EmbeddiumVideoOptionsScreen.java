@@ -19,6 +19,7 @@ import org.embeddedt.embeddium.api.math.Dim2i;
 import org.embeddedt.embeddium.api.util.ColorARGB;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
@@ -60,6 +61,9 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     private FlatButtonWidget donateButton, hideDonateButton;
 
     private Dim2i logoDim;
+
+    /** 液态玻璃底板区域（5:4 居中主区域），在 parentFrameBuilder 中计算。 */
+    private Dim2i glassSlabDim;
 
     private boolean hasPendingChanges;
 
@@ -186,10 +190,11 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         }
 
         Dim2i basicFrameDim = new Dim2i((this.width - newWidth) / 2, 0, newWidth, this.height);
+        this.glassSlabDim = basicFrameDim;
         Dim2i tabFrameDim = new Dim2i(basicFrameDim.x() + basicFrameDim.width() / 20 / 2, basicFrameDim.y() + basicFrameDim.height() / 4 / 2, basicFrameDim.width() - (basicFrameDim.width() / 20), basicFrameDim.height() / 4 * 3);
 
-        Dim2i undoButtonDim = new Dim2i(tabFrameDim.getLimitX() - 203, tabFrameDim.getLimitY() + 5, 65, 20);
-        Dim2i applyButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134, tabFrameDim.getLimitY() + 5, 65, 20);
+        Dim2i undoButtonDim = new Dim2i(tabFrameDim.getLimitX() - 207, tabFrameDim.getLimitY() + 5, 65, 20);
+        Dim2i applyButtonDim = new Dim2i(tabFrameDim.getLimitX() - 136, tabFrameDim.getLimitY() + 5, 65, 20);
         Dim2i closeButtonDim = new Dim2i(tabFrameDim.getLimitX() - 65, tabFrameDim.getLimitY() + 5, 65, 20);
 
         Component donationText = Component.translatable("sodium.options.buttons.donate");
@@ -296,7 +301,12 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(gfx, mouseX, mouseY, partialTick);
+        if (com.example.ribbon.optimization.RuntimeConfig.liquidGlassEnabled
+                && renderLiquidGlassBackground(gfx, partialTick)) {
+            // 液态玻璃背景已绘制（增强模糊 + 暗化 + 玻璃底板 + sheen）
+        } else {
+            super.renderBackground(gfx, mouseX, mouseY, partialTick);
+        }
 
         // Render watermarks
         gfx.setColor(ColorARGB.unpackRed(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackGreen(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackBlue(DefaultColors.ELEMENT_ACTIVATED) / 255f, 0.8F);
@@ -310,6 +320,51 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
         gfx.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    /**
+     * 液态玻璃背景：增强背景模糊 → 中性暗化 → 玻璃底板 → 漂移镜面高光。
+     *
+     * <p>模糊复用原版 {@code blur.json} post chain：临时把「菜单背景模糊度」
+     * 提到配置强度后调用原版 {@link #renderBlurredBackground(float)}（强度 ≥6
+     * 时双重调用叠加出毛玻璃效果），调用完立即恢复原值，不污染用户设置。
+     * 任何异常都返回 false 回退原版绘制路径，保证设置界面永不因主题崩溃。</p>
+     */
+    private boolean renderLiquidGlassBackground(GuiGraphics gfx, float partialTick) {
+        try {
+            if (this.minecraft.level == null) {
+                this.renderPanorama(gfx, partialTick);
+            }
+
+            int strength = Math.max(0, com.example.ribbon.optimization.RuntimeConfig.liquidGlassBlur);
+            if (strength > 0) {
+                OptionInstance<Integer> blurOption = this.minecraft.options.menuBackgroundBlurriness();
+                int previous = blurOption.get();
+                try {
+                    blurOption.set(Math.max(previous, Math.min(strength, 10)));
+                    this.renderBlurredBackground(partialTick);
+                    if (strength >= 6) {
+                        // 二次叠加：box blur 的卷积近似高斯，两轮后过渡更柔
+                        this.renderBlurredBackground(partialTick);
+                    }
+                } finally {
+                    blurOption.set(previous);
+                }
+            }
+
+            com.example.ribbon.glass.LiquidGlassTheme.renderScrim(gfx, this.width, this.height);
+            if (this.glassSlabDim != null && com.example.ribbon.glass.LiquidGlassTheme.drawPanel(
+                    gfx, this.glassSlabDim.x(), this.glassSlabDim.y(),
+                    this.glassSlabDim.getLimitX(), this.glassSlabDim.getLimitY(), 1.0F)) {
+                com.example.ribbon.glass.LiquidGlassTheme.renderSheen(
+                        gfx, this.glassSlabDim.x(), this.glassSlabDim.y(),
+                        this.glassSlabDim.width(), this.glassSlabDim.height());
+            }
+            return true;
+        } catch (Throwable t) {
+            Embeddium.logger().warn("[Ribbon] Liquid glass backdrop failed; falling back to vanilla background", t);
+            return false;
+        }
     }
 
     @Override

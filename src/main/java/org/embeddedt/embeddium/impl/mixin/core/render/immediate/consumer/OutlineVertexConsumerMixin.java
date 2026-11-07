@@ -5,6 +5,7 @@ import org.embeddedt.embeddium.api.util.ColorARGB;
 import org.embeddedt.embeddium.api.vertex.attributes.CommonVertexAttribute;
 import org.embeddedt.embeddium.api.vertex.attributes.common.ColorAttribute;
 import org.embeddedt.embeddium.api.vertex.format.VertexFormatDescription;
+import org.embeddedt.embeddium.api.vertex.format.VertexFormatRegistry;
 import org.embeddedt.embeddium.api.vertex.buffer.VertexBufferWriter;
 import org.lwjgl.system.MemoryStack;
 import org.spongepowered.asm.mixin.Final;
@@ -16,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(targets = "net/minecraft/client/renderer/OutlineBufferSource$EntityOutlineGenerator")
-public abstract class OutlineVertexConsumerMixin implements VertexBufferWriter {
+public abstract class OutlineVertexConsumerMixin implements VertexBufferWriter, net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter {
     @Shadow
     @Final
     private VertexConsumer delegate;
@@ -43,6 +44,11 @@ public abstract class OutlineVertexConsumerMixin implements VertexBufferWriter {
 
         VertexBufferWriter.of(this.delegate)
                 .push(stack, ptr, count, format);
+    }
+
+    @Override
+    public void push(MemoryStack stack, long ptr, int count, com.mojang.blaze3d.vertex.VertexFormat format) {
+        this.push(stack, ptr, count, VertexFormatRegistry.instance().get(format));
     }
 
     /**

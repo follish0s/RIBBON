@@ -1,13 +1,13 @@
 package com.example.ribbon.mixin;
 
-import com.example.ribbon.Config;
 import com.example.ribbon.ShadowRendererDetector;
 import com.example.ribbon.entityculling.EntityCullingManager;
+import com.example.ribbon.optimization.EntityCullingPolicy;
+import com.example.ribbon.optimization.RuntimeConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,18 +33,27 @@ public class MixinEntityRenderer {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null && entity == mc.player) return;
 
-        // ===== 掉落物距离剔除 =====
-        if (Config.isItemEntityCullingEnabled() && entity instanceof ItemEntity) {
-            double maxDist = Config.getItemEntityMaxDistance();
-            Vec3 cameraPos = new Vec3(camX, camY, camZ);
-            if (cameraPos.distanceToSqr(entity.position()) > maxDist * maxDist) {
+        // ===== 掉落物距离剔除（零分配：不 new Vec3，距离平方来自 volatile 快照） =====
+        if (RuntimeConfig.itemEntityCullingEnabled && entity instanceof ItemEntity) {
+            net.minecraft.world.phys.Vec3 pos = entity.position();
+            double dx = pos.x - camX;
+            double dy = pos.y - camY;
+            double dz = pos.z - camZ;
+            if (dx * dx + dy * dy + dz * dz > RuntimeConfig.itemEntityMaxDistanceSq) {
                 cir.setReturnValue(false);
                 return;
             }
         }
 
-        // ===== 通用实体遮挡剔除 =====
-        if (!Config.isEntityCullingEnabled()) return;
+        // ===== 通用实体距离剔除（含重要实体白名单，高压时自动收紧） =====
+        if (EntityCullingPolicy.shouldCullByDistance(entity, camX, camY, camZ)) {
+            cir.setReturnValue(false);
+            return;
+        }
+
+        // ===== 通用实体遮挡剔除（白名单实体不参与） =====
+        if (!RuntimeConfig.entityCullingEnabled) return;
+        if (EntityCullingPolicy.isProtected(entity)) return;
         if (!EntityCullingManager.isVisible(entity)) {
             cir.setReturnValue(false);
         }

@@ -34,7 +34,7 @@ public class TabFrame extends AbstractFrame {
     public TabFrame(Dim2i dim, boolean renderOutline, Multimap<String, Tab<?>> tabs, Runnable onSetTab, AtomicReference<Component> tabSectionSelectedTab, AtomicReference<Integer> tabSectionScrollBarOffset) {
         super(dim, renderOutline);
         this.tabs = ImmutableListMultimap.copyOf(tabs);
-        int tabSectionY = (this.tabs.size() + this.tabs.keySet().size()) * 18;
+        int tabSectionY = tabSectionContentHeight();
         Optional<Integer> result = Stream.concat(
                 tabs.keys().stream().map(id -> this.getStringWidth(TabHeaderWidget.getLabel(id)) + 10),
                 tabs.values().stream().map(tab -> this.getStringWidth(tab.title()) + TAB_OPTION_INDENT)
@@ -42,7 +42,7 @@ public class TabFrame extends AbstractFrame {
 
         this.tabSection = new Dim2i(this.dim.x(), this.dim.y(), result.map(integer -> integer + (24)).orElseGet(() -> (int) (this.dim.width() * 0.35D)), this.dim.height());
         this.tabSectionInner = tabSectionY > this.dim.height() ? this.tabSection.withHeight(tabSectionY) : this.tabSection;
-        this.frameSection = new Dim2i(this.tabSection.getLimitX(), this.dim.y(), this.dim.width() - this.tabSection.width(), this.dim.height());
+        this.frameSection = new Dim2i(this.tabSection.getLimitX() + 4, this.dim.y(), this.dim.width() - this.tabSection.width() - 4, this.dim.height());
 
         this.onSetTab = onSetTab;
         this.tabSectionSelectedTab = tabSectionSelectedTab;
@@ -56,6 +56,15 @@ public class TabFrame extends AbstractFrame {
 
         // Let's build each frame, future note for anyone: do not move this line.
         this.tabs.values().stream().filter(tab -> this.selectedTab != tab).forEach(tab -> tab.getFrameFunction().apply(this.frameSection));
+    }
+
+    /**
+     * 侧边栏内容总高度：顶部 2px 呼吸 + 每个条目 18px 高 + 2px 间距 + 每个模组分隔 4px。
+     * 必须与 {@link TabSidebarFrame#rebuildTabs()} 的布局严格一致。
+     */
+    private int tabSectionContentHeight() {
+        int groups = this.tabs.keySet().size();
+        return 2 + (this.tabs.size() + groups) * 20 + groups * 4;
     }
 
     public static Builder createBuilder() {
@@ -88,14 +97,14 @@ public class TabFrame extends AbstractFrame {
         }
 
         private void rebuildTabs() {
-            int offsetY = 0;
+            int offsetY = 2; // 顶部呼吸空间
             int width = tabSection.width() - 4;
             int height = 18;
 
             for (var modEntry : tabs.asMap().entrySet()) {
                 // Add a "button" as the header
                 Dim2i modHeaderDim = new Dim2i(0, offsetY, width, height).withParentOffset(tabSection);
-                offsetY += height;
+                offsetY += height + 2;
                 TabHeaderWidget headerButton = new TabHeaderWidget(modHeaderDim, modEntry.getKey());
                 headerButton.setLeftAligned(true);
                 this.children.add(headerButton);
@@ -119,8 +128,11 @@ public class TabFrame extends AbstractFrame {
                     button.setLeftAligned(true);
                     this.children.add(button);
 
-                    offsetY += height;
+                    offsetY += height + 2;
                 }
+
+                // 模组分组之间的分隔呼吸空间
+                offsetY += 4;
             }
         }
     }

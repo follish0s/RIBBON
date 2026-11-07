@@ -8,6 +8,7 @@ import org.embeddedt.embeddium.api.vertex.attributes.CommonVertexAttribute;
 import org.embeddedt.embeddium.api.vertex.attributes.common.ColorAttribute;
 import org.embeddedt.embeddium.api.vertex.attributes.common.TextureAttribute;
 import org.embeddedt.embeddium.api.vertex.format.VertexFormatDescription;
+import org.embeddedt.embeddium.api.vertex.format.VertexFormatRegistry;
 import net.minecraft.core.Direction;
 import org.embeddedt.embeddium.api.vertex.buffer.VertexBufferWriter;
 import org.joml.Matrix3f;
@@ -25,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SheetedDecalTextureGenerator.class)
-public class OverlayVertexConsumerMixin implements VertexBufferWriter {
+public class OverlayVertexConsumerMixin implements VertexBufferWriter, net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter {
     @Shadow
     @Final
     private VertexConsumer delegate;
@@ -62,6 +63,11 @@ public class OverlayVertexConsumerMixin implements VertexBufferWriter {
 
         VertexBufferWriter.of(this.delegate)
                 .push(stack, ptr, count, format);
+    }
+
+    @Override
+    public void push(MemoryStack stack, long ptr, int count, com.mojang.blaze3d.vertex.VertexFormat format) {
+        this.push(stack, ptr, count, VertexFormatRegistry.instance().get(format));
     }
 
     /**

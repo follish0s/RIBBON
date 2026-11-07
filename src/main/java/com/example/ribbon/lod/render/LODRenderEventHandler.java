@@ -50,6 +50,9 @@ public final class LODRenderEventHandler {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
+        // 实验性总闸（默认关闭）：放在最前面，关闭时零开销、连 Iris 反射都不做
+        if (!com.example.ribbon.optimization.RuntimeConfig.lodEnabled) return;
+
         // 【光影兼容·双阶段提交】这是解决"光影下 LOD 全黑 + 拖影"的关键。
         //
         // 无光影：在 AFTER_TRANSLUCENT_BLOCKS 提交（深度已稳定，覆盖半透明水面之上）。
@@ -77,7 +80,6 @@ public final class LODRenderEventHandler {
 
         LODManager manager = LODManager.getInstance();
         if (!manager.isRunning()) return;
-        if (!com.example.ribbon.Config.isLodEnabled()) return;
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) return;
@@ -91,7 +93,15 @@ public final class LODRenderEventHandler {
         int camChunkX = (int) Math.floor(camPos.x / 16.0);
         int camChunkZ = (int) Math.floor(camPos.z / 16.0);
         int radius = com.example.ribbon.Config.getLodRadiusChunks();
-        int innerRadius = Math.max(mc.options.getEffectiveRenderDistance(), 2);
+        // 【关键修复·用客户端选项而非服务端有效距离】
+        // 此前用 mc.options.getEffectiveRenderDistance() 作为内圈，它 = min(客户端选项,
+        // 服务端 view distance)。世界加载/性能模组会把服务端 view distance 短暂降到 2
+        // （日志「Changing view distance to 2」），导致 innerRadius 塌缩到 2，LOD 从
+        // 玩家脚边 2 区块就开始接管，叠压在原版渲染的区块之上 →「糊脚底」。
+        // 客户端选项 renderDistance() 才是玩家在视频设置里选的稳定值，是原版区块
+        // 实际被渲染覆盖的范围，用它做内圈才能与原版渲染边界严格对齐。
+        int clientRenderDist = mc.options.renderDistance().get();
+        int innerRadius = Math.max(clientRenderDist, 2);
         // 【回退·淘汰对齐覆盖】淘汰半径 = 请求覆盖外半径 + 少量缓冲，两者必须同源。
         // 请求覆盖 = innerRadius + radius，故淘汰 = innerRadius + radius + 2，
         // 既保留刚生成区块，又能淘汰真正跑出范围的旧区块，避免"生成→淘汰→再生成"抖动。
@@ -192,20 +202,27 @@ public final class LODRenderEventHandler {
             if (irisRendering) {
                 // —— 光影(AFTER_LEVEL)专用状态 ——
                 // deferred 管线已全部结束，LOD 作为最终画面的几何叠加绘制。
-                // 关键：**不清空深度**。近景正常区块已在主 framebuffer 里，深度缓冲
-                // 保存着它们的正确深度。LOD 用 LEQUAL 深度测试 + 深度写入，让近景
-                // 区块正确遮挡远景 LOD（避免 LOD 覆盖在近景之上产生穿插）。之前这里
-                // clear(GL_DEPTH_BUFFER_BIT) 会清掉近景深度，导致 LOD 无视遮挡直接
-                // 画在最上层，与近景地形穿插、杂乱无章。
-                // 1) 显式绑定主渲染目标，确保画在最终显示到屏幕的 framebuffer 上；
-                // 2) LEQUAL 深度测试 + 深度写入，让近景正确遮挡 LOD、LOD 内部山体
-                //    正确遮挡、不穿插；
-                // 3) 关闭混合（不透明），杜绝 Iris composite 残留的混合状态导致过曝。
+                //
+                // 【关键修复·深度缓冲重置】之前「不清空深度」依赖主 framebuffer 深度缓冲
+                // 里保存着近景深度。但 Iris deferred 管线的近景深度写在它自己的 GBuffer
+                // framebuffer 里，主 framebuffer（getMainRenderTarget）的深度缓冲在 final
+                // composite 阶段通常只写颜色、不写深度 → 主 framebuffer 深度是空的/过期的。
+                // 此时 LEQUAL 深度测试对近景形同虚设（LOD 仍叠压近景），且 LOD 内部面片
+                // 之间也因深度全空而互相穿插、碎片化（截图里「斑块状、支离破碎」的根源）。
+                //
+                // 正确做法：显式清空主 framebuffer 深度，让 LOD 自己建立深度，配合
+                // 「近→远排序 + LEQUAL + 深度写入」，保证 LOD 内部山体正确遮挡、不碎片化。
+                // 近景遮挡交给内圈过滤（LOD 只画在原版渲染距离之外），不依赖深度缓冲。
+                // 1) 绑定主渲染目标；
+                // 2) 清空深度（清掉 composite 残留的过期/空深度）；
+                // 3) LEQUAL 深度测试 + 深度写入，LOD 内部正确遮挡；
+                // 4) 关闭混合（不透明），杜绝 composite 残留混合状态导致过曝。
                 mc.getMainRenderTarget().bindWrite(false);
                 RenderSystem.enableDepthTest();
                 RenderSystem.depthMask(true);
                 RenderSystem.depthFunc(GL11.GL_LEQUAL);
                 RenderSystem.disableBlend();
+                GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
             } else {
                 // 【修复·强制深度写入 + 深度测试】不依赖 setupRenderState 的隐含状态，
                 // 显式确保深度测试开启且深度可写，解决"纸片穿插"。
@@ -240,9 +257,14 @@ public final class LODRenderEventHandler {
                 if (!irisRendering) {
                     com.example.ribbon.IrisReflection.clearMainBound();
                 }
-            } else if (!diagShaderPrinted) {
-                diagShaderPrinted = true;
-                LOGGER.error("[Ribbon/LOD][P0] lod_terrain shader 未就绪！检查 .vsh/.fsh 编译与 LODShaderRegistry 注册流程");
+            } else {
+                // shader 未注册：通常是「刚打开实验性总闸但未 F3+T 重载资源」的窗口期。
+                // 这是预期状态，不是错误，直接跳过绘制（避免无效 VBO 上传与误导性 ERROR）。
+                if (!diagShaderPrinted) {
+                    diagShaderPrinted = true;
+                    LOGGER.info("[Ribbon/LOD] shader 尚未注册，跳过绘制；按 F3+T 重载资源或重启后生效");
+                }
+                return;
             }
 
             // 【修复·远切】按区块中心到相机的距离过滤。超出视距的区块直接跳过提交，

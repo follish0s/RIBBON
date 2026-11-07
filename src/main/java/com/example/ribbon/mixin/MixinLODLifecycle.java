@@ -6,6 +6,10 @@ package com.example.ribbon.mixin;
 
 import com.example.ribbon.Config;
 import com.example.ribbon.lod.LODManager;
+import com.example.ribbon.optimization.CullingOptimizer;
+import com.example.ribbon.optimization.AdaptivePerformanceManager;
+import com.example.ribbon.optimization.ParticleSpawnBudget;
+import com.example.ribbon.optimization.RuntimeConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -42,8 +46,17 @@ public abstract class MixinLODLifecycle {
                                     CallbackInfo ci) {
         try {
             if (level == null) return;
-            // 远景 LOD 总开关：关闭时完全跳过（不启动调度器）
-            if (!Config.isLodEnabled()) return;
+            // 世界切换：重置自适应统计与剔除扫描状态，避免沿用上一世界的数据
+            AdaptivePerformanceManager.reset();
+            CullingOptimizer.reset();
+            ParticleSpawnBudget.reset();
+            // 远景 LOD 总开关（实验性总闸 + 自身开关）：关闭时完全跳过，不启动调度器。
+            // 若运行中关闭，顺手停掉已启动的调度器，保证「默认关闭」真的不占资源。
+            if (!RuntimeConfig.lodEnabled) {
+                LODManager mgr = LODManager.getInstance();
+                if (mgr.isRunning()) mgr.stop();
+                return;
+            }
             // 只在单人存档（或能解析到区域目录）时启用 LOD；解析失败则保持关闭。
             Minecraft mc = Minecraft.getInstance();
             Path regionDir = resolveRegionDir(mc, level);
@@ -53,7 +66,16 @@ public abstract class MixinLODLifecycle {
                     "main", level.dimension(), "chunk");
             int minBuildY = level.getMinBuildHeight();
 
-            LODManager.getInstance().start(regionDir, info, minBuildY);
+            // 【群系染色】把世界 registry 只读快照（Frozen，线程安全）传给 LODManager，
+            // 供后台解码 .mca 的 biomes 时解析草/树叶/水染色值。解析失败静默降级为
+            // 中性（不染色），不影响 LOD 主流程。
+            net.minecraft.core.RegistryAccess registryAccess = null;
+            try {
+                registryAccess = level.registryAccess();
+            } catch (Throwable ignored) {
+            }
+
+            LODManager.getInstance().start(regionDir, info, minBuildY, registryAccess);
         } catch (Throwable t) {
             // 任何异常都静默，绝不干扰世界加载
         }
@@ -71,6 +93,11 @@ public abstract class MixinLODLifecycle {
     private void ribbon$onClientTick(CallbackInfo ci) {
         try {
             LODManager manager = LODManager.getInstance();
+            // 运行中关闭总闸：立即停机，不再请求、不再有后台线程
+            if (!RuntimeConfig.lodEnabled) {
+                if (manager.isRunning()) manager.stop();
+                return;
+            }
             if (!manager.isRunning()) return;
 
             Minecraft mc = Minecraft.getInstance();
@@ -94,12 +121,13 @@ public abstract class MixinLODLifecycle {
             int camChunkZ = (int) Math.floor(cam.z / 16.0);
             ChunkPos center = new ChunkPos(camChunkX, camChunkZ);
 
-            // 内圈 = 原版有效渲染距离（原版区块会接管这部分，LOD 不应重叠画）。
-            // 之前写死跳过 4 区块是错的——原版渲染距离可能是 2~32 区块，
-            // 写死 4 会导致 LOD 环带要么与原版重叠（renderDistance 大时），
-            // 要么中间留出真空带（renderDistance 小时，如 2 区块时 32~64 格空白）。
-            // 正确做法：从原版有效渲染距离之外开始接管。
-            int innerRadius = Math.max(mc.options.getEffectiveRenderDistance(), 2);
+            // 内圈 = 客户端选项渲染距离（原版区块会接管这部分，LOD 不应重叠画）。
+            // 【关键修复】之前用 getEffectiveRenderDistance()（= min(客户端选项, 服务端
+            // view distance)），世界加载/性能模组会把服务端 view distance 短暂降到 2，
+            // 导致 innerRadius 塌缩到 2、LOD 从脚边 2 区块就开始接管，叠压原版区块
+            // （「糊脚底 / X 光」的直接原因）。改用客户端选项 renderDistance()，这是
+            // 玩家在视频设置里选的稳定值，与原版实际渲染覆盖范围严格对齐。
+            int innerRadius = Math.max(mc.options.renderDistance().get(), 2);
 
             // 【回退·范围修正】外半径 = innerRadius + radius（radius 默认 8 区块）。
             // 关键认知：LOD 只能基于实际存在的 .mca 数据生成，无法凭空请求未探索区块。

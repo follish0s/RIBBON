@@ -148,12 +148,24 @@ public final class LODManager {
     public synchronized void start(java.nio.file.Path regionDir,
                                    net.minecraft.world.level.chunk.storage.RegionStorageInfo storageInfo,
                                    int minBuildY) {
+        start(regionDir, storageInfo, minBuildY, null);
+    }
+
+    /**
+     * 带 {@code RegistryAccess} 的启动入口：供主线程传入世界 registry 只读快照，
+     * 用于后台解码 .mca 的 biomes 时解析群系染色值（{@code RegistryAccess} 的 Frozen
+     * 快照线程安全，后台线程只读不写）。传 {@code null} 则跳过群系染色（中性兜底）。
+     */
+    public synchronized void start(java.nio.file.Path regionDir,
+                                   net.minecraft.world.level.chunk.storage.RegionStorageInfo storageInfo,
+                                   int minBuildY,
+                                   net.minecraft.core.RegistryAccess registryAccess) {
         if (running) return;
 
         if (reader != null) {
             reader.close();
         }
-        reader = new McaRegionReader(regionDir, storageInfo, minBuildY);
+        reader = new McaRegionReader(regionDir, storageInfo, minBuildY, registryAccess);
 
         int configured = com.example.ribbon.Config.getLodWorkerThreads();
         int threads;

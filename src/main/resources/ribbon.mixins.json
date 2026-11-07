@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "com.example.ribbon.mixin",
   "compatibilityLevel": "JAVA_21",
+  "plugin": "com.example.ribbon.mixin.RibbonCompatMixinPlugin",
   "mixins": [],
   "client": [
     "MixinEntityHit",
@@ -12,6 +13,8 @@
     "MixinLevelBrightness",
     "MixinEntityRenderer",
     "MixinBlockEntityRenderer",
+    "MixinParticleEngine",
+    "MixinLightTexture",
     "pathfinding.MixinPathNavigation",
     "shadercache.MixinShaderInstance"
   ],

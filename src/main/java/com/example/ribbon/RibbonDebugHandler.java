@@ -39,7 +39,7 @@ public class RibbonDebugHandler {
         String mcVersion = SharedConstants.getCurrentVersion().getName();
         String ribbonVersion = ModList.get().getModContainerById("ribbon")
                 .map(c -> c.getModInfo().getVersion().toString())
-                .orElse("0.10.5-Beta");
+                .orElse("0.20.7");
         left.add(" §fMC: §a" + mcVersion + " §7| §fRibbon: §a" + ribbonVersion);
 
         // 解释伪装机制，避免玩家困惑
@@ -108,7 +108,6 @@ public class RibbonDebugHandler {
         }
 
         boolean conflictFound = false;
-        if (ModList.get().isLoaded("sodium")) { right.add(" §c⚠ 致命: Sodium"); conflictFound = true; }
         if (ModList.get().isLoaded("radium")) { right.add(" §c⚠ 致命: Radium"); conflictFound = true; }
         if (!conflictFound) { right.add(" §a✔ 无已知致命冲突"); }
 
@@ -137,12 +136,12 @@ public class RibbonDebugHandler {
         ModList.get().getMods().forEach(modInfo -> {
             String modId = modInfo.getModId();
 
-            // 铁律：绝对不能把自己的伪装身份（embeddium）和自己（ribbon）列进去
-            if (modId.equals("ribbon") || modId.equals("embeddium")) return;
+            // 铁律：绝对不能把自己的伪装身份（sodium）和自己（ribbon）列进去
+            if (modId.equals("ribbon") || modId.equals("sodium")) return;
 
-            // 检查该模组的依赖列表中是否有 ribbon 或 embeddium
+            // 检查该模组的依赖列表中是否有 ribbon 或 sodium
             boolean dependsOnUs = modInfo.getDependencies().stream()
-                    .anyMatch(dep -> dep.getModId().equals("embeddium") || dep.getModId().equals("ribbon"));
+                    .anyMatch(dep -> dep.getModId().equals("sodium") || dep.getModId().equals("ribbon"));
 
             if (dependsOnUs) {
                 // 如果模组显示名和 ID 差别很大，以显示名为准

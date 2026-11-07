@@ -65,7 +65,13 @@ public class ChunkBuilder {
      * spawn more tasks than the budget allows, it will block until resources become available.
      */
     public int getSchedulingBudget() {
-        return Math.max(0, (this.threads.size() * TASK_QUEUE_LIMIT_PER_WORKER) - this.queue.size());
+        int base = Math.max(0, (this.threads.size() * TASK_QUEUE_LIMIT_PER_WORKER) - this.queue.size());
+        // Ribbon: 帧时间高压时临时收紧每帧重建任务数，削掉大范围区块更新造成的帧尖峰。
+        // 开关关闭时 scale 恒为 1.0，行为与原版完全一致。
+        double scale = com.example.ribbon.optimization.AdaptivePerformanceManager.getChunkBudgetScale();
+        if (scale >= 1.0) return base;
+        // 至少保留 1 个任务，避免重建被完全饿死导致世界一直不加载
+        return base == 0 ? 0 : Math.max(1, (int) Math.floor(base * scale));
     }
 
     /**

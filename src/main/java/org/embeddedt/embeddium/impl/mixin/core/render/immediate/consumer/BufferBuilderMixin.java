@@ -18,7 +18,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 @Mixin(BufferBuilder.class)
-public abstract class BufferBuilderMixin implements VertexBufferWriter {
+public abstract class BufferBuilderMixin implements VertexBufferWriter, net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter {
     @Shadow
     @Final
     private ByteBufferBuilder buffer;
@@ -75,5 +75,10 @@ public abstract class BufferBuilderMixin implements VertexBufferWriter {
         VertexSerializerRegistry.instance()
                 .get(format, this.embeddiumFormat)
                 .serialize(src, dst, count);
+    }
+
+    @Override
+    public void push(MemoryStack stack, long src, int count, com.mojang.blaze3d.vertex.VertexFormat format) {
+        this.push(stack, src, count, VertexFormatRegistry.instance().get(format));
     }
 }
