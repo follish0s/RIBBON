@@ -78,9 +78,22 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
 sourceSets.main.resources.srcDir generateModMetadata
 neoForge.ideSyncTask generateModMetadata
 
-// JLayer 打包进 jar 先延后：Gradle 9 不允许在配置阶段解析 runtimeClasspath。
-// 等 26.2 首个可编译版本稳定后，改用 from({ ... zipTree(...) }) 延迟求值方式加回。
-// （音乐播放器代码仍保留，运行时由 JLayer 依赖提供）
+// JLayer 打包进 Ribbon jar。Gradle 9 禁止在配置阶段解析 runtimeClasspath，
+// 必须用 from({ ... }) 延迟求值（1.21.1 版的配置期写法在 Gradle 9 会直接报错）。
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from({
+        configurations.runtimeClasspath
+                .filter { it.name.startsWith('jlayer') }
+                .collect { zipTree(it) }
+    }) {
+        exclude 'META-INF/MANIFEST.MF'
+        exclude 'META-INF/*.SF'
+        exclude 'META-INF/*.DSA'
+        exclude 'META-INF/*.RSA'
+        exclude 'module-info.class'
+    }
+}
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
